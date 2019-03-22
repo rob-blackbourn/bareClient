@@ -1,7 +1,7 @@
 from asyncio import AbstractEventLoop
 import json
 from ssl import SSLContext
-from typing import Union, List, Mapping, Any, Callable, Optional
+from typing import Union, List, Mapping, Any, Callable, Optional, Tuple
 from urllib.parse import urlparse
 from .client import HttpClient
 
@@ -10,11 +10,14 @@ JsonType = Union[List[Any], Mapping[str, Any]]
 
 async def get_json(
         url: str, *,
+        headers: List[Tuple[bytes, bytes]] = None,
         loads: Callable[[str], JsonType] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> JsonType:
-    headers = [
+    if headers is None:
+        headers = list()
+    headers += [
         (b'host', urlparse(url).hostname.encode('ascii')),
         (b'accept', b'application/json'),
         (b'content-length', b'0'),
