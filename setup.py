@@ -11,17 +11,11 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-# Read the version from the __init__.py
-with open(path.join(here, 'src', 'bareclient', '__init__.py')) as f:
-    txt = f.read()
-    try:
-        version = re.findall(r"^__version__ = '([^']+)'\r?$", txt, re.M)[0]
-    except IndexError:
-        raise RuntimeError('Unable to determine version.')
+__version__ = '0.2.0'
 
 setup(
     name='bareclient',
-    version=version,
+    version=__version__,
     description='A lightweight asyncio HTTP client',
     long_description=long_description,
     url='https://github.com/rob-blackbourn/bareclient',
