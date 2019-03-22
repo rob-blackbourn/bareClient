@@ -4,8 +4,11 @@ from ssl import SSLContext
 from typing import Union, List, Mapping, Any, Callable, Optional, Tuple
 from urllib.parse import urlparse
 from .client import HttpClient
+from .__version__ import __version__
 
 JsonType = Union[List[Any], Mapping[str, Any]]
+
+USER_AGENT = f'bareClient/{__version__}'.encode('ascii')
 
 
 async def get_json(
@@ -21,7 +24,7 @@ async def get_json(
         (b'host', urlparse(url).hostname.encode('ascii')),
         (b'accept', b'application/json'),
         (b'content-length', b'0'),
-        (b'user-agent', b'bareClient/0.1.0'),
+        (b'user-agent', USER_AGENT),
         (b'connection', b'close')
     ]
     async with HttpClient(url, 'GET', headers, loop=loop, ssl=ssl) as (response, body):
