@@ -11,10 +11,8 @@ async def main(url, headers, ssl):
                 print(part)
 
 
-# url = 'https://docs.python.org/3/library/cgi.html'
-# headers = [(b'Host', b'docs.python.org'), (b'Connection', b'close')]
-url = 'https://httpbin.org/xml'
-headers = [(b'Host', b'httpbin.org'), (b'content-length', b'0'), (b'connection', b'keep-alive'), (b'Accept', b'*/*')]
+url = 'https://docs.python.org/3/library/cgi.html'
+headers = [(b'host', b'docs.python.org'), (b'connection', b'close')]
 ssl_context = ssl.SSLContext()
 
 loop = asyncio.get_event_loop()

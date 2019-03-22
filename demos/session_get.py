@@ -13,8 +13,8 @@ async def main(url, headers, paths, ssl):
                     print(part)
 
 
-url = 'https://docs.python.org/3/library/cgi.html'
-headers = [(b'Host', b'docs.python.org'), (b'Connection', b'keep-alive')]
+url = 'https://docs.python.org'
+headers = [(b'host', b'docs.python.org'), (b'connection', b'keep-alive')]
 paths = ['/3/library/cgi.html', '/3/library/urllib.parse.html']
 ssl_context = ssl.SSLContext()
 
