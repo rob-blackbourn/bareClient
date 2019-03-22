@@ -8,6 +8,14 @@ This package provides the asyncio transport for [h11](https://h11.readthedocs.io
 
 It makes little attempt to provide any helpful features.
 
+## Installation
+
+This is a Python 3.7 package.
+
+```bash
+pip install bareclient
+```
+
 ## Usage
 
 The basic usage is to create an `HttpClient`.
