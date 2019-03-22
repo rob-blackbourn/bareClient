@@ -1,5 +1,5 @@
 import asyncio
-from bareclient.client import HttpClient
+from bareclient import HttpClient
 import ssl
 
 
@@ -11,9 +11,10 @@ async def main(url, headers, ssl):
                 print(part)
 
 
-url = 'https://127.0.0.1:3004/rob'
-headers = [(b'Host', b'127.0.0.1'), (b'Connection', b'close')]
-# headers = [(b'Host', b'127.0.0.1')]
+# url = 'https://docs.python.org/3/library/cgi.html'
+# headers = [(b'Host', b'docs.python.org'), (b'Connection', b'close')]
+url = 'https://httpbin.org/xml'
+headers = [(b'Host', b'httpbin.org'), (b'content-length', b'0'), (b'connection', b'keep-alive'), (b'Accept', b'*/*')]
 ssl_context = ssl.SSLContext()
 
 loop = asyncio.get_event_loop()

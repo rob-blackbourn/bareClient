@@ -2,7 +2,7 @@ from asyncio import AbstractEventLoop, open_connection
 import h11
 from typing import AsyncGenerator, Tuple, Callable, List, Optional
 import urllib.parse
-from .utils import get_port
+from .utils import get_port, get_target
 from .requester import Requester
 
 
@@ -31,7 +31,7 @@ class HttpClient:
         reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
         self._close = lambda: writer.close()
         requester = Requester(reader, writer)
-        return await requester.request(self.url, self.method, self.headers, self.data)
+        return await requester.request(get_target(self.url), self.method, self.headers, self.data)
 
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:

@@ -1,43 +1,49 @@
 from asyncio import StreamReader, StreamWriter
 import h11
 from typing import AsyncGenerator, List, Tuple, Optional, Callable
-import urllib.parse
-from .utils import get_target
 
 
 class Requester:
 
-    def __init__(self, reader: StreamReader, writer: StreamWriter) -> None:
+    def __init__(self, reader: StreamReader, writer: StreamWriter, bufsiz: int = 1024) -> None:
         self.reader = reader
         self.writer = writer
+        self.bufsiz = bufsiz
+        self.conn: h11.Connection = None
 
 
     async def request(
             self,
-            url: urllib.parse.ParseResult,
+            path: str,
             method: str,
             headers: List[Tuple[bytes, bytes]],
-            data: Optional[bytes]
+            data: Optional[bytes] = None
     ) -> Tuple[h11.Response, Callable[[], AsyncGenerator[h11.Data, None]]]:
-        # noinspection PyUnresolvedReferences
-        conn = h11.Connection(our_role=h11.CLIENT)
+        if not self.conn:
+            # noinspection PyUnresolvedReferences
+            self.conn = h11.Connection(our_role=h11.CLIENT)
+        else:
+            self.conn.start_next_cycle()
 
         request = h11.Request(
             method=method,
-            target=get_target(url),
+            target=path,
             headers=headers
         )
 
-        self.writer.write(conn.send(request))
+        buf = self.conn.send(request)
+        self.writer.write(buf)
         if data:
             self.writer.write(data)
-        self.writer.write(conn.send(h11.EndOfMessage()))
+        buf = self.conn.send(h11.EndOfMessage())
+        self.writer.write(buf)
         await self.writer.drain()
 
         while True:
-            event = conn.next_event()
+            event = self.conn.next_event()
             if event is h11.NEED_DATA:
-                conn.receive_data(await self.reader.read())
+                buf = await self.reader.read(self.bufsiz)
+                self.conn.receive_data(buf)
             elif isinstance(event, h11.Response):
                 break
             elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
@@ -48,9 +54,9 @@ class Requester:
 
         async def body() -> AsyncGenerator[h11.Data, None]:
             while True:
-                event = conn.next_event()
+                event = self.conn.next_event()
                 if event is h11.NEED_DATA:
-                    conn.receive_data(await self.reader.read())
+                    self.conn.receive_data(await self.reader.read(self.bufsiz))
                 elif isinstance(event, h11.Data):
                     yield event
                 elif isinstance(event, h11.EndOfMessage):
