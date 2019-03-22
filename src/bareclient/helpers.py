@@ -18,6 +18,19 @@ async def get_json(
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> JsonType:
+    """Gets a json object from a url.
+
+    .. code-block:: python
+
+        obj = await get_json('https://jsonplaceholder.typicode.com/todos/1', ssl=ssl.SSLContext())
+
+    :param url: The url to get.
+    :param headers: Any extra headers required.
+    :param loads: An optional function to decode the JSON (defaults to json.loads).
+    :param loop: The optional asyncio event loop.
+    :param ssl: An optional ssl.SSLContext.
+    :return: The decoded JSON object.
+    """
     if headers is None:
         headers = list()
     headers += [

@@ -6,6 +6,12 @@ from typing import AsyncGenerator, List, Tuple, Optional, Callable
 class Requester:
 
     def __init__(self, reader: StreamReader, writer: StreamWriter, bufsiz: int = 1024) -> None:
+        """Requests HTTP from a session.
+
+        :param reader: An asyncio.StreamReader provider by the context.
+        :param writer: An asyncio.StreamWriter provider by the context.
+        :param bufsiz: The block size to read and write.
+        """
         self.reader = reader
         self.writer = writer
         self.bufsiz = bufsiz
@@ -19,6 +25,14 @@ class Requester:
             headers: List[Tuple[bytes, bytes]],
             data: Optional[bytes] = None
     ) -> Tuple[h11.Response, Callable[[], AsyncGenerator[h11.Data, None]]]:
+        """Make an HTTP request.
+
+        :param path: The request path.
+        :param method: The request method (e.g. GET, POST, etc.)
+        :param headers: Headers to send.
+        :param data: Optional data to send.
+        :return: An h11.Response object and an async generator function to retirve the body.
+        """
         if not self.conn:
             # noinspection PyUnresolvedReferences
             self.conn = h11.Connection(our_role=h11.CLIENT)
