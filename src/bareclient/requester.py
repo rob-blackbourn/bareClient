@@ -34,7 +34,10 @@ class Requester:
         buf = self.conn.send(request)
         self.writer.write(buf)
         if data:
-            self.writer.write(data)
+            start, end = 0, self.bufsiz
+            while start < len(data):
+                self.writer.write(data[start:end])
+                start, end = end, end + self.bufsiz
         buf = self.conn.send(h11.EndOfMessage())
         self.writer.write(buf)
         await self.writer.drain()
