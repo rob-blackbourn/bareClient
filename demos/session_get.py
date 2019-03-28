@@ -9,7 +9,7 @@ async def main(url, headers, paths, ssl):
             response, body = await requester.request(path, method='GET', headers=headers)
             print(response)
             if response.status_code == 200:
-                async for part in body():
+                async for part in body:
                     print(part)
 
 

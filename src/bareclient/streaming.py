@@ -4,23 +4,6 @@ from typing import AsyncIterator, Optional
 import zlib
 
 
-async def bytes_reader(content: AsyncIterator[bytes]) -> bytes:
-    buf = b''
-    async for b in content:
-        buf += b
-    return buf
-
-
-async def bytes_writer(buf: bytes, chunk_size: int = -1) -> AsyncIterator[bytes]:
-    if chunk_size == -1:
-        yield buf
-    else:
-        start, end = 0, chunk_size
-        while start < len(buf):
-            yield buf[start:end]
-            start, end = end, end + chunk_size
-
-
 class Decompressor(metaclass=ABCMeta):
     """A class to represent the methods available on a compressor"""
 

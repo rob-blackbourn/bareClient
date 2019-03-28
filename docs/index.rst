@@ -35,7 +35,7 @@ The basic usage is to create an ``HttpClient``.
         async with HttpClient(url, method='GET', headers=headers, ssl=ssl) as (response, body):
             print(response)
             if response.status_code == 200:
-                async for part in body():
+                async for part in body:
                     print(part)
 
 
@@ -62,7 +62,7 @@ There is also an ``HttpSession`` for keep-alive connections.
                 response, body = await requester.request(path, method='GET', headers=headers)
                 print(response)
                 if response.status_code == 200:
-                    async for part in body():
+                    async for part in body:
                         print(part)
 
 

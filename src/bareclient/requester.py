@@ -21,6 +21,7 @@ async def body_reader(conn: h11.Connection, reader: StreamReader, bufsiz: int) -
         if event is h11.NEED_DATA:
             conn.receive_data(await reader.read(bufsiz))
         elif isinstance(event, h11.Data):
+            # noinspection PyUnresolvedReferences
             yield event.data
         elif isinstance(event, h11.EndOfMessage):
             return
