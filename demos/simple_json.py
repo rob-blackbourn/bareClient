@@ -4,7 +4,7 @@ from bareclient import get_json
 
 
 async def main(url, ssl):
-    obj = await get_json(url, ssl=ssl)
+    obj = await get_json(url, ssl=ssl, headers=[(b'accept-encoding', b'gzip')])
     print(obj)
 
 

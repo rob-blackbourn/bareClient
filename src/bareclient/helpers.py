@@ -44,6 +44,6 @@ async def get_json(
         if response.status_code < 200 or response.status_code >= 300:
             raise RuntimeError('Request failed')
         buf = b''
-        async for part in body():
-            buf += part.data
+        async for part in body:
+            buf += part
         return loads(buf.decode('utf-8'))
