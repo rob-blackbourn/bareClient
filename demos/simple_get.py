@@ -7,7 +7,7 @@ async def main(url, headers, ssl):
     async with HttpClient(url, method='GET', headers=headers, ssl=ssl) as (response, body):
         print(response)
         if response.status_code == 200:
-            async for part in body():
+            async for part in body:
                 print(part)
 
 

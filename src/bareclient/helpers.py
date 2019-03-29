@@ -68,7 +68,7 @@ async def request(
 
     data = bytes_writer(content, chunk_size) if content else None
 
-    async with HttpClient(url, method, headers, data=data, loop=loop, ssl=ssl) as (response, body):
+    async with HttpClient(url, method, headers, content=data, loop=loop, ssl=ssl) as (response, body):
         if response.status_code < 200 or response.status_code >= 300:
             raise RuntimeError('Request failed')
         buf = b''
