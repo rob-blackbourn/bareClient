@@ -82,8 +82,11 @@ class Requester:
         buf = self.conn.send(request)
         self.writer.write(buf)
         if content:
+            data = b''
             async for value in content:
-                self.writer.write(value)
+                data += value
+            buf = self.conn.send(h11.Data(data=data))
+            self.writer.write(buf)
         buf = self.conn.send(h11.EndOfMessage())
         self.writer.write(buf)
         await self.writer.drain()
