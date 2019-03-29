@@ -39,7 +39,7 @@ class HttpClient:
             url: str,
             method: str = 'GET',
             headers: List[Tuple[bytes, bytes]] = None,
-            data: Optional[bytes] = None,
+            content: Optional[AsyncIterator[bytes]] = None,
             loop: Optional[AbstractEventLoop] = None,
             bufsiz: int = 1024,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
@@ -59,7 +59,7 @@ class HttpClient:
         self.url = urllib.parse.urlparse(url)
         self.method = method
         self.headers = headers
-        self.data = data
+        self.content = content
         self.loop = loop
         self.bufsiz = bufsiz
         self.decompressors = decompressors
@@ -88,7 +88,7 @@ class HttpClient:
         reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
         self._close = lambda: writer.close()
         requester = Requester(reader, writer, self.bufsiz, self.decompressors)
-        return await requester.request(get_target(self.url), self.method, self.headers, self.data)
+        return await requester.request(get_target(self.url), self.method, self.headers, self.content)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.
