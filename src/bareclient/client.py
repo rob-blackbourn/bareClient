@@ -1,9 +1,10 @@
 from asyncio import AbstractEventLoop, open_connection
 import h11
-from typing import AsyncGenerator, Tuple, Callable, List, Optional
+from typing import AsyncIterator, Tuple, Mapping, List, Optional, Type
 import urllib.parse
 from .utils import get_port, get_target
 from .requester import Requester
+from .streaming import Decompressor
 
 
 class HttpClient:
@@ -33,14 +34,15 @@ class HttpClient:
                     print(part)
     """
 
-
     def __init__(
             self,
             url: str,
             method: str = 'GET',
             headers: List[Tuple[bytes, bytes]] = None,
             data: Optional[bytes] = None,
-            loop: AbstractEventLoop = None,
+            loop: Optional[AbstractEventLoop] = None,
+            bufsiz: int = 1024,
+            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             **kwargs
     ) -> None:
         """Construct the client.
@@ -50,6 +52,8 @@ class HttpClient:
         :param headers: Headers to send.
         :param data: Optional data.
         :param loop: An optional event loop
+        :param bufsiz: The block size to read and write.
+        :param decompressors: An optional dictionary of decompressors.
         :param kwargs: Optional args to send to asyncio.open_connection
         """
         self.url = urllib.parse.urlparse(url)
@@ -57,11 +61,12 @@ class HttpClient:
         self.headers = headers
         self.data = data
         self.loop = loop
+        self.bufsiz = bufsiz
+        self.decompressors = decompressors
         self.kwargs = kwargs
         self._close = None
 
-
-    async def __aenter__(self) -> Tuple[h11.Response, Callable[[], AsyncGenerator[h11.Data, None]]]:
+    async def __aenter__(self) -> Tuple[h11.Response, AsyncIterator[bytes]]:
         """opens the context.
 
         .. code-block:: python
@@ -82,9 +87,8 @@ class HttpClient:
         port = get_port(self.url)
         reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
         self._close = lambda: writer.close()
-        requester = Requester(reader, writer)
+        requester = Requester(reader, writer, self.bufsiz, self.decompressors)
         return await requester.request(get_target(self.url), self.method, self.headers, self.data)
-
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.

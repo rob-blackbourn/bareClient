@@ -1,7 +1,9 @@
 from asyncio import AbstractEventLoop, open_connection
+from typing import Optional, Mapping, Type
 import urllib.parse
 from .utils import get_port
 from .requester import Requester
+from .streaming import Decompressor
 
 
 class HttpSession:
@@ -31,24 +33,28 @@ class HttpSession:
                     print(part)
     """
 
-
     def __init__(
             self,
             url: str,
-            loop: AbstractEventLoop = None,
+            loop: Optional[AbstractEventLoop] = None,
+            bufsiz: int = 1024,
+            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             **kwargs
     ) -> None:
         """Construct the client.
 
         :param url: The url.
         :param loop: An optional asyncio event loop.
+        :param bufsiz: The block size to read and write.
+        :param decompressors: An optional dictionary of decompressors.
         :param kwargs: Args passed to asyncio.open_connection.
         """
         self.url = urllib.parse.urlparse(url)
         self.loop = loop
+        self.bufsiz = bufsiz
+        self.decompressors = decompressors
         self.kwargs = kwargs
         self._close = None
-
 
     async def __aenter__(self) -> Requester:
         """Opens the context.
@@ -58,8 +64,7 @@ class HttpSession:
         port = get_port(self.url)
         reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
         self._close = lambda: writer.close()
-        return Requester(reader, writer)
-
+        return Requester(reader, writer, self.bufsiz, self.decompressors)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Closes the context"""
