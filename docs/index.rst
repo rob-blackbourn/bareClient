@@ -10,7 +10,7 @@ This package provides the asyncio transport for `h11 <https://h11.readthedocs.io
 
 It makes little attempt to provide any helpful features.
 
-THis client may be used with `bareASGI <https://bareasgi.readthedocs.io/en/latest/index.html>`_.
+This client may be used with `bareASGI <https://bareasgi.readthedocs.io/en/latest/index.html>`_.
 
 Installation
 ------------
