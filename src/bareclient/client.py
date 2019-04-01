@@ -16,6 +16,7 @@ class HttpClient:
     :param data: Optional data.
     :param loop: An optional event loop
     :param kwargs: Optional args to send to asyncio.open_connection
+    :param decompressors: An optional dictionary of decompressors.
     :return: The h11 Response object and a body function which returns an async generator.
 
     For example:
@@ -32,7 +33,10 @@ class HttpClient:
             if response.status_code == 200:
                 async for part in body():
                     print(part)
+
+    If unspecified the ``decompressors`` argument will default to gzip and deflate.
     """
+
 
     def __init__(
             self,
@@ -66,6 +70,7 @@ class HttpClient:
         self.kwargs = kwargs
         self._close = None
 
+
     async def __aenter__(self) -> Tuple[h11.Response, AsyncIterator[bytes]]:
         """opens the context.
 
@@ -89,6 +94,7 @@ class HttpClient:
         self._close = lambda: writer.close()
         requester = Requester(reader, writer, self.bufsiz, self.decompressors)
         return await requester.request(get_target(self.url), self.method, self.headers, self.content)
+
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.
