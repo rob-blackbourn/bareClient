@@ -15,8 +15,9 @@ class HttpClient:
     :param headers: Headers to send.
     :param data: Optional data.
     :param loop: An optional event loop
-    :param kwargs: Optional args to send to asyncio.open_connection
+    :param bufsiz: An optional block size to read and write (defaults to 1024).
     :param decompressors: An optional dictionary of decompressors.
+    :param kwargs: Optional args to send to asyncio.open_connection
     :return: The h11 Response object and a body function which returns an async generator.
 
     For example:
@@ -56,7 +57,7 @@ class HttpClient:
         :param headers: Headers to send.
         :param data: Optional data.
         :param loop: An optional event loop
-        :param bufsiz: The block size to read and write.
+        :param bufsiz: An optional block size to read and write (defaults to 1024).
         :param decompressors: An optional dictionary of decompressors.
         :param kwargs: Optional args to send to asyncio.open_connection
         """

@@ -7,12 +7,14 @@ from .streaming import Decompressor
 
 
 class HttpSession:
-    """An asyncio HTTP session.
+    """Creates an asyncio HTTP session.
 
     :param url: The url.
     :param loop: An optional asyncio event loop.
+    :param bufsiz: The block size to read and write.
+    :param decompressors: An optional dictionary of decompressors.
     :param kwargs: Args passed to asyncio.open_connection.
-    return: A requester
+    :return: A bareclient.Requester instance for making requests to the connected host.
 
     .. code-block:: python
 
@@ -32,6 +34,7 @@ class HttpSession:
                 async for part in body():
                     print(part)
     """
+
 
     def __init__(
             self,
@@ -56,6 +59,7 @@ class HttpSession:
         self.kwargs = kwargs
         self._close = None
 
+
     async def __aenter__(self) -> Requester:
         """Opens the context.
 
@@ -65,6 +69,7 @@ class HttpSession:
         reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
         self._close = lambda: writer.close()
         return Requester(reader, writer, self.bufsiz, self.decompressors)
+
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Closes the context"""
