@@ -18,6 +18,7 @@ setup(
     version=__version__,
     description='A lightweight asyncio HTTP client',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/rob-blackbourn/bareclient',
     author='Rob Blackbourn',
     author_email='rob.blackbourn@googlemail.com',
