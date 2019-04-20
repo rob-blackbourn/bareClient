@@ -15,6 +15,8 @@ class HttpClient:
     :param headers: Headers to send.
     :param data: Optional data.
     :param loop: An optional event loop
+    :param bufsiz: An optional block size to read and write (defaults to 1024).
+    :param decompressors: An optional dictionary of decompressors.
     :param kwargs: Optional args to send to asyncio.open_connection
     :return: The h11 Response object and a body function which returns an async generator.
 
@@ -32,7 +34,10 @@ class HttpClient:
             if response.status_code == 200:
                 async for part in body():
                     print(part)
+
+    If unspecified the ``decompressors`` argument will default to gzip and deflate.
     """
+
 
     def __init__(
             self,
@@ -52,7 +57,7 @@ class HttpClient:
         :param headers: Headers to send.
         :param data: Optional data.
         :param loop: An optional event loop
-        :param bufsiz: The block size to read and write.
+        :param bufsiz: An optional block size to read and write (defaults to 1024).
         :param decompressors: An optional dictionary of decompressors.
         :param kwargs: Optional args to send to asyncio.open_connection
         """
@@ -65,6 +70,7 @@ class HttpClient:
         self.decompressors = decompressors
         self.kwargs = kwargs
         self._close = None
+
 
     async def __aenter__(self) -> Tuple[h11.Response, AsyncIterator[bytes]]:
         """opens the context.
@@ -89,6 +95,7 @@ class HttpClient:
         self._close = lambda: writer.close()
         requester = Requester(reader, writer, self.bufsiz, self.decompressors)
         return await requester.request(get_target(self.url), self.method, self.headers, self.content)
+
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.
