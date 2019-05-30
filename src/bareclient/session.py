@@ -3,7 +3,7 @@ from typing import Optional, Mapping, Type
 import urllib.parse
 from .utils import get_port
 from .requester import Requester
-from .streaming import Decompressor
+from bareutils.compression import Decompressor
 
 
 class HttpSession:

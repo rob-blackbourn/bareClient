@@ -4,7 +4,8 @@ from typing import AsyncIterator, Tuple, Mapping, List, Optional, Type
 import urllib.parse
 from .utils import get_port, get_target
 from .requester import Requester
-from .streaming import Decompressor
+from baretypes import Header
+from bareutils.compression import Decompressor
 
 
 class HttpClient:
@@ -43,7 +44,7 @@ class HttpClient:
             self,
             url: str,
             method: str = 'GET',
-            headers: List[Tuple[bytes, bytes]] = None,
+            headers: List[Header] = None,
             content: Optional[AsyncIterator[bytes]] = None,
             loop: Optional[AbstractEventLoop] = None,
             bufsiz: int = 1024,

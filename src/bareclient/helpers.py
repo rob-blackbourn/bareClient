@@ -5,7 +5,8 @@ from typing import Union, List, Mapping, Any, Callable, Optional, Tuple, AsyncIt
 from urllib.parse import urlparse
 from .client import HttpClient
 from .__version__ import __version__
-import bareclient.header as header
+from baretypes import Header
+import bareutils.header as header
 
 JsonType = Union[List[Any], Mapping[str, Any]]
 
@@ -33,7 +34,7 @@ async def request(
         url: str,
         method: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         content: Optional[bytes] = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None,
@@ -69,7 +70,7 @@ async def request(
     data = bytes_writer(content, chunk_size) if content else None
 
     async with HttpClient(url, method, headers, content=data, loop=loop, ssl=ssl) as (response, body):
-        if response.status_code < 200 or response.status_code >= 300:
+        if response.status_code < 200 or response.status_code >= 400:
             raise RuntimeError('Request failed')
         buf = b''
         async for part in body:
@@ -80,7 +81,7 @@ async def request(
 async def get(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> bytes:
@@ -102,7 +103,7 @@ async def get(
 async def get_text(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         loop: Optional[AbstractEventLoop] = None,
         encoding: str = 'utf-8',
         ssl: Optional[SSLContext] = None
@@ -132,7 +133,7 @@ async def get_text(
 async def get_json(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         loads: Callable[[str], JsonType] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
@@ -163,7 +164,7 @@ async def post(
         url: str,
         content: bytes,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> bytes:
@@ -188,7 +189,7 @@ async def post_text(
         text: str,
         *,
         encoding='utf-8',
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> str:
@@ -226,7 +227,7 @@ async def post_json(
         *,
         loads: Callable[[str], JsonType] = json.loads,
         dumps: Callable[[JsonType], str] = json.dumps,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: List[Header] = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> Optional[JsonType]:

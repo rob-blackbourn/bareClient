@@ -1,13 +1,14 @@
 from asyncio import StreamReader, StreamWriter
 import h11
 from typing import List, Tuple, Optional, AsyncIterator, Mapping, Type
-from .streaming import (
+from baretypes import Header
+from bareutils.compression import (
     make_gzip_decompressobj,
     make_deflate_decompressobj,
     compression_reader_adapter,
     Decompressor
 )
-import bareclient.header as header
+import bareutils.header as header
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
@@ -52,11 +53,12 @@ class Requester:
         self.conn: Optional[h11.Connection] = None
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
 
+
     async def request(
             self,
             path: str,
             method: str,
-            headers: List[Tuple[bytes, bytes]],
+            headers: List[Header],
             content: Optional[AsyncIterator[bytes]] = None
     ) -> Tuple[h11.Response, AsyncIterator[bytes]]:
         """Make an HTTP request.
