@@ -44,12 +44,16 @@ async def request(
 
     content_length = str(len(content)).encode('ascii') if content else b'0'
 
-    headers += [
+    base_headers = [
         (b'host', urlparse(url).hostname.encode('ascii')),
         (b'content-length', content_length),
         (b'user-agent', USER_AGENT),
         (b'connection', b'close')
     ]
+
+    for name, value in base_headers:
+        if not header.find(name, headers):
+            headers.append((name, value))
 
     data = bytes_writer(content, chunk_size) if content else None
 
