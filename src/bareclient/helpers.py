@@ -39,8 +39,8 @@ async def request(
     :param chunk_size: The size of each chunk to send or -1 to send as a single chunk.
     :return: The decoded JSON object.
     """
-    if headers is None:
-        headers = list()
+
+    headers = [] if headers is None else list(headers)
 
     content_length = str(len(content)).encode('ascii') if content else b'0'
 
@@ -109,8 +109,9 @@ async def get_text(
     :param ssl: An optional ssl.SSLContext.
     :return: The decoded JSON object.
     """
-    if not headers:
-        headers = []
+
+    headers = [] if headers is None else list(headers)
+
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'text/plain'))
 
@@ -139,8 +140,8 @@ async def get_json(
     :param ssl: An optional ssl.SSLContext.
     :return: The decoded JSON object.
     """
-    if not headers:
-        headers = []
+    headers = [] if headers is None else list(headers)
+
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'application/json'))
 
@@ -196,8 +197,8 @@ async def post_text(
     :return: The decoded JSON object.
     """
 
-    if not headers:
-        headers = []
+    headers = [] if headers is None else list(headers)
+
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'text/plain'))
 
@@ -235,8 +236,8 @@ async def post_json(
     :return: The decoded JSON object.
     """
 
-    if not headers:
-        headers = []
+    headers = [] if headers is None else list(headers)
+
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'application/json'))
 
