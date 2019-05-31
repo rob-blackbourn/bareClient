@@ -1,33 +1,17 @@
 from asyncio import AbstractEventLoop
 import json
 from ssl import SSLContext
-from typing import Union, List, Mapping, Any, Callable, Optional, Tuple, AsyncIterator
+from typing import Union, List, Mapping, Any, Callable, Optional
 from urllib.parse import urlparse
 from .client import HttpClient
 from .__version__ import __version__
 from baretypes import Header
 import bareutils.header as header
+from bareutils import bytes_writer
 
 JsonType = Union[List[Any], Mapping[str, Any]]
 
 USER_AGENT = f'bareClient/{__version__}'.encode('ascii')
-
-
-async def bytes_writer(buf: bytes, chunk_size: int = -1) -> AsyncIterator[bytes]:
-    """Creates an asynchronous generator from the supplied response body.
-
-    :param buf: The response body to return.
-    :param chunk_size: The size of each chunk to send or -1 to send as a single chunk.
-    :return: An asynchronous generator of bytes.
-    """
-
-    if chunk_size == -1:
-        yield buf
-    else:
-        start, end = 0, chunk_size
-        while start < len(buf):
-            yield buf[start:end]
-            start, end = end, end + chunk_size
 
 
 async def request(
