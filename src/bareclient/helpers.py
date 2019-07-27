@@ -5,7 +5,7 @@ from typing import Union, List, Mapping, Any, Callable, Optional
 from urllib.parse import urlparse
 from .client import HttpClient
 from .__version__ import __version__
-from baretypes import Header
+from baretypes import Headers
 import bareutils.header as header
 from bareutils import bytes_writer
 
@@ -18,7 +18,7 @@ async def request(
         url: str,
         method: str,
         *,
-        headers: List[Header] = None,
+        headers: Headers = None,
         content: Optional[bytes] = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None,
@@ -69,7 +69,7 @@ async def request(
 async def get(
         url: str,
         *,
-        headers: List[Header] = None,
+        headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> bytes:
@@ -91,7 +91,7 @@ async def get(
 async def get_text(
         url: str,
         *,
-        headers: List[Header] = None,
+        headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         encoding: str = 'utf-8',
         ssl: Optional[SSLContext] = None
@@ -122,7 +122,7 @@ async def get_text(
 async def get_json(
         url: str,
         *,
-        headers: List[Header] = None,
+        headers: Headers = None,
         loads: Callable[[str], JsonType] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
@@ -153,7 +153,7 @@ async def post(
         url: str,
         content: bytes,
         *,
-        headers: List[Header] = None,
+        headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> bytes:
@@ -178,7 +178,7 @@ async def post_text(
         text: str,
         *,
         encoding='utf-8',
-        headers: List[Header] = None,
+        headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> str:
@@ -216,7 +216,7 @@ async def post_json(
         *,
         loads: Callable[[str], JsonType] = json.loads,
         dumps: Callable[[JsonType], str] = json.dumps,
-        headers: List[Header] = None,
+        headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         ssl: Optional[SSLContext] = None
 ) -> Optional[JsonType]:

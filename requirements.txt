@@ -1,2 +1,2 @@
-bareutils>=2.2<3
+bareutils>=3.0.1<4
 h11~=0.8.1

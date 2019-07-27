@@ -1,10 +1,10 @@
 from asyncio import AbstractEventLoop, open_connection
 import h11
-from typing import AsyncIterator, Tuple, Mapping, List, Optional, Type
+from typing import Tuple, Mapping, Optional, Type
 import urllib.parse
 from .utils import get_port, get_target
 from .requester import Requester
-from baretypes import Header
+from baretypes import Headers, Content
 from bareutils.compression import Decompressor
 
 
@@ -39,13 +39,12 @@ class HttpClient:
     If unspecified the ``decompressors`` argument will default to gzip and deflate.
     """
 
-
     def __init__(
             self,
             url: str,
             method: str = 'GET',
-            headers: List[Header] = None,
-            content: Optional[AsyncIterator[bytes]] = None,
+            headers: Headers = None,
+            content: Optional[Content] = None,
             loop: Optional[AbstractEventLoop] = None,
             bufsiz: int = 1024,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
@@ -72,8 +71,7 @@ class HttpClient:
         self.kwargs = kwargs
         self._close = None
 
-
-    async def __aenter__(self) -> Tuple[h11.Response, AsyncIterator[bytes]]:
+    async def __aenter__(self) -> Tuple[h11.Response, Content]:
         """opens the context.
 
         .. code-block:: python
@@ -96,7 +94,6 @@ class HttpClient:
         self._close = lambda: writer.close()
         requester = Requester(reader, writer, self.bufsiz, self.decompressors)
         return await requester.request(get_target(self.url), self.method, self.headers, self.content)
-
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.
