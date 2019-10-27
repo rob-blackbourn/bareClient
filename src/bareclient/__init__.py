@@ -1,3 +1,5 @@
+"""Exports from bareclient"""
+
 from .client import HttpClient
 from .session import HttpSession
 from .helpers import (
@@ -21,5 +23,3 @@ __all__ = [
     'post_text',
     'post_json'
 ]
-
-__version__ = '0.1.0'

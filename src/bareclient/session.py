@@ -1,9 +1,18 @@
+"""Session"""
+
 from asyncio import AbstractEventLoop, open_connection
-from typing import Optional, Mapping, Type
+from typing import (
+    Callable,
+    Optional,
+    Mapping,
+    Type
+)
 import urllib.parse
+
+from bareutils.compression import Decompressor
+
 from .utils import get_port
 from .requester import Requester
-from bareutils.compression import Decompressor
 
 
 class HttpSession:
@@ -22,19 +31,26 @@ class HttpSession:
 
         async with HttpSession('https://docs.python.org', ssl=ssl.SSLContext()) as requester:
 
-            response, body = await requester.request('/3/library/cgi.html', method='GET', headers=headers)
+            response, body = await requester.request(
+                '/3/library/cgi.html',
+                method='GET',
+                headers=headers
+            )
             print(response)
             if response.status_code == 200:
                 async for part in body():
                     print(part)
 
-            response, body = await requester.request('/3/library/urllib.parse.html', method='GET', headers=headers)
+            response, body = await requester.request(
+                '/3/library/urllib.parse.html',
+                method='GET',
+                headers=headers
+            )
             print(response)
             if response.status_code == 200:
                 async for part in body():
                     print(part)
     """
-
 
     def __init__(
             self,
@@ -57,20 +73,31 @@ class HttpSession:
         self.bufsiz = bufsiz
         self.decompressors = decompressors
         self.kwargs = kwargs
-        self._close = None
-
+        self._close: Optional[Callable[[], None]] = None
 
     async def __aenter__(self) -> Requester:
         """Opens the context.
 
         :return: A requester.
         """
+        hostname = self.url.hostname
         port = get_port(self.url)
-        reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
-        self._close = lambda: writer.close()
-        return Requester(reader, writer, self.bufsiz, self.decompressors)
 
+        if hostname is None:
+            raise RuntimeError('unspecified hostname')
+        if port is None:
+            raise RuntimeError('unspecified port')
+
+        reader, writer = await open_connection(
+            hostname,
+            port,
+            loop=self.loop,
+            **self.kwargs
+        )
+        self._close = writer.close
+        return Requester(reader, writer, self.bufsiz, self.decompressors)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Closes the context"""
-        self._close()
+        if self._close is not None:
+            self._close()

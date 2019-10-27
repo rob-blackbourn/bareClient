@@ -1,6 +1,15 @@
+"""Requesters"""
+
 from asyncio import StreamReader, StreamWriter
+from typing import (
+    Mapping,
+    Optional,
+    Tuple,
+    Type
+)
+
 import h11
-from typing import Tuple, Optional, Mapping, Type
+
 from baretypes import Headers, Content
 from bareutils.compression import (
     make_gzip_decompressobj,
@@ -16,7 +25,24 @@ DEFAULT_DECOMPRESSORS = {
 }
 
 
-async def body_reader(conn: h11.Connection, reader: StreamReader, bufsiz: int) -> Content:
+async def body_reader(
+        conn: h11.Connection,
+        reader: StreamReader,
+        bufsiz: int
+) -> Content:
+    """A body reader
+
+    :param conn: The h11 connection
+    :type conn: h11.Connection
+    :param reader: A reader
+    :type reader: StreamReader
+    :param bufsiz: The size of the buffer
+    :type bufsiz: int
+    :raises ConnectionError: Raised if a response was not received
+    :raises ValueError: Raised for an unknown event
+    :return: The content
+    :rtype: Content
+    """
     while True:
         event = conn.next_event()
         if event is h11.NEED_DATA:
@@ -33,6 +59,7 @@ async def body_reader(conn: h11.Connection, reader: StreamReader, bufsiz: int) -
 
 
 class Requester:
+    """A requester"""
 
     def __init__(
             self,
@@ -66,7 +93,7 @@ class Requester:
         :param method: The request method (e.g. GET, POST, etc.)
         :param headers: Headers to send.
         :param content: Optional data to send.
-        :return: An h11.Response object and an async generator function to retirve the body.
+        :return: An h11.Response object and an async generator function to retrieve the body.
         """
         if not self.conn:
             # noinspection PyUnresolvedReferences
@@ -106,7 +133,8 @@ class Requester:
 
         writer = body_reader(self.conn, self.reader, self.bufsiz)
 
-        content_types = header.find(b'content-encoding', response.headers, b'').split(b', ')
+        content_types = header.find(
+            b'content-encoding', response.headers, b'').split(b', ')
         for content_type in content_types:
             if content_type in self.decompressors:
                 decompressor = self.decompressors[content_type]

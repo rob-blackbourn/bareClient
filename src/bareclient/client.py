@@ -1,11 +1,22 @@
+"""The Client"""
+
 from asyncio import AbstractEventLoop, open_connection
-import h11
-from typing import Tuple, Mapping, Optional, Type
+from typing import (
+    Callable,
+    Mapping,
+    Optional,
+    Tuple,
+    Type
+)
 import urllib.parse
-from .utils import get_port, get_target
-from .requester import Requester
+
+import h11
+
 from baretypes import Headers, Content
 from bareutils.compression import Decompressor
+
+from .utils import get_port, get_target
+from .requester import Requester
 
 
 class HttpClient:
@@ -69,7 +80,7 @@ class HttpClient:
         self.bufsiz = bufsiz
         self.decompressors = decompressors
         self.kwargs = kwargs
-        self._close = None
+        self._close: Optional[Callable[[], None]] = None
 
     async def __aenter__(self) -> Tuple[h11.Response, Content]:
         """opens the context.
@@ -89,13 +100,30 @@ class HttpClient:
 
         :return: The h11 Response object and a body function which returns an async generator.
         """
+        hostname = self.url.hostname
+        if hostname is None:
+            raise RuntimeError('unspecified hostname')
         port = get_port(self.url)
-        reader, writer = await open_connection(self.url.hostname, port, loop=self.loop, **self.kwargs)
-        self._close = lambda: writer.close()
+        if port is None:
+            raise RuntimeError('unspecified port')
+
+        reader, writer = await open_connection(
+            hostname,
+            port,
+            loop=self.loop,
+            **self.kwargs
+        )
+        self._close = writer.close
         requester = Requester(reader, writer, self.bufsiz, self.decompressors)
-        return await requester.request(get_target(self.url), self.method, self.headers, self.content)
+        return await requester.request(
+            get_target(self.url),
+            self.method,
+            self.headers,
+            self.content
+        )
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.
         """
-        self._close()
+        if self._close is not None:
+            self._close()

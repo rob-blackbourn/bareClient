@@ -1,17 +1,20 @@
+"""Helpers"""
+
 from asyncio import AbstractEventLoop
 import json
 from ssl import SSLContext
 from typing import Union, List, Mapping, Any, Callable, Optional
 from urllib.parse import urlparse
-from .client import HttpClient
-from .__version__ import __version__
+
 from baretypes import Headers
 import bareutils.header as header
 from bareutils import bytes_writer
 
+from .client import HttpClient
+
 JsonType = Union[List[Any], Mapping[str, Any]]
 
-USER_AGENT = f'bareClient/{__version__}'.encode('ascii')
+USER_AGENT = b'bareClient'
 
 
 async def request(
@@ -28,7 +31,11 @@ async def request(
 
     .. code-block:: python
 
-        buf = await request('https://jsonplaceholder.typicode.com/todos/1', 'GET', ssl=ssl.SSLContext())
+        buf = await request(
+            'https://jsonplaceholder.typicode.com/todos/1',
+            'GET',
+            ssl=ssl.SSLContext()
+        )
 
     :param url: The url to get.
     :param method: The HTTP method (eg. 'GET', 'POST', etc).
@@ -44,8 +51,12 @@ async def request(
 
     content_length = str(len(content)).encode('ascii') if content else b'0'
 
+    hostname = urlparse(url).hostname
+    if hostname is None:
+        raise RuntimeError('unspecified hostname')
+
     base_headers = [
-        (b'host', urlparse(url).hostname.encode('ascii')),
+        (b'host', hostname.encode('ascii')),
         (b'content-length', content_length),
         (b'user-agent', USER_AGENT),
         (b'connection', b'close')
@@ -57,7 +68,14 @@ async def request(
 
     data = bytes_writer(content, chunk_size) if content else None
 
-    async with HttpClient(url, method, headers, content=data, loop=loop, ssl=ssl) as (response, body):
+    async with HttpClient(
+            url,
+            method,
+            headers,
+            content=data,
+            loop=loop,
+            ssl=ssl
+    ) as (response, body):
         if response.status_code < 200 or response.status_code >= 400:
             raise RuntimeError('Request failed')
         buf = b''
@@ -161,7 +179,11 @@ async def post(
 
     .. code-block:: python
 
-        buf = await post('https://jsonplaceholder.typicode.com/todos', b'Big jobs', ssl=ssl.SSLContext())
+        buf = await post(
+            'https://jsonplaceholder.typicode.com/todos',
+            b'Big jobs',
+            ssl=ssl.SSLContext()
+        )
 
     :param url: The url to get.
     :param content: The content to send.
@@ -186,7 +208,11 @@ async def post_text(
 
     .. code-block:: python
 
-        buf = await post('https://jsonplaceholder.typicode.com/todos', b'Big jobs', ssl=ssl.SSLContext())
+        buf = await post(
+            'https://jsonplaceholder.typicode.com/todos',
+            b'Big jobs',
+            ssl=ssl.SSLContext()
+        )
 
     :param url: The url to get.
     :param text: The text to send.
@@ -224,7 +250,11 @@ async def post_json(
 
     .. code-block:: python
 
-        buf = await post('https://jsonplaceholder.typicode.com/todos', b'Big jobs', ssl=ssl.SSLContext())
+        buf = await post(
+            'https://jsonplaceholder.typicode.com/todos',
+            b'Big jobs',
+            ssl=ssl.SSLContext()
+        )
 
     :param url: The url to get.
     :param obj: The object to send.
