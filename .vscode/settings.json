@@ -5,6 +5,7 @@
     "python.linting.pylintEnabled": true,
     "python.linting.mypyEnabled": true,
     "cSpell.words": [
+      "Decompressor",
       "aenter",
       "aexit",
       "alpn",

@@ -15,6 +15,7 @@ from bareutils.compression import Decompressor
 
 from .utils import get_port, create_ssl_context
 from .requester import Requester
+from .h11_requester import H11Requester
 
 
 class HttpSession:
@@ -102,9 +103,9 @@ class HttpSession:
             negotiated_protocol = ssl_object.selected_alpn_protocol()
             if negotiated_protocol is None:
                 negotiated_protocol = ssl_object.selected_npn_protocol()
-        
+
         self._close = writer.close
-        return Requester(reader, writer, self.bufsiz, self.decompressors, negotiated_protocol)
+        return H11Requester(reader, writer, self.bufsiz, self.decompressors)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Closes the context"""

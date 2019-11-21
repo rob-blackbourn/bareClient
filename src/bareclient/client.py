@@ -18,7 +18,7 @@ from baretypes import Headers, Content
 from bareutils.compression import Decompressor
 
 from .utils import get_port, get_target, create_ssl_context
-from .requester import Requester
+from .h11_requester import H11Requester
 
 class HttpClient:
     """An asyncio HTTP client.
@@ -112,7 +112,7 @@ class HttpClient:
             hostname,
             port,
             loop=self.loop,
-            ssl = self.ssl_context
+            ssl=self.ssl_context
         )
 
         ssl_object: Optional[ssl.SSLSocket] = writer.get_extra_info('ssl_object') if self.ssl_context else None
@@ -123,7 +123,7 @@ class HttpClient:
 
 
         self._close = writer.close
-        requester = Requester(reader, writer, self.bufsiz, self.decompressors, negotiated_protocol)
+        requester = H11Requester(reader, writer, self.bufsiz, self.decompressors)
         return await requester.request(
             get_target(self.url),
             self.method,
