@@ -1,7 +1,9 @@
 """Session"""
 
 from asyncio import AbstractEventLoop, open_connection
+import ssl
 from typing import (
+    Any,
     Callable,
     Optional,
     Mapping,
@@ -11,7 +13,7 @@ import urllib.parse
 
 from bareutils.compression import Decompressor
 
-from .utils import get_port
+from .utils import get_port, create_ssl_context
 from .requester import Requester
 
 
@@ -58,7 +60,7 @@ class HttpSession:
             loop: Optional[AbstractEventLoop] = None,
             bufsiz: int = 1024,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            **kwargs
+            ssl_kwargs: Optional[Mapping[str, Any]] = None
     ) -> None:
         """Construct the client.
 
@@ -72,7 +74,7 @@ class HttpSession:
         self.loop = loop
         self.bufsiz = bufsiz
         self.decompressors = decompressors
-        self.kwargs = kwargs
+        self.ssl_context = create_ssl_context(**ssl_kwargs) if ssl_kwargs is not None else None
         self._close: Optional[Callable[[], None]] = None
 
     async def __aenter__(self) -> Requester:
@@ -92,10 +94,17 @@ class HttpSession:
             hostname,
             port,
             loop=self.loop,
-            **self.kwargs
+            ssl=self.ssl_context
         )
+
+        ssl_object: Optional[ssl.SSLSocket] = writer.get_extra_info('ssl_object') if self.ssl_context else None
+        if ssl_object:
+            negotiated_protocol = ssl_object.selected_alpn_protocol()
+            if negotiated_protocol is None:
+                negotiated_protocol = ssl_object.selected_npn_protocol()
+        
         self._close = writer.close
-        return Requester(reader, writer, self.bufsiz, self.decompressors)
+        return Requester(reader, writer, self.bufsiz, self.decompressors, negotiated_protocol)
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Closes the context"""

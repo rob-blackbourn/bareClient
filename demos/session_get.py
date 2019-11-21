@@ -1,10 +1,13 @@
+"""A session GET"""
+
 import asyncio
+from typing import Any, List, Mapping, Optional
+
 from bareclient import HttpSession
-import ssl
+from baretypes import Header
 
-
-async def main(url, headers, paths, ssl):
-    async with HttpSession(url, ssl=ssl) as requester:
+async def main(url: str, headers: List[Header], paths: List[str], ssl_kwargs: Optional[Mapping[str, Any]]) -> None:
+    async with HttpSession(url, ssl_kwargs=ssl_kwargs) as requester:
         for path in paths:
             response, body = await requester.request(path, method='GET', headers=headers)
             print(response)
@@ -13,10 +16,10 @@ async def main(url, headers, paths, ssl):
                     print(part)
 
 
-url = 'https://docs.python.org'
-headers = [(b'host', b'docs.python.org'), (b'connection', b'keep-alive')]
-paths = ['/3/library/cgi.html', '/3/library/urllib.parse.html']
-ssl_context = ssl.SSLContext()
+URL = 'https://docs.python.org'
+HEADERS = [(b'host', b'docs.python.org'), (b'connection', b'keep-alive')]
+PATHS = ['/3/library/cgi.html', '/3/library/urllib.parse.html']
+SSL_KWARGS: Mapping[str, Any] = {}
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(main(url, headers, paths, ssl_context))
+loop.run_until_complete(main(URL, HEADERS, PATHS, SSL_KWARGS))

@@ -2,8 +2,7 @@
 
 from asyncio import AbstractEventLoop
 import json
-from ssl import SSLContext
-from typing import Union, List, Mapping, Any, Callable, Optional
+from typing import Any, Callable, Mapping, List, Optional, Union
 from urllib.parse import urlparse
 
 from baretypes import Headers
@@ -24,7 +23,7 @@ async def request(
         headers: Headers = None,
         content: Optional[bytes] = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None,
+        ssl_kwargs: Optional[Mapping[str, Any]] = None,
         chunk_size: int = -1
 ) -> bytes:
     """Gets bytes from a url.
@@ -74,7 +73,7 @@ async def request(
             headers,
             content=data,
             loop=loop,
-            ssl=ssl
+            ssl_kwargs=ssl_kwargs
     ) as (response, body):
         if response.status_code < 200 or response.status_code >= 400:
             raise RuntimeError('Request failed')
@@ -89,7 +88,7 @@ async def get(
         *,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        ssl_kwargs: Optional[Mapping[str, Any]] = None
 ) -> bytes:
     """Gets bytes from a url.
 
@@ -103,7 +102,7 @@ async def get(
     :param ssl: An optional ssl.SSLContext.
     :return: The decoded JSON object.
     """
-    return await request(url, 'GET', headers=headers, loop=loop, ssl=ssl)
+    return await request(url, 'GET', headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
 
 
 async def get_text(
@@ -112,7 +111,7 @@ async def get_text(
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         encoding: str = 'utf-8',
-        ssl: Optional[SSLContext] = None
+        ssl_kwargs: Optional[Mapping[str, Any]] = None
 ) -> str:
     """Gets text from a url.
 
@@ -133,7 +132,7 @@ async def get_text(
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'text/plain'))
 
-    buf = await get(url, headers=headers, loop=loop, ssl=ssl)
+    buf = await get(url, headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
     return buf.decode(encoding)
 
 
@@ -143,7 +142,7 @@ async def get_json(
         headers: Headers = None,
         loads: Callable[[str], JsonType] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        ssl_kwargs: Optional[Mapping[str, Any]] = None
 ) -> JsonType:
     """Gets a json object from a url.
 
@@ -163,7 +162,7 @@ async def get_json(
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'application/json'))
 
-    text = await get_text(url, headers=headers, encoding='utf-8', loop=loop, ssl=ssl)
+    text = await get_text(url, headers=headers, encoding='utf-8', loop=loop, ssl_kwargs=ssl_kwargs)
     return loads(text)
 
 
@@ -173,7 +172,7 @@ async def post(
         *,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        ssl_kwargs: Optional[Mapping[str, Any]] = None
 ) -> bytes:
     """Posts bytes to a url.
 
@@ -192,7 +191,7 @@ async def post(
     :param ssl: An optional ssl.SSLContext.
     :return: The decoded JSON object.
     """
-    return await request(url, method='POST', content=content, headers=headers, loop=loop, ssl=ssl)
+    return await request(url, method='POST', content=content, headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
 
 
 async def post_text(
@@ -202,7 +201,7 @@ async def post_text(
         encoding='utf-8',
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        ssl_kwargs: Optional[Mapping[str, Any]] = None
 ) -> str:
     """Posts text to a url.
 
@@ -232,7 +231,7 @@ async def post_text(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'text/plain'))
 
-    response = await post(url, content=content, headers=headers, loop=loop, ssl=ssl)
+    response = await post(url, content=content, headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
     return response.decode(encoding=encoding)
 
 
@@ -244,7 +243,7 @@ async def post_json(
         dumps: Callable[[JsonType], str] = json.dumps,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        ssl_kwargs: Optional[Mapping[str, Any]] = None
 ) -> Optional[JsonType]:
     """Posts text to a url.
 
@@ -275,5 +274,5 @@ async def post_json(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'application/json'))
 
-    text = await post_text(url, text=content, encoding='utf-8', headers=headers, loop=loop, ssl=ssl)
+    text = await post_text(url, text=content, encoding='utf-8', headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
     return loads(text)

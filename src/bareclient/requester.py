@@ -66,7 +66,8 @@ class Requester:
             reader: StreamReader,
             writer: StreamWriter,
             bufsiz: int = 1024,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None
+            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+            negotiated_protocol: Optional[str] = None
     ) -> None:
         """Requests HTTP from a session.
 
@@ -79,6 +80,7 @@ class Requester:
         self.bufsiz = bufsiz
         self.conn: Optional[h11.Connection] = None
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
+        self.negotiated_protocol = negotiated_protocol
 
     async def request(
             self,
