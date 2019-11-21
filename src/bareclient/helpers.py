@@ -2,7 +2,7 @@
 
 from asyncio import AbstractEventLoop
 import json
-from typing import Any, Callable, Mapping, List, Optional, Union
+from typing import Any, AnyStr, Callable, Mapping, List, Optional, Union
 from urllib.parse import urlparse
 
 from baretypes import Headers
@@ -23,7 +23,9 @@ async def request(
         headers: Headers = None,
         content: Optional[bytes] = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl_kwargs: Optional[Mapping[str, Any]] = None,
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None,
         chunk_size: int = -1
 ) -> bytes:
     """Gets bytes from a url.
@@ -73,7 +75,9 @@ async def request(
             headers,
             content=data,
             loop=loop,
-            ssl_kwargs=ssl_kwargs
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata
     ) as (response, body):
         if response.status_code < 200 or response.status_code >= 400:
             raise RuntimeError('Request failed')
@@ -88,7 +92,9 @@ async def get(
         *,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl_kwargs: Optional[Mapping[str, Any]] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None
 ) -> bytes:
     """Gets bytes from a url.
 
@@ -102,7 +108,15 @@ async def get(
     :param ssl: An optional ssl.SSLContext.
     :return: The decoded JSON object.
     """
-    return await request(url, 'GET', headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
+    return await request(
+        url,
+        'GET',
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
 
 
 async def get_text(
@@ -111,7 +125,9 @@ async def get_text(
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         encoding: str = 'utf-8',
-        ssl_kwargs: Optional[Mapping[str, Any]] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None
 ) -> str:
     """Gets text from a url.
 
@@ -132,7 +148,14 @@ async def get_text(
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'text/plain'))
 
-    buf = await get(url, headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
+    buf = await get(
+        url,
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return buf.decode(encoding)
 
 
@@ -142,7 +165,9 @@ async def get_json(
         headers: Headers = None,
         loads: Callable[[str], JsonType] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
-        ssl_kwargs: Optional[Mapping[str, Any]] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None
 ) -> JsonType:
     """Gets a json object from a url.
 
@@ -162,7 +187,15 @@ async def get_json(
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'application/json'))
 
-    text = await get_text(url, headers=headers, encoding='utf-8', loop=loop, ssl_kwargs=ssl_kwargs)
+    text = await get_text(
+        url,
+        headers=headers,
+        encoding='utf-8',
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return loads(text)
 
 
@@ -172,7 +205,9 @@ async def post(
         *,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl_kwargs: Optional[Mapping[str, Any]] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None
 ) -> bytes:
     """Posts bytes to a url.
 
@@ -191,7 +226,16 @@ async def post(
     :param ssl: An optional ssl.SSLContext.
     :return: The decoded JSON object.
     """
-    return await request(url, method='POST', content=content, headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
+    return await request(
+        url,
+        method='POST',
+        content=content,
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
 
 
 async def post_text(
@@ -201,7 +245,9 @@ async def post_text(
         encoding='utf-8',
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl_kwargs: Optional[Mapping[str, Any]] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None
 ) -> str:
     """Posts text to a url.
 
@@ -231,7 +277,15 @@ async def post_text(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'text/plain'))
 
-    response = await post(url, content=content, headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
+    response = await post(
+        url,
+        content=content,
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return response.decode(encoding=encoding)
 
 
@@ -243,7 +297,9 @@ async def post_json(
         dumps: Callable[[JsonType], str] = json.dumps,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl_kwargs: Optional[Mapping[str, Any]] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[AnyStr] = None
 ) -> Optional[JsonType]:
     """Posts text to a url.
 
@@ -274,5 +330,14 @@ async def post_json(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'application/json'))
 
-    text = await post_text(url, text=content, encoding='utf-8', headers=headers, loop=loop, ssl_kwargs=ssl_kwargs)
+    text = await post_text(
+        url,
+        text=content,
+        encoding='utf-8',
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return loads(text)

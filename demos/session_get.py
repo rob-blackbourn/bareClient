@@ -1,13 +1,13 @@
 """A session GET"""
 
 import asyncio
-from typing import Any, List, Mapping, Optional
-
-from bareclient import HttpSession
+from typing import List
 from baretypes import Header
 
-async def main(url: str, headers: List[Header], paths: List[str], ssl_kwargs: Optional[Mapping[str, Any]]) -> None:
-    async with HttpSession(url, ssl_kwargs=ssl_kwargs) as requester:
+from bareclient import HttpSession
+
+async def main(url: str, headers: List[Header], paths: List[str]) -> None:
+    async with HttpSession(url) as requester:
         for path in paths:
             response, body = await requester.request(path, method='GET', headers=headers)
             print(response)
@@ -19,7 +19,5 @@ async def main(url: str, headers: List[Header], paths: List[str], ssl_kwargs: Op
 URL = 'https://docs.python.org'
 HEADERS = [(b'host', b'docs.python.org'), (b'connection', b'keep-alive')]
 PATHS = ['/3/library/cgi.html', '/3/library/urllib.parse.html']
-SSL_KWARGS: Mapping[str, Any] = {}
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(URL, HEADERS, PATHS, SSL_KWARGS))
+asyncio.run(main(URL, HEADERS, PATHS))

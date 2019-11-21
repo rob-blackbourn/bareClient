@@ -1,23 +1,28 @@
 """The Client"""
 
 from asyncio import AbstractEventLoop, open_connection
-import ssl
 from typing import (
-    Any,
     Callable,
     Mapping,
     Optional,
     Tuple,
-    Type
+    Type,
+    AnyStr
 )
 import urllib.parse
+from urllib.error import URLError
 
 import h11
 
 from baretypes import Headers, Content
 from bareutils.compression import Decompressor
 
-from .utils import get_port, get_target, create_ssl_context
+from .utils import (
+    get_port,
+    get_target,
+    create_ssl_context,
+    get_negotiated_protocol
+)
 from .h11_requester import H11Requester
 
 class HttpClient:
@@ -60,7 +65,9 @@ class HttpClient:
             loop: Optional[AbstractEventLoop] = None,
             bufsiz: int = 1024,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            ssl_kwargs: Optional[Mapping[str, Any]] = None
+            cafile: Optional[str] = None,
+            capath: Optional[str] = None,
+            cadata: Optional[AnyStr] = None
     ) -> None:
         """Construct the client.
 
@@ -80,7 +87,16 @@ class HttpClient:
         self.loop = loop
         self.bufsiz = bufsiz
         self.decompressors = decompressors
-        self.ssl_context = create_ssl_context(**ssl_kwargs) if ssl_kwargs is not None else None
+        if self.url.scheme == 'https':
+            self.ssl_context = create_ssl_context(
+                cafile=cafile,
+                capath=capath,
+                cadata=cadata
+            )
+        elif self.url.scheme == 'https':
+            self.ssl_content = None
+        else:
+            raise URLError(f'Invalid scheme: {self.url.scheme}')
         self._close: Optional[Callable[[], None]] = None
 
     async def __aenter__(self) -> Tuple[h11.Response, Content]:
@@ -115,12 +131,7 @@ class HttpClient:
             ssl=self.ssl_context
         )
 
-        ssl_object: Optional[ssl.SSLSocket] = writer.get_extra_info('ssl_object') if self.ssl_context else None
-        if ssl_object:
-            negotiated_protocol = ssl_object.selected_alpn_protocol()
-            if negotiated_protocol is None:
-                negotiated_protocol = ssl_object.selected_npn_protocol()
-
+        negotiated_protocol = get_negotiated_protocol(writer) if self.ssl_context else None
 
         self._close = writer.close
         requester = H11Requester(reader, writer, self.bufsiz, self.decompressors)

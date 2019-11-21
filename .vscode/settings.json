@@ -5,10 +5,14 @@
     "python.linting.pylintEnabled": true,
     "python.linting.mypyEnabled": true,
     "cSpell.words": [
+      "AESGCM",
       "Decompressor",
+      "ECDHE",
       "aenter",
       "aexit",
       "alpn",
-      "bufsiz"
+      "bufsiz",
+      "cadata",
+      "capath"
     ]
 }

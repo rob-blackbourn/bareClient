@@ -1,7 +1,6 @@
 """Session"""
 
 from asyncio import AbstractEventLoop, open_connection
-import ssl
 from typing import (
     Any,
     Callable,
@@ -13,7 +12,7 @@ import urllib.parse
 
 from bareutils.compression import Decompressor
 
-from .utils import get_port, create_ssl_context
+from .utils import get_port, create_ssl_context, get_negotiated_protocol
 from .requester import Requester
 from .h11_requester import H11Requester
 
@@ -98,11 +97,7 @@ class HttpSession:
             ssl=self.ssl_context
         )
 
-        ssl_object: Optional[ssl.SSLSocket] = writer.get_extra_info('ssl_object') if self.ssl_context else None
-        if ssl_object:
-            negotiated_protocol = ssl_object.selected_alpn_protocol()
-            if negotiated_protocol is None:
-                negotiated_protocol = ssl_object.selected_npn_protocol()
+        negotiated_protocol = get_negotiated_protocol(writer) if self.ssl_context else None
 
         self._close = writer.close
         return H11Requester(reader, writer, self.bufsiz, self.decompressors)
