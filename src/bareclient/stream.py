@@ -2,7 +2,8 @@
 
 import asyncio
 from asyncio import StreamReader, StreamWriter, Lock, BaseTransport
-from typing import Any, Awaitable, Iterable, Optional
+from functools import partial
+from typing import Any, Awaitable, Callable, Iterable, Optional
 
 from .timeout import TimeoutConfig, TimeoutFlag
 
@@ -27,7 +28,7 @@ class Stream:
             flag: Optional[TimeoutFlag] = None
     ) -> bytes:
         return await self._retry_reader(
-            self.reader.read(n),
+            partial(self.reader.read, n),
             timeout,
             flag
         )
@@ -38,7 +39,7 @@ class Stream:
             flag: Optional[TimeoutFlag] = None
     ) -> bytes:
         return await self._retry_reader(
-            self.reader.readline(),
+            self.reader.readline,
             timeout,
             flag
         )
@@ -50,7 +51,7 @@ class Stream:
             flag: Optional[TimeoutFlag] = None
     ) -> bytes:
         return await self._retry_reader(
-            self.reader.readexactly(n),
+            partial(self.reader.readexactly, n),
             timeout,
             flag
         )
@@ -62,14 +63,14 @@ class Stream:
             flag: Optional[TimeoutFlag] = None
     ) -> bytes:
         return await self._retry_reader(
-            self.reader.readuntil(separator),
+            partial(self.reader.readuntil, separator),
             timeout,
             flag
         )
 
     async def _retry_reader(
             self,
-            reader: Awaitable[bytes],
+            reader: Callable[[], Awaitable[bytes]],
             timeout: Optional[TimeoutConfig],
             flag: Optional[TimeoutFlag]
     ) -> bytes:
@@ -82,7 +83,7 @@ class Stream:
         while True:
             try:
                 async with self.read_lock:
-                    return await asyncio.wait_for(reader, read_timeout)
+                    return await asyncio.wait_for(reader(), read_timeout)
             except asyncio.TimeoutError:
                 if should_raise:
                     raise

@@ -1,17 +1,18 @@
 """Requesters"""
 
 import asyncio
+from asyncio import Queue, Task
 import functools
 from typing import (
     Any,
     AsyncIterator,
+    Awaitable,
     Callable,
     Dict,
     List,
     Optional,
     Tuple
 )
-import urllib.parse
 from urllib.parse import ParseResult
 
 import h2.connection
@@ -19,13 +20,11 @@ import h2.events
 import h2.settings
 
 from baretypes import Header
-from bareutils import bytes_writer
 from bareutils.compression import (
     make_gzip_decompressobj,
     make_deflate_decompressobj
 )
 
-from .background_manager import BackgroundManager
 from .requester import Requester
 from .utils import get_target, get_authority
 from .timeout import TimeoutConfig, TimeoutFlag
@@ -67,43 +66,79 @@ class H2Requester(Requester):
         self.window_update_received: Dict[int, asyncio.Event] = {}
         self.timeout_flags : Dict[int, TimeoutFlag] = {}
         self.initialized = False
+        self.read_queue: "Queue[Dict[str, Any]]" = Queue(maxsize=1)
+        self.pending: List[Task] = []
+        self.stream_id = -1
+        self.on_close: Optional[Callable[[], Awaitable[None]]] = None
 
     async def send(
             self,
             request: Dict[str, Any],
             timeout: TimeoutConfig
-    ) -> Dict[str, Any]:
+    ):
+        request_type: str = request['type']
+
+        if request_type == 'http.request':
+            await self._send_request(request, timeout)
+        elif request_type == 'http.request.body':
+            await self._send_request_body(request, timeout)
+        elif request_type == 'http.disconnect':
+            if self.on_close:
+                await self.on_close()
+        else:
+            raise Exception(f'unknown request type: {request_type}')
+
+    async def receive(self) -> Dict[str, Any]:
+        return await self.read_queue.get()
+
+    async def _send_request(self, request: Dict[str, Any], timeout: TimeoutConfig) -> None:
         # Start sending the request.
         if not self.initialized:
             self.initiate_connection()
 
         url = request['url']
-        stream_id = await self.send_headers(
+        self.stream_id = await self.send_headers(
             url,
             request['method'],
             request.get('headers', []),
             timeout
         )
 
-        self.events[stream_id] = []
-        self.timeout_flags[stream_id] = TimeoutFlag()
-        self.window_update_received[stream_id] = asyncio.Event()
+        self.events[self.stream_id] = []
+        self.timeout_flags[self.stream_id] = TimeoutFlag()
+        self.window_update_received[self.stream_id] = asyncio.Event()
 
-        body = request.get('body', bytes_writer(b''))
+        body = request.get('body', b'')
+        more_body = request.get('more_body', False)
 
-        async with BackgroundManager(self.send_request_data(stream_id, body, timeout)):
-            status_code, headers = await self.receive_response(stream_id, timeout)
-        content = self.body_iter(stream_id, timeout)
-        on_close = functools.partial(self.response_closed, stream_id=stream_id)
+        self._create_task(
+            self._send_request_data(self.stream_id, body, more_body, timeout)
+        )
+        self._create_task(
+            self.receive_response(self.stream_id, timeout)
+        )
+        self.on_close = functools.partial(self.response_closed, stream_id=self.stream_id)
 
-        return {
-            'status_code': status_code,
-            'http_version': "HTTP/2",
-            'headers': headers,
-            'content': content,
-            'on_close': on_close,
-            'request': request,
-        }
+    async def _send_request_body(self, message: Dict[str, Any], timeout: TimeoutConfig) -> None:
+        self._create_task(
+            self._send_request_data(
+                self.stream_id,
+                message.get('body', b''),
+                message.get('more_body', False),
+                timeout
+            )
+        )
+
+    def _create_task(self, coroutine) -> Task:
+        task = asyncio.create_task(coroutine)
+        self.pending.append(task)
+        task.add_done_callback(self._reap_task)
+        return task
+
+    def _reap_task(self, task: Task):
+        self.pending.remove(task)
+        print('here')
+
 
     async def close(self) -> None:
         await self.stream.close()
@@ -156,18 +191,19 @@ class H2Requester(Requester):
         await self.stream.write(data_to_send, timeout)
         return stream_id
 
-    async def send_request_data(
+    async def _send_request_data(
         self,
         stream_id: int,
-        stream: AsyncIterator[bytes],
+        body: bytes,
+        more_body: bool,
         timeout: TimeoutConfig
     ) -> None:
         try:
-            async for data in stream:
-                await self.send_data(stream_id, data, timeout)
-            await self.end_stream(stream_id, timeout)
+            await self.send_data(stream_id, body, timeout)
+            if not more_body:
+                await self.end_stream(stream_id, timeout)
         finally:
-            # Once we've sent the request we should enable read timeouts.
+            # Once we've sent some data we should enable read timeouts.
             self.timeout_flags[stream_id].set_read_timeouts()
 
     async def send_data(
@@ -207,7 +243,7 @@ class H2Requester(Requester):
             self,
             stream_id: int,
             timeout: TimeoutConfig = None
-    ) -> Tuple[int, List[Tuple[bytes, bytes]]]:
+    ) -> None:
         """
         Read the response status and headers from the network.
         """
@@ -216,18 +252,42 @@ class H2Requester(Requester):
             # As soon as we start seeing response events, we should enable
             # read timeouts, if we haven't already.
             self.timeout_flags[stream_id].set_read_timeouts()
-            if isinstance(event, h2.events.ResponseReceived):
+            if not isinstance(event, h2.events.ResponseReceived):
+                continue
+
+            status_code = 200
+            headers = []
+            more_body = False
+            for k, v in event.headers:
+                if k == b":status":
+                    status_code = int(v.decode("ascii", errors="ignore"))
+                elif not k.startswith(b":"):
+                    headers.append((k, v))
+                    if k == b'content-length' and int(v):
+                        more_body = True
+                    elif k == b'transfer-encoding' and v == b'chunked':
+                        more_body = True
+            await self.read_queue.put({
+                'type': 'http.response',
+                'status_code': status_code,
+                'headers': headers,
+                'more_body': more_body
+            })
+            break
+
+        while True:
+            event = await self.receive_event(stream_id, timeout)
+            if isinstance(event, h2.events.DataReceived):
+                self.h2_state.acknowledge_received_data(
+                    event.flow_controlled_length, stream_id
+                )
+                await self.read_queue.put({
+                    'body': event.data,
+                    'more_body': event.stream_ended is not None,
+                    'stream_id': event.stream_id
+                })
+            elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
                 break
-
-        status_code = 200
-        headers = []
-        for k, v in event.headers:
-            if k == b":status":
-                status_code = int(v.decode("ascii", errors="ignore"))
-            elif not k.startswith(b":"):
-                headers.append((k, v))
-
-        return status_code, headers
 
     async def receive_event(
             self,
@@ -265,23 +325,18 @@ class H2Requester(Requester):
 
         return self.events[stream_id].pop(0)
 
-    async def body_iter(
-        self, stream_id: int, timeout: TimeoutConfig = None
-    ) -> AsyncIterator[bytes]:
-        while True:
-            event = await self.receive_event(stream_id, timeout)
-            if isinstance(event, h2.events.DataReceived):
-                self.h2_state.acknowledge_received_data(
-                    event.flow_controlled_length, stream_id
-                )
-                yield event.data
-            elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
-                break
-
     async def response_closed(self, stream_id: int) -> None:
         del self.events[stream_id]
         del self.timeout_flags[stream_id]
         del self.window_update_received[stream_id]
+
+        for task in self.pending:
+            if not task.done():
+                try:
+                    task.cancel()
+                    await task
+                except asyncio.CancelledError:
+                    pass
 
         if not self.events and self.on_release is not None:
             await self.on_release()

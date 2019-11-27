@@ -129,3 +129,6 @@ class H11Requester(Requester):
             'response': response,
             'content': writer
         }
+
+    async def receive(self) -> Dict[str, Any]:
+        return {}
