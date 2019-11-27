@@ -6,14 +6,15 @@ from bareutils import bytes_reader
 from baretypes import Header
 
 from bareclient import HttpClient
+from bareclient.timeout import TimeoutConfig
 
 
 async def main(url: str, headers: List[Header]) -> None:
     async with HttpClient(url, method='GET', headers=headers) as (send, receive):
-        message = await receive()
+        message = await receive(TimeoutConfig())
         print(message)
         while message.get('more_body', False):
-            message = await receive()
+            message = await receive(TimeoutConfig())
             print(message)
         print('body read')
     print('complete')

@@ -60,5 +60,9 @@ class Requester(metaclass=ABCMeta):
         ...
 
     @abstractmethod
-    async def receive(self) -> Dict[str, Any]:
+    async def receive(self, timeout: TimeoutConfig) -> Dict[str, Any]:
+        ...
+
+    @abstractmethod
+    async def close(self) -> None:
         ...

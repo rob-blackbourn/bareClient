@@ -52,6 +52,20 @@ class ProtocolError(HTTPError):
     Malformed HTTP.
     """
 
+class ResponseEvent(asyncio.Event):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.message: Optional[Dict[str, Any]] = None
+
+    def set_with_message(self, message: Dict[str, Any]) -> None:
+        self.message = message
+        super().set()
+
+    async def wait_with_message(self) -> Optional[Dict[str, Any]]:
+        await super().wait()
+        message, self.message = self.message, None
+        return message
 
 class H2Requester(Requester):
     """An HTTP/2 requester"""
@@ -66,7 +80,7 @@ class H2Requester(Requester):
         self.window_update_received: Dict[int, asyncio.Event] = {}
         self.timeout_flags : Dict[int, TimeoutFlag] = {}
         self.initialized = False
-        self.read_queue: "Queue[Dict[str, Any]]" = Queue(maxsize=1)
+        self.response_event = ResponseEvent()
         self.pending: List[Task] = []
         self.stream_id = -1
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
@@ -88,8 +102,29 @@ class H2Requester(Requester):
         else:
             raise Exception(f'unknown request type: {request_type}')
 
-    async def receive(self) -> Dict[str, Any]:
-        return await self.read_queue.get()
+    async def receive(self, timeout: TimeoutConfig) -> Dict[str, Any]:
+
+        message = await self.response_event.wait_with_message()
+        if message is not None:
+            return message
+
+        while True:
+            event = await self.receive_event(self.stream_id, timeout)
+            if isinstance(event, h2.events.DataReceived):
+                self.h2_state.acknowledge_received_data(
+                    event.flow_controlled_length, self.stream_id
+                )
+                return {
+                    'type': 'http.response.body',
+                    'body': event.data,
+                    'more_body': event.stream_ended is None,
+                    'stream_id': event.stream_id
+                }
+            elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
+                return {
+                    'type': 'http.disconnect'
+                }
+        raise Exception('Closed')
 
     async def _send_request(self, request: Dict[str, Any], timeout: TimeoutConfig) -> None:
         # Start sending the request.
@@ -267,27 +302,13 @@ class H2Requester(Requester):
                         more_body = True
                     elif k == b'transfer-encoding' and v == b'chunked':
                         more_body = True
-            await self.read_queue.put({
+            self.response_event.set_with_message({
                 'type': 'http.response',
                 'status_code': status_code,
                 'headers': headers,
                 'more_body': more_body
             })
             break
-
-        while True:
-            event = await self.receive_event(stream_id, timeout)
-            if isinstance(event, h2.events.DataReceived):
-                self.h2_state.acknowledge_received_data(
-                    event.flow_controlled_length, stream_id
-                )
-                await self.read_queue.put({
-                    'body': event.data,
-                    'more_body': event.stream_ended is not None,
-                    'stream_id': event.stream_id
-                })
-            elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
-                break
 
     async def receive_event(
             self,

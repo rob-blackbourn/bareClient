@@ -132,3 +132,6 @@ class H11Requester(Requester):
 
     async def receive(self) -> Dict[str, Any]:
         return {}
+
+    async def close(self) -> None:
+        pass

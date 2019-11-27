@@ -106,7 +106,7 @@ class HttpClient:
             raise URLError(f'Invalid scheme: {self.url.scheme}')
         self.requester: Optional[Requester] = None
 
-    async def __aenter__(self) -> Tuple[Callable[[Dict[str, Any], TimeoutConfig], Coroutine[Any, Any, Dict[str, Any]]], Callable[[], Awaitable[Dict[str, Any]]]]:
+    async def __aenter__(self) -> Tuple[Callable[[Dict[str, Any], TimeoutConfig], Coroutine[Any, Any, Dict[str, Any]]], Callable[[TimeoutConfig], Awaitable[Dict[str, Any]]]]:
         """opens the context.
 
         .. code-block:: python
@@ -162,4 +162,4 @@ class HttpClient:
         """Exiting the context closes the connection.
         """
         if self.requester is not None:
-            self.requester()
+            await self.requester.close()
