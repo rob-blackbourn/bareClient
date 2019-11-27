@@ -13,7 +13,7 @@ from typing import (
     Optional,
     Tuple
 )
-from urllib.parse import ParseResult
+from urllib.parse import urlparse, ParseResult
 
 import h2.connection
 import h2.events
@@ -104,8 +104,8 @@ class H2Requester(Requester):
     async def receive(
             self,
             stream_id: Optional[int] = None,
-            timeout: Optional[TimeoutConfig] =
-     None) -> Dict[str, Any]:
+            timeout: Optional[TimeoutConfig] = None
+    ) -> Dict[str, Any]:
 
         message = await self.response_event.wait_with_message()
         if message is not None:
@@ -128,7 +128,8 @@ class H2Requester(Requester):
                 }
             elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
                 return {
-                    'type': 'http.disconnect'
+                    'type': 'http.stream.disconnect',
+                    'stream_id': event.stream_id
                 }
         raise Exception('Closed')
 
@@ -137,7 +138,7 @@ class H2Requester(Requester):
         if not self.initialized:
             self.initiate_connection()
 
-        url = request['url']
+        url = urlparse(request['url'])
         stream_id = await self.send_headers(
             url,
             request['method'],

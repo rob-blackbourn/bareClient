@@ -147,15 +147,6 @@ class HttpClient:
         else:
             self.requester = H11Requester(reader, writer, self.bufsiz, self.decompressors)
 
-        request = {
-            'type': 'http.request',
-            'url': self.url,
-            'method': self.method,
-            'headers': self.headers,
-            'body': self.content,
-            'more_body': False
-        }
-        await self.requester.send(request, TimeoutConfig())
         return self.requester.send, self.requester.receive
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
