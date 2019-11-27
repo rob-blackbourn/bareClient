@@ -1,6 +1,7 @@
 """Utilities"""
 
-from asyncio import StreamWriter
+import asyncio
+from asyncio import StreamWriter, StreamReader
 import logging
 import ssl
 from typing import AnyStr, Optional
@@ -47,8 +48,8 @@ def get_target(url: ParseResult) -> str:
         path += '#' + url.fragment
     return path
 
-# PROTOCOLS = ["h2", "http/1.1"]
-PROTOCOLS = ["http/1.1"]
+PROTOCOLS = ["h2", "http/1.1"]
+# PROTOCOLS = ["http/1.1"]
 
 def create_ssl_context(
         cafile: Optional[str] = None,
@@ -101,3 +102,10 @@ def get_negotiated_protocol(writer: StreamWriter) -> Optional[str]:
     if negotiated_protocol is None:
         negotiated_protocol = ssl_object.selected_npn_protocol()
     return negotiated_protocol
+
+def get_authority(url: ParseResult) -> str:
+    """Get the http/2 authority"""
+    if isinstance(url.hostname, str):
+        return url.hostname
+    host, _port = url.netloc.split(':', maxsplit=1)
+    return host

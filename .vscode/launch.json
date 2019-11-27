@@ -1,12 +1,19 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Simple JSON",
-      "type": "python",
-      "request": "launch",
-      "program": "${workspaceFolder}/demos/simple_json.py",
-      "console": "integratedTerminal"
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Simple Get H2",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demos/simple_get_h2.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Simple JSON",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demos/simple_json.py",
+            "console": "integratedTerminal"
+        }
+    ]
 }

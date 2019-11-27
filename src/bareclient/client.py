@@ -2,7 +2,9 @@
 
 from asyncio import AbstractEventLoop, open_connection
 from typing import (
+    Any,
     Callable,
+    Dict,
     Mapping,
     Optional,
     Tuple,
@@ -23,7 +25,10 @@ from .utils import (
     create_ssl_context,
     get_negotiated_protocol
 )
+from .requester import Requester
 from .h11_requester import H11Requester
+from .h2_requester import H2Requester
+from .timeout import TimeoutConfig
 
 class HttpClient:
     """An asyncio HTTP client.
@@ -99,7 +104,7 @@ class HttpClient:
             raise URLError(f'Invalid scheme: {self.url.scheme}')
         self._close: Optional[Callable[[], None]] = None
 
-    async def __aenter__(self) -> Tuple[h11.Response, Content]:
+    async def __aenter__(self) -> Dict[str, Any]:
         """opens the context.
 
         .. code-block:: python
@@ -134,13 +139,19 @@ class HttpClient:
         negotiated_protocol = get_negotiated_protocol(writer) if self.ssl_context else None
 
         self._close = writer.close
-        requester = H11Requester(reader, writer, self.bufsiz, self.decompressors)
-        return await requester.request(
-            get_target(self.url),
-            self.method,
-            self.headers,
-            self.content
-        )
+        
+        if negotiated_protocol == 'h2':
+            requester: Requester = H2Requester(reader, writer, decompressors=self.decompressors)
+        else:
+            requester = H11Requester(reader, writer, self.bufsiz, self.decompressors)
+
+        request = {
+            'url': self.url,
+            'method': self.method,
+            'headers': self.headers,
+            'content': self.content
+        }
+        return await requester.send(request, TimeoutConfig())
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exiting the context closes the connection.

@@ -3,13 +3,13 @@
 from abc import ABCMeta, abstractmethod
 from asyncio import StreamReader, StreamWriter
 from typing import (
+    Any,
+    Dict,
     Mapping,
     Optional,
-    Tuple,
     Type
 )
-
-import h11
+from urllib.parse import ParseResult
 
 from baretypes import Headers, Content
 from bareutils.compression import (
@@ -17,6 +17,9 @@ from bareutils.compression import (
     make_deflate_decompressobj,
     Decompressor
 )
+
+from .stream import Stream
+from .timeout import TimeoutConfig, DEFAULT_TIMEOUT_CONFIG
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
@@ -31,6 +34,7 @@ class Requester(metaclass=ABCMeta):
             reader: StreamReader,
             writer: StreamWriter,
             bufsiz: int = 1024,
+            timeout: TimeoutConfig = DEFAULT_TIMEOUT_CONFIG,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None
     ) -> None:
         """Requests HTTP from a session.
@@ -39,25 +43,18 @@ class Requester(metaclass=ABCMeta):
         :param writer: An asyncio.StreamWriter provider by the context.
         :param bufsiz: The block size to read and write.
         """
-        self.reader = reader
-        self.writer = writer
+        self.stream = Stream(
+            reader,
+            writer,
+            timeout
+        )
         self.bufsiz = bufsiz
-        self.conn: Optional[h11.Connection] = None
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
 
     @abstractmethod
-    async def request(
+    async def send(
             self,
-            path: str,
-            method: str,
-            headers: Headers,
-            content: Optional[Content] = None
-    ) -> Tuple[h11.Response, Content]:
-        """Make an HTTP request.
-
-        :param path: The request path.
-        :param method: The request method (e.g. GET, POST, etc.)
-        :param headers: Headers to send.
-        :param content: Optional data to send.
-        :return: An h11.Response object and an async generator function to retrieve the body.
-        """
+            request: Dict[str, Any],
+            timeout: TimeoutConfig
+    ) -> Dict[str, Any]:
+        ...
