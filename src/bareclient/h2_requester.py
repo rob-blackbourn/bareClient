@@ -82,37 +82,43 @@ class H2Requester(Requester):
         self.initialized = False
         self.response_event = ResponseEvent()
         self.pending: List[Task] = []
-        self.stream_id = -1
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
 
     async def send(
             self,
             request: Dict[str, Any],
-            timeout: TimeoutConfig
+            timeout: Optional[TimeoutConfig] = None
     ):
         request_type: str = request['type']
 
         if request_type == 'http.request':
-            await self._send_request(request, timeout)
+            await self._send_request(request, timeout or TimeoutConfig())
         elif request_type == 'http.request.body':
-            await self._send_request_body(request, timeout)
+            await self._send_request_body(request, timeout or TimeoutConfig())
         elif request_type == 'http.disconnect':
             if self.on_close:
                 await self.on_close()
         else:
             raise Exception(f'unknown request type: {request_type}')
 
-    async def receive(self, timeout: TimeoutConfig) -> Dict[str, Any]:
+    async def receive(
+            self,
+            stream_id: Optional[int] = None,
+            timeout: Optional[TimeoutConfig] =
+     None) -> Dict[str, Any]:
 
         message = await self.response_event.wait_with_message()
         if message is not None:
             return message
 
+        if stream_id is None:
+            raise Exception('missing stream id')
+
         while True:
-            event = await self.receive_event(self.stream_id, timeout)
+            event = await self.receive_event(stream_id, timeout)
             if isinstance(event, h2.events.DataReceived):
                 self.h2_state.acknowledge_received_data(
-                    event.flow_controlled_length, self.stream_id
+                    event.flow_controlled_length, stream_id
                 )
                 return {
                     'type': 'http.response.body',
@@ -132,36 +138,34 @@ class H2Requester(Requester):
             self.initiate_connection()
 
         url = request['url']
-        self.stream_id = await self.send_headers(
+        stream_id = await self.send_headers(
             url,
             request['method'],
             request.get('headers', []),
             timeout
         )
 
-        self.events[self.stream_id] = []
-        self.timeout_flags[self.stream_id] = TimeoutFlag()
-        self.window_update_received[self.stream_id] = asyncio.Event()
+        self.events[stream_id] = []
+        self.timeout_flags[stream_id] = TimeoutFlag()
+        self.window_update_received[stream_id] = asyncio.Event()
 
         body = request.get('body', b'')
         more_body = request.get('more_body', False)
 
         self._create_task(
-            self._send_request_data(self.stream_id, body, more_body, timeout)
+            self._send_request_data(stream_id, body, more_body, timeout)
         )
         self._create_task(
-            self.receive_response(self.stream_id, timeout)
+            self.receive_response(stream_id, timeout)
         )
-        self.on_close = functools.partial(self.response_closed, stream_id=self.stream_id)
+        self.on_close = functools.partial(self.response_closed, stream_id=stream_id)
 
     async def _send_request_body(self, message: Dict[str, Any], timeout: TimeoutConfig) -> None:
-        self._create_task(
-            self._send_request_data(
-                self.stream_id,
-                message.get('body', b''),
-                message.get('more_body', False),
-                timeout
-            )
+        await self._send_request_data(
+            message['stream_id'],
+            message['body'],
+            message.get('more_body', False),
+            timeout
         )
 
     def _create_task(self, coroutine) -> Task:
@@ -224,6 +228,7 @@ class H2Requester(Requester):
         self.h2_state.send_headers(stream_id, headers)
         data_to_send = self.h2_state.data_to_send()
         await self.stream.write(data_to_send, timeout)
+
         return stream_id
 
     async def _send_request_data(
@@ -298,6 +303,7 @@ class H2Requester(Requester):
                     status_code = int(v.decode("ascii", errors="ignore"))
                 elif not k.startswith(b":"):
                     headers.append((k, v))
+                    # TODO: is it better to check stream_ended?
                     if k == b'content-length' and int(v):
                         more_body = True
                     elif k == b'transfer-encoding' and v == b'chunked':
@@ -306,7 +312,8 @@ class H2Requester(Requester):
                 'type': 'http.response',
                 'status_code': status_code,
                 'headers': headers,
-                'more_body': more_body
+                'more_body': more_body,
+                'stream_id': stream_id
             })
             break
 

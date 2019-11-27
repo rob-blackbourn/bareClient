@@ -78,7 +78,7 @@ class H11Requester(Requester):
     async def send(
             self,
             request: Dict[str, Any],
-            timeout: TimeoutConfig
+            timeout: Optional[TimeoutConfig] = None
     ) -> Dict[str, Any]:
         self.connect()
 
@@ -130,7 +130,7 @@ class H11Requester(Requester):
             'content': writer
         }
 
-    async def receive(self) -> Dict[str, Any]:
+    async def receive(self, stream_id: Optional[int] = None, timeout: Optional[TimeoutConfig] = None) -> Dict[str, Any]:
         return {}
 
     async def close(self) -> None:

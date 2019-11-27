@@ -55,12 +55,16 @@ class Requester(metaclass=ABCMeta):
     async def send(
             self,
             request: Dict[str, Any],
-            timeout: TimeoutConfig
+            timeout: Optional[TimeoutConfig] = None
     ) -> Dict[str, Any]:
         ...
 
     @abstractmethod
-    async def receive(self, timeout: TimeoutConfig) -> Dict[str, Any]:
+    async def receive(
+            self,
+            stream_id: Optional[int] = None,
+            timeout: Optional[TimeoutConfig] = None
+    ) -> Dict[str, Any]:
         ...
 
     @abstractmethod

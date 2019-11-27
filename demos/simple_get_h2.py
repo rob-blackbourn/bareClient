@@ -14,7 +14,7 @@ async def main(url: str, headers: List[Header]) -> None:
         message = await receive(TimeoutConfig())
         print(message)
         while message.get('more_body', False):
-            message = await receive(TimeoutConfig())
+            message = await receive(message['stream_id'])
             print(message)
         print('body read')
     print('complete')
