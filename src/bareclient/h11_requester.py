@@ -82,7 +82,7 @@ class H11Requester(Requester):
     ) -> Dict[str, Any]:
         self.connect()
 
-        url = request['url']
+        url = urlparse(request['url'])
 
         request = h11.Request(
             method=request['method'],

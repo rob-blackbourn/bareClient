@@ -1,17 +1,15 @@
 """Requesters"""
 
 import asyncio
-from asyncio import Queue, Task
+from asyncio import Task
 import functools
 from typing import (
     Any,
-    AsyncIterator,
     Awaitable,
     Callable,
     Dict,
     List,
-    Optional,
-    Tuple
+    Optional
 )
 from urllib.parse import urlparse, ParseResult
 
@@ -67,6 +65,13 @@ class ResponseEvent(asyncio.Event):
         message, self.message = self.message, None
         return message
 
+class StreamState:
+
+    def __init__(self) -> None:
+        self.timeout_flag = TimeoutFlag()
+        self.h2_events: List[h2.events.Event] = []
+        self.window_update_received = asyncio.Event()
+
 class H2Requester(Requester):
     """An HTTP/2 requester"""
 
@@ -76,9 +81,7 @@ class H2Requester(Requester):
         super().__init__(reader, writer, bufsiz=bufsiz, decompressors=decompressors)
         self.on_release = on_release
         self.h2_state = h2.connection.H2Connection()
-        self.events: Dict[int, List[h2.events.Event]] = {}
-        self.window_update_received: Dict[int, asyncio.Event] = {}
-        self.timeout_flags : Dict[int, TimeoutFlag] = {}
+        self.stream_states: Dict[int, StreamState] = {}
         self.initialized = False
         self.response_event = ResponseEvent()
         self.pending: List[Task] = []
@@ -146,9 +149,7 @@ class H2Requester(Requester):
             timeout
         )
 
-        self.events[stream_id] = []
-        self.timeout_flags[stream_id] = TimeoutFlag()
-        self.window_update_received[stream_id] = asyncio.Event()
+        self.stream_states[stream_id] = StreamState()
 
         body = request.get('body', b'')
         more_body = request.get('more_body', False)
@@ -245,7 +246,7 @@ class H2Requester(Requester):
                 await self.end_stream(stream_id, timeout)
         finally:
             # Once we've sent some data we should enable read timeouts.
-            self.timeout_flags[stream_id].set_read_timeouts()
+            self.stream_states[stream_id].timeout_flag.set_read_timeouts()
 
     async def send_data(
             self,
@@ -267,8 +268,8 @@ class H2Requester(Requester):
                 # this means that the flow control window is 0 (either for the stream
                 # or the connection one), and no data can be sent until the flow control
                 # window is updated.
-                await self.window_update_received[stream_id].wait()
-                self.window_update_received[stream_id].clear()
+                await self.stream_states[stream_id].window_update_received.wait()
+                self.stream_states[stream_id].window_update_received.clear()
             else:
                 chunk, data = data[:chunk_size], data[chunk_size:]
                 self.h2_state.send_data(stream_id, chunk)
@@ -292,7 +293,7 @@ class H2Requester(Requester):
             event = await self.receive_event(stream_id, timeout)
             # As soon as we start seeing response events, we should enable
             # read timeouts, if we haven't already.
-            self.timeout_flags[stream_id].set_read_timeouts()
+            self.stream_states[stream_id].timeout_flag.set_read_timeouts()
             if not isinstance(event, h2.events.ResponseReceived):
                 continue
 
@@ -323,8 +324,8 @@ class H2Requester(Requester):
             stream_id: int,
             timeout: TimeoutConfig = None
     ) -> h2.events.Event:
-        while not self.events[stream_id]:
-            flag = self.timeout_flags[stream_id]
+        while not self.stream_states[stream_id].h2_events:
+            flag = self.stream_states[stream_id].timeout_flag
             data = await self.stream.read(self.READ_NUM_BYTES, timeout, flag=flag)
             events = self.h2_state.receive_data(data)
             for event in events:
@@ -335,29 +336,21 @@ class H2Requester(Requester):
 
                 if isinstance(event, h2.events.WindowUpdated):
                     if event_stream_id == 0:
-                        for window_update_event in self.window_update_received.values():
-                            window_update_event.set()
+                        for stream_state in self.stream_states.values():
+                            stream_state.window_update_received.set()
                     else:
-                        try:
-                            self.window_update_received[event_stream_id].set()
-                        except KeyError:  # pragma: no cover
-                            # the window_update_received dictionary is only relevant
-                            # when sending data, which should never raise a KeyError
-                            # here.
-                            pass
+                        self.stream_states[event.stream_id].window_update_received.set()
 
                 if event_stream_id:
-                    self.events[event.stream_id].append(event)
+                    self.stream_states[event.stream_id].h2_events.append(event)
 
             data_to_send = self.h2_state.data_to_send()
             await self.stream.write(data_to_send, timeout)
 
-        return self.events[stream_id].pop(0)
+        return self.stream_states[stream_id].h2_events.pop(0)
 
     async def response_closed(self, stream_id: int) -> None:
-        del self.events[stream_id]
-        del self.timeout_flags[stream_id]
-        del self.window_update_received[stream_id]
+        del self.stream_states[stream_id]
 
         for task in self.pending:
             if not task.done():
@@ -367,7 +360,7 @@ class H2Requester(Requester):
                 except asyncio.CancelledError:
                     pass
 
-        if not self.events and self.on_release is not None:
+        if not self.stream_states and self.on_release is not None:
             await self.on_release()
 
     @property
