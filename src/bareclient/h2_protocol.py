@@ -20,7 +20,7 @@ import h2.settings
 from baretypes import Header
 
 from .http_protocol import HttpProtocol
-from .utils import get_target, get_authority, ResponseEvent
+from .utils import get_target, get_authority, MessageEvent
 
 
 class StreamState:
@@ -43,8 +43,8 @@ class H2Protocol(HttpProtocol):
         self.h2_state = h2.connection.H2Connection()
         self.stream_states: Dict[int, StreamState] = {}
         self.initialized = False
-        self.connection_event = ResponseEvent()
-        self.response_event = ResponseEvent()
+        self.connection_event = MessageEvent()
+        self.response_event = MessageEvent()
         self.pending: List[Task] = []
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
 

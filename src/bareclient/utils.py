@@ -110,7 +110,7 @@ def get_authority(url: ParseResult) -> str:
     host, _port = url.netloc.split(':', maxsplit=1)
     return host
 
-class ResponseEvent(asyncio.Event):
+class MessageEvent(asyncio.Event):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

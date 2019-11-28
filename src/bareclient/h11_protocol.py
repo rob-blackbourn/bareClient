@@ -18,7 +18,7 @@ from bareutils.compression import (
 import bareutils.header as header
 
 from .http_protocol import HttpProtocol
-from .utils import get_target, ResponseEvent
+from .utils import get_target, MessageEvent
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
@@ -32,8 +32,8 @@ class H11Protocol(HttpProtocol):
         super().__init__(reader, writer, bufsiz)
         self.conn = h11.Connection(our_role=h11.CLIENT)
         self.is_initialised = False
-        self.connection_event = ResponseEvent()
-        self.response_event = ResponseEvent()
+        self.connection_event = MessageEvent()
+        self.response_event = MessageEvent()
 
     def connect(self) -> None:
         if self.is_initialised:
