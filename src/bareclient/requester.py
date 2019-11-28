@@ -116,12 +116,10 @@ class RequestHandlerInstance:
             yield message.get('body', b'')
             more_body = message.get('more_body', False)
 
-    async def disconnect(self):
-        print('read the disconnect')
-        message = await self.receive()
-
     async def close(self) -> None:
-        pass
+        await self.send({
+            'type': 'http.disconnect'
+        })
 
 
 class RequestHandler:

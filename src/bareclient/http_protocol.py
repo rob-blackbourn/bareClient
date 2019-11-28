@@ -27,7 +27,3 @@ class HttpProtocol(metaclass=ABCMeta):
     @abstractmethod
     async def receive(self) -> Dict[str, Any]:
         ...
-
-    @abstractmethod
-    async def close(self) -> None:
-        ...

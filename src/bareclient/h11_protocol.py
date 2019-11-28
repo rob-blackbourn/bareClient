@@ -27,6 +27,7 @@ class H11Protocol(HttpProtocol):
     def connect(self) -> None:
         if self.is_initialised:
             self.h11_state.start_next_cycle()
+        self._is_message_ended = False
 
     async def send(self, message: Dict[str, Any]) -> None:
 
@@ -120,9 +121,12 @@ class H11Protocol(HttpProtocol):
         })
 
     async def _disconnect(self):
-        buf = self.h11_state.send(h11.EndOfMessage())
-        self.writer.write(buf)
-        await self.writer.drain()
+        if not self._is_message_ended:
+            buf = self.h11_state.send(h11.EndOfMessage())
+            self.writer.write(buf)
+            await self.writer.drain()
+        self.writer.close()
+        await self.writer.wait_closed()
 
 
     async def receive(self) -> Dict[str, Any]:
@@ -147,20 +151,17 @@ class H11Protocol(HttpProtocol):
                     'stream_id': None
                 }
             elif isinstance(event, h11.EndOfMessage):
+                self._is_message_ended = True
                 return {
                     'type': 'http.response.body',
                     'body': b'',
                     'more_body': False,
                     'stream_id': None
                 }
-            elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
+            elif isinstance(event, h11.ConnectionClosed):
                 return {
                     'type': 'http.stream.disconnect',
                     'stream_id': None
                 }
             else:
                 raise ValueError('Unknown event')
-
-
-    async def close(self) -> None:
-        pass

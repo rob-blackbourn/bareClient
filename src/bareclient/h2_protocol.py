@@ -73,7 +73,7 @@ class H2Protocol(HttpProtocol):
             return message
 
         while True:
-            event = await self.receive_event()
+            event = await self._receive_event()
             if isinstance(event, h2.events.DataReceived):
                 self.h2_state.acknowledge_received_data(
                     event.flow_controlled_length, event.stream_id
@@ -118,9 +118,9 @@ class H2Protocol(HttpProtocol):
             self._send_request_data(stream_id, body, more_body)
         )
         self._create_task(
-            self.receive_response()
+            self._receive_response()
         )
-        self.on_close = functools.partial(self.response_closed, stream_id=stream_id)
+        self.on_close = functools.partial(self._response_closed, stream_id=stream_id)
 
     async def _send_request_body(
             self,
@@ -141,11 +141,6 @@ class H2Protocol(HttpProtocol):
     def _reap_task(self, task: Task):
         self.pending.remove(task)
         print('here')
-
-
-    async def close(self) -> None:
-        self.writer.close()
-        await self.writer.wait_closed()
 
     def _initiate_connection(self) -> None:
         self.h2_state.local_settings = h2.settings.Settings(
@@ -231,14 +226,11 @@ class H2Protocol(HttpProtocol):
         self.writer.write(data_to_send)
         await self.writer.drain()
 
-    async def receive_response(self) -> None:
-        """
-        Read the response status and headers from the network.
-        """
+    async def _receive_response(self) -> None:
 
         event: Optional[h2.events.Event] = None
         while not isinstance(event, h2.events.ResponseReceived):
-            event = await self.receive_event()
+            event = await self._receive_event()
 
         status_code = 200
         headers = []
@@ -266,7 +258,7 @@ class H2Protocol(HttpProtocol):
             'stream_id': event.stream_id
         })
 
-    async def receive_event(self) -> h2.events.Event:
+    async def _receive_event(self) -> h2.events.Event:
         while not self.h2_events:
             data = await self.reader.read(self.READ_NUM_BYTES)
             events = self.h2_state.receive_data(data)
@@ -292,7 +284,7 @@ class H2Protocol(HttpProtocol):
 
         return self.h2_events.pop(0)
 
-    async def response_closed(self, stream_id: int) -> None:
+    async def _response_closed(self, stream_id: int) -> None:
         del self.stream_states[stream_id]
 
         for task in self.pending:
@@ -305,6 +297,9 @@ class H2Protocol(HttpProtocol):
 
         if not self.stream_states and self.on_release is not None:
             await self.on_release()
+
+        self.writer.close()
+        await self.writer.wait_closed()
 
     @property
     def is_closed(self) -> bool:
