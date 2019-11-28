@@ -4,7 +4,7 @@ import asyncio
 from asyncio import StreamWriter
 import logging
 import ssl
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Generic, Optional, TypeVar
 from urllib.parse import ParseResult
 
 LOGGER = logging.getLogger(__name__)
@@ -48,8 +48,8 @@ def get_target(url: ParseResult) -> str:
         path += '#' + url.fragment
     return path
 
-# PROTOCOLS = ["h2", "http/1.1"]
-PROTOCOLS = ["http/1.1"]
+PROTOCOLS = ["h2", "http/1.1"]
+# PROTOCOLS = ["http/1.1"]
 
 def create_ssl_context(
         cafile: Optional[str] = None,
@@ -124,3 +124,14 @@ class MessageEvent(asyncio.Event):
         await super().wait()
         message, self.message = self.message, None
         return message
+
+T = TypeVar('T')
+
+class NullIter(Generic[T]):
+    """An iterator containing no items"""
+
+    def __aiter__(self):
+        return self
+    
+    async def __anext__(self) -> T:
+        raise StopAsyncIteration

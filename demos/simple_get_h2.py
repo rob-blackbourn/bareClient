@@ -18,6 +18,10 @@ async def main(url: str, headers: List[Header]) -> None:
     print('complete')
 
 URL = 'https://docs.python.org/3/library/cgi.html'
-HEADERS = [(b'host', b'docs.python.org'), (b'connection', b'close')]
+HEADERS = [
+    (b'host', b'docs.python.org'),
+    (b'accept-encoding', b'gzip'),
+    (b'connection', b'close')
+]
 
 asyncio.run(main(URL, HEADERS))

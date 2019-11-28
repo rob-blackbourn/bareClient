@@ -1,34 +1,25 @@
 """Requester"""
 
-from asyncio import AbstractEventLoop
 from typing import (
     Any,
-    AnyStr,
     AsyncIterable,
     AsyncIterator,
     Dict,
-    Generic,
     List,
+    Mapping,
     Optional,
     Tuple,
-    TypeVar
+    Type
 )
-from baretypes import (
-    Header,
-    Content
+from baretypes import Header
+from bareutils.compression import (
+    compression_reader_adapter,
+    Decompressor
 )
+import bareutils.header as header
 
-from .main import start, ReceiveCallable, SendCallable
-
-T = TypeVar('T')
-class NullIter(Generic[T]):
-    """An iterator containing no items"""
-
-    def __aiter__(self):
-        return self
-    
-    async def __anext__(self) -> T:
-        raise StopAsyncIteration
+from .main import ReceiveCallable, SendCallable
+from .utils import NullIter
 
 class RequestHandlerInstance:
     """The request handler"""
@@ -40,7 +31,8 @@ class RequestHandlerInstance:
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
             send: SendCallable,
-            receive: ReceiveCallable
+            receive: ReceiveCallable,
+            decompressors: Mapping[bytes, Type[Decompressor]]
     ) -> None:
         self.url = url
         self.method = method
@@ -48,6 +40,7 @@ class RequestHandlerInstance:
         self.content = content
         self.send = send
         self.receive = receive
+        self.decompressors = decompressors
 
     async def process(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
 
@@ -97,15 +90,33 @@ class RequestHandlerInstance:
 
         response = await self.receive(None, None)
 
-        async def body_iter() -> AsyncIterator[bytes]:
-            more_body = response.get('more_body', False)
+        reader = self._make_body_reader(
+            stream_id,
+            response.get('more_body', False),
+            header.content_encoding(response['headers'])
+        )
 
-            while more_body:
-                message = await self.receive(stream_id, None)
-                yield message.get('body', b'')
-                more_body = message.get('more_body', False)
+        return response, reader
 
-        return response, body_iter()
+    def _make_body_reader(
+            self,
+            stream_id: Optional[int],
+            more_body: bool,
+            content_encoding: Optional[List[bytes]]
+    ) -> AsyncIterator[bytes]:
+        reader = self._body_reader(stream_id, more_body)
+        if content_encoding:
+            for encoding in content_encoding:
+                if encoding in self.decompressors:
+                    decompressor = self.decompressors[encoding]
+                    return compression_reader_adapter(reader, decompressor())
+        return reader
+
+    async def _body_reader(self, stream_id: Optional[int], more_body: bool) -> AsyncIterator[bytes]:
+        while more_body:
+            message = await self.receive(stream_id, None)
+            yield message.get('body', b'')
+            more_body = message.get('more_body', False)
 
     async def disconnect(self, stream_id: Optional[int]):
         print('read the disconnect')
@@ -122,13 +133,15 @@ class RequestHandler:
             url: str,
             method: str,
             headers: Optional[List[Header]],
-            content: Optional[AsyncIterable[bytes]]
+            content: Optional[AsyncIterable[bytes]],
+            decompressors: Mapping[bytes, Type[Decompressor]]
     ) -> None:
         self.url = url
         self.method = method
         self.headers = headers or []
         self.content = content
         self.instance: Optional[RequestHandlerInstance] = None
+        self.decompressors = decompressors
 
     async def __call__(self, receive: ReceiveCallable, send: SendCallable) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
         self.instance = RequestHandlerInstance(
@@ -137,7 +150,8 @@ class RequestHandler:
             self.headers,
             self.content,
             send,
-            receive
+            receive,
+            self.decompressors
         )
         response, body = await self.instance.process()
         return response, body

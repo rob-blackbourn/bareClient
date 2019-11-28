@@ -6,29 +6,44 @@ from typing import (
     AsyncIterator,
     Dict,
     List,
+    Mapping,
     Optional,
-    Tuple
+    Tuple,
+    Type
 )
 
+from bareutils.compression import (
+    make_gzip_decompressobj,
+    make_deflate_decompressobj,
+    compression_reader_adapter,
+    Decompressor
+)
 from baretypes import Header, Content
 from .requester import RequestHandler
 from .main import start
+
+DEFAULT_DECOMPRESSORS = {
+    b'gzip': make_gzip_decompressobj,
+    b'deflate': make_deflate_decompressobj
+}
+
 
 class HttpClient:
     """An http client"""
 
     def __init__(
-        self,
-        url: str,
-        *,
-        method: str = 'GET',
-        headers: Optional[List[Header]] = None,
-        content: Optional[Content] = None,
-        loop: Optional[AbstractEventLoop] = None,
-        bufsiz: int = 8096,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None
+            self,
+            url: str,
+            *,
+            method: str = 'GET',
+            headers: Optional[List[Header]] = None,
+            content: Optional[Content] = None,
+            loop: Optional[AbstractEventLoop] = None,
+            bufsiz: int = 8096,
+            cafile: Optional[str] = None,
+            capath: Optional[str] = None,
+            cadata: Optional[str] = None,
+            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None
     ) -> None:
         self.url = url
         self.method = method
@@ -40,9 +55,16 @@ class HttpClient:
         self.capath = capath
         self.cadata = cadata
         self.handler: Optional[RequestHandler] = None
+        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
 
     async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
-        self.handler = RequestHandler(self.url, self.method, self.headers, self.content)
+        self.handler = RequestHandler(
+            self.url,
+            self.method,
+            self.headers,
+            self.content,
+            self.decompressors
+        )
         response, body = await start(
             self.url,
             self.handler,
