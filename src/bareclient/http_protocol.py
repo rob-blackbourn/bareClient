@@ -41,7 +41,6 @@ class HttpProtocol(metaclass=ABCMeta):
     async def send(
             self,
             message: Dict[str, Any],
-            stream_id: Optional[int] = None,
             timeout: Optional[float] = None
     ) -> None:
         ...

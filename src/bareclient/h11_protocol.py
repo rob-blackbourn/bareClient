@@ -42,7 +42,6 @@ class H11Protocol(HttpProtocol):
     async def send(
             self,
             message: Dict[str, Any],
-            stream_id: Optional[int] = None,
             timeout: Optional[float] = None
     ) -> None:
 
@@ -51,8 +50,6 @@ class H11Protocol(HttpProtocol):
         if request_type == 'http.request':
             await self._send_request(message, timeout)
         elif request_type == 'http.request.body':
-            if stream_id is None:
-                raise RuntimeError('http/2 requires a stream id')
             await self._send_request_body(message, timeout)
         elif request_type == 'http.disconnect':
             await self._disconnect()

@@ -4,7 +4,6 @@ from asyncio import AbstractEventLoop, open_connection
 import ssl
 from typing import (
     Any,
-    AnyStr,
     AsyncIterator,
     Awaitable,
     Callable,
@@ -26,7 +25,7 @@ from .h11_protocol import H11Protocol
 from .h2_protocol import H2Protocol
 
 SendCallable = Callable[
-    [Dict[str, Any], Optional[int], Optional[float]],
+    [Dict[str, Any], Optional[float]],
     Coroutine[Any, Any, None]
 ]
 ReceiveCallable = Callable[
@@ -43,7 +42,7 @@ async def start(
         *,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None,
+        cadata: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
         bufsiz: int = 8096
 ) -> Response:

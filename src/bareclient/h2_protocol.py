@@ -51,7 +51,6 @@ class H2Protocol(HttpProtocol):
     async def send(
             self,
             message: Dict[str, Any],
-            stream_id: Optional[int] = None,
             timeout: Optional[float] = None
     ):
         message_type: str = message['type']
@@ -59,9 +58,7 @@ class H2Protocol(HttpProtocol):
         if message_type == 'http.request':
             await self._send_request(message, timeout)
         elif message_type == 'http.request.body':
-            if stream_id is None:
-                raise RuntimeError('http/2 requires a stream id')
-            await self._send_request_body(stream_id, message, timeout)
+            await self._send_request_body(message, timeout)
         elif message_type == 'http.disconnect':
             if self.on_close:
                 await self.on_close()
@@ -139,12 +136,11 @@ class H2Protocol(HttpProtocol):
 
     async def _send_request_body(
             self,
-            stream_id: int,
             message: Dict[str, Any],
             timeout: Optional[float]
     ) -> None:
         await self._send_request_data(
-            stream_id,
+            message['stream_id'],
             message['body'],
             message.get('more_body', False),
             timeout

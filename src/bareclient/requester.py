@@ -64,7 +64,7 @@ class RequestHandlerInstance:
             'body': body,
             'more_body': more_body
         }
-        await self.send(message, None, None)
+        await self.send(message, None)
         connection = await self.receive(None, None)
 
         stream_id: Optional[int] = connection['stream_id']
@@ -85,7 +85,7 @@ class RequestHandlerInstance:
                 'more_body': more_body,
                 'stream_id': stream_id
             }
-            await self.send(message, None, None)
+            await self.send(message, None)
 
 
         response = await self.receive(None, None)
