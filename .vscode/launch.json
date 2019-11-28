@@ -6,14 +6,16 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/demos/simple_get_h2.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
         },
         {
             "name": "Simple JSON",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/demos/simple_json.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

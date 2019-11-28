@@ -18,39 +18,13 @@ import h2.events
 import h2.settings
 
 from baretypes import Header
-from bareutils.compression import (
-    make_gzip_decompressobj,
-    make_deflate_decompressobj
-)
 
-from .requester import Requester
+from .http_protocol import HttpProtocol
 from .utils import get_target, get_authority, ResponseEvent
-
-DEFAULT_DECOMPRESSORS = {
-    b'gzip': make_gzip_decompressobj,
-    b'deflate': make_deflate_decompressobj
-}
-
-class HTTPError(Exception):
-
-    def __init__(
-        self,
-        *args: Any,
-        request: Dict[str, Any] = None,
-        response: Dict[str, Any] = None,
-    ) -> None:
-        self.response = response
-        self.request = request or getattr(self.response, "request", None)
-        super().__init__(*args)
-
-
-class ProtocolError(HTTPError):
-    """
-    Malformed HTTP.
-    """
 
 
 class StreamState:
+    """Captures the stream state"""
 
     def __init__(self) -> None:
         self.raise_on_read_timeout = False
@@ -58,17 +32,18 @@ class StreamState:
         self.h2_events: List[h2.events.Event] = []
         self.window_update_received = asyncio.Event()
 
-class H2Requester(Requester):
-    """An HTTP/2 requester"""
+class H2Protocol(HttpProtocol):
+    """An HTTP/2 protocol handler"""
 
     READ_NUM_BYTES = 4096
 
-    def __init__(self, reader, writer, bufsiz=1024, decompressors=None, on_release: Optional[Callable] = None):
-        super().__init__(reader, writer, bufsiz=bufsiz, decompressors=decompressors)
+    def __init__(self, reader, writer, bufsiz=1024, on_release: Optional[Callable] = None):
+        super().__init__(reader, writer, bufsiz=bufsiz)
         self.on_release = on_release
         self.h2_state = h2.connection.H2Connection()
         self.stream_states: Dict[int, StreamState] = {}
         self.initialized = False
+        self.connection_event = ResponseEvent()
         self.response_event = ResponseEvent()
         self.pending: List[Task] = []
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
@@ -98,6 +73,10 @@ class H2Requester(Requester):
             stream_id: Optional[int] = None,
             timeout: Optional[float] = None
     ) -> Dict[str, Any]:
+
+        message = await self.connection_event.wait_with_message()
+        if message is not None:
+            return message
 
         message = await self.response_event.wait_with_message()
         if message is not None:
@@ -141,8 +120,11 @@ class H2Requester(Requester):
             message.get('headers', []),
             timeout
         )
-
         self.stream_states[stream_id] = StreamState()
+        self.connection_event.set_with_message({
+            'type': 'http.response.connection',
+            'stream_id': stream_id
+        })
 
         body = message.get('body', b'')
         more_body = message.get('more_body', False)
@@ -183,9 +165,6 @@ class H2Requester(Requester):
         await self.stream.close()
 
     def initiate_connection(self) -> None:
-        # Need to set these manually here instead of manipulating via
-        # __setitem__() otherwise the H2Connection will emit SettingsUpdate
-        # frames in addition to sending the undesired defaults.
         self.h2_state.local_settings = h2.settings.Settings(
             client=True,
             initial_values={
@@ -336,7 +315,7 @@ class H2Requester(Requester):
                 event_stream_id = getattr(event, "stream_id", 0)
 
                 if hasattr(event, "error_code"):
-                    raise ProtocolError(event)
+                    raise RuntimeError(event)
 
                 if isinstance(event, h2.events.WindowUpdated):
                     if event_stream_id == 0:

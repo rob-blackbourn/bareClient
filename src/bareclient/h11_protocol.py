@@ -17,7 +17,7 @@ from bareutils.compression import (
 )
 import bareutils.header as header
 
-from .requester import Requester
+from .http_protocol import HttpProtocol
 from .utils import get_target, ResponseEvent
 
 DEFAULT_DECOMPRESSORS = {
@@ -25,13 +25,14 @@ DEFAULT_DECOMPRESSORS = {
     b'deflate': make_deflate_decompressobj
 }
 
-class H11Requester(Requester):
-    """An HTTP/1.1 requester"""
+class H11Protocol(HttpProtocol):
+    """An HTTP/1.1 protocol handler"""
 
-    def __init__(self, reader, writer, bufsiz=8096, decompressors=None):
-        super().__init__(reader, writer, bufsiz=bufsiz, decompressors=decompressors)
+    def __init__(self, reader, writer, bufsiz):
+        super().__init__(reader, writer, bufsiz)
         self.conn = h11.Connection(our_role=h11.CLIENT)
         self.is_initialised = False
+        self.connection_event = ResponseEvent()
         self.response_event = ResponseEvent()
 
     def connect(self) -> None:
@@ -76,7 +77,11 @@ class H11Requester(Requester):
         )
 
         buf = self.conn.send(request)
-        self.stream.write_nowait(buf)
+        await self.stream.write(buf)
+        self.connection_event.set_with_message({
+            'type': 'http.response.connection',
+            'stream_id': None            
+        })
 
         body = message.get('body', b'')
         more_body = message.get('more_body', False)
@@ -118,14 +123,6 @@ class H11Requester(Requester):
             else:
                 raise ValueError('Unknown event')
 
-        content_types = header.find(
-            b'content-encoding', event.headers, b'').split(b', ')
-        for content_type in content_types:
-            if content_type in self.decompressors:
-                decompressor = self.decompressors[content_type]
-                writer = compression_reader_adapter(writer, decompressor())
-                break
-
         more_body = False
         for k, v in event.headers:
             if k == b'content-length' and int(v):
@@ -152,6 +149,10 @@ class H11Requester(Requester):
             stream_id: Optional[int] = None,
             timeout: Optional[float] = None
     ) -> Dict[str, Any]:
+
+        message = await self.connection_event.wait_with_message()
+        if message is not None:
+            return message
 
         message = await self.response_event.wait_with_message()
         if message is not None:

@@ -1,155 +1,59 @@
 """The Client"""
 
-from asyncio import AbstractEventLoop, open_connection
+from asyncio import AbstractEventLoop
 from typing import (
     Any,
-    Awaitable,
-    Callable,
-    Coroutine,
+    AsyncIterator,
     Dict,
-    Mapping,
+    List,
     Optional,
-    Tuple,
-    Type,
-    AnyStr
+    Tuple
 )
-import urllib.parse
-from urllib.error import URLError
 
-from baretypes import Headers, Content
-from bareutils.compression import Decompressor
-
-from .utils import (
-    get_port,
-    create_ssl_context,
-    get_negotiated_protocol
-)
-from .requester import Requester
-from .h11_requester import H11Requester
-from .h2_requester import H2Requester
-
-SendCallable = Callable[[Dict[str, Any], Optional[float]], Coroutine[Any, Any, Dict[str, Any]]]
-ReceiveCallable = Callable[[Optional[int], Optional[float]], Awaitable[Dict[str, Any]]]
+from baretypes import Header, Content
+from .requester import RequestHandler
+from .main import start
 
 class HttpClient:
-    """An asyncio HTTP client.
-
-    :param url: The url.
-    :param method: The HTTP method (GET, POST, etc.)
-    :param headers: Headers to send.
-    :param data: Optional data.
-    :param loop: An optional event loop
-    :param bufsiz: An optional block size to read and write (defaults to 1024).
-    :param decompressors: An optional dictionary of decompressors.
-    :param kwargs: Optional args to send to asyncio.open_connection
-    :return: The h11 Response object and a body function which returns an async generator.
-
-    For example:
-
-    .. code-block:: python
-
-        async with HttpClient(
-                'https://docs.python.org/3/library/index.html',
-                method='GET',
-                headers=[(b'host', b'docs.python.org'), (b'connection', b'close')],
-                ssl=ssl.SSLContext()
-        ) as (response, body):
-            print(response)
-            if response.status_code == 200:
-                async for part in body():
-                    print(part)
-
-    If unspecified the ``decompressors`` argument will default to gzip and deflate.
-    """
+    """An http client"""
 
     def __init__(
-            self,
-            url: str,
-            method: str = 'GET',
-            headers: Headers = None,
-            content: Optional[Content] = None,
-            loop: Optional[AbstractEventLoop] = None,
-            bufsiz: int = 8096,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            cafile: Optional[str] = None,
-            capath: Optional[str] = None,
-            cadata: Optional[AnyStr] = None
+        self,
+        url: str,
+        *,
+        method: str = 'GET',
+        headers: Optional[List[Header]] = None,
+        content: Optional[Content] = None,
+        loop: Optional[AbstractEventLoop] = None,
+        bufsiz: int = 8096,
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
     ) -> None:
-        """Construct the client.
-
-        :param url: The url.
-        :param method: The HTTP method (GET, POST, etc.)
-        :param headers: Headers to send.
-        :param data: Optional data.
-        :param loop: An optional event loop
-        :param bufsiz: An optional block size to read and write (defaults to 1024).
-        :param decompressors: An optional dictionary of decompressors.
-        :param kwargs: Optional args to send to asyncio.open_connection
-        """
-        self.url = urllib.parse.urlparse(url)
+        self.url = url
         self.method = method
         self.headers = headers
         self.content = content
         self.loop = loop
         self.bufsiz = bufsiz
-        self.decompressors = decompressors
-        if self.url.scheme == 'https':
-            self.ssl_context = create_ssl_context(
-                cafile=cafile,
-                capath=capath,
-                cadata=cadata
-            )
-        elif self.url.scheme == 'https':
-            self.ssl_content = None
-        else:
-            raise URLError(f'Invalid scheme: {self.url.scheme}')
-        self.requester: Optional[Requester] = None
+        self.cafile = cafile
+        self.capath = capath
+        self.cadata = cadata
+        self.handler: Optional[RequestHandler] = None
 
-    async def __aenter__(self) -> Tuple[SendCallable, ReceiveCallable]:
-        """opens the context.
-
-        .. code-block:: python
-
-            async with HttpClient(
-                    'https://docs.python.org/3/library/index.html',
-                    method='GET',
-                    headers=[(b'host', b'docs.python.org'), (b'connection', b'close')],
-                    ssl=ssl.SSLContext()
-            ) as (response, body):
-                print(response)
-                if response.status_code == 200:
-                    async for part in body():
-                        print(part)
-
-        :return: The h11 Response object and a body function which returns an async generator.
-        """
-        hostname = self.url.hostname
-        if hostname is None:
-            raise RuntimeError('unspecified hostname')
-        port = get_port(self.url)
-        if port is None:
-            raise RuntimeError('unspecified port')
-
-        reader, writer = await open_connection(
-            hostname,
-            port,
+    async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+        self.handler = RequestHandler(self.url, self.method, self.headers, self.content)
+        response, body = await start(
+            self.url,
+            self.handler,
+            cafile=self.cafile,
+            capath=self.capath,
+            cadata=self.cadata,
             loop=self.loop,
-            ssl=self.ssl_context
+            bufsiz=self.bufsiz
         )
-
-        negotiated_protocol = get_negotiated_protocol(writer) if self.ssl_context else None
-
-        self._close = writer.close
-        
-        if negotiated_protocol == 'h2':
-            self.requester = H2Requester(reader, writer, decompressors=self.decompressors)
-        else:
-            self.requester = H11Requester(reader, writer, self.bufsiz, self.decompressors)
-
-        return self.requester.send, self.requester.receive
+        return response, body
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Exiting the context closes the connection.
-        """
-        if self.requester is not None:
-            await self.requester.close()
+        if self.handler is not None:
+            await self.handler.close()

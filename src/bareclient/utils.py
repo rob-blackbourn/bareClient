@@ -1,10 +1,10 @@
 """Utilities"""
 
 import asyncio
-from asyncio import StreamWriter, StreamReader
+from asyncio import StreamWriter
 import logging
 import ssl
-from typing import Any, AnyStr, Dict, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import ParseResult
 
 LOGGER = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ PROTOCOLS = ["http/1.1"]
 def create_ssl_context(
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> ssl.SSLContext:
     """Create an ssl context suitable for https
 
