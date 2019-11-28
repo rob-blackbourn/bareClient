@@ -2,15 +2,7 @@
 
 from abc import ABCMeta, abstractmethod
 from asyncio import StreamReader, StreamWriter
-from typing import (
-    Any,
-    Dict,
-    Optional
-)
-
-from .stream import Stream
-
-DEFAULT_TIMEOUT = 5.0
+from typing import Any, Dict
 
 class HttpProtocol(metaclass=ABCMeta):
     """A requester"""
@@ -18,39 +10,22 @@ class HttpProtocol(metaclass=ABCMeta):
     def __init__(
             self,
             reader: StreamReader,
-            writer: StreamWriter,
-            bufsiz: int = 1024,
-            read_timeout = DEFAULT_TIMEOUT,
-            write_timeout = DEFAULT_TIMEOUT
+            writer: StreamWriter
     ) -> None:
         """Requests HTTP from a session.
 
         :param reader: An asyncio.StreamReader provider by the context.
         :param writer: An asyncio.StreamWriter provider by the context.
-        :param bufsiz: The block size to read and write.
         """
-        self.stream = Stream(
-            reader,
-            writer,
-            read_timeout,
-            write_timeout
-        )
-        self.bufsiz = bufsiz
+        self.reader = reader
+        self.writer = writer
 
     @abstractmethod
-    async def send(
-            self,
-            message: Dict[str, Any],
-            timeout: Optional[float] = None
-    ) -> None:
+    async def send(self, message: Dict[str, Any]) -> None:
         ...
 
     @abstractmethod
-    async def receive(
-            self,
-            stream_id: Optional[int] = None,
-            timeout: Optional[float] = None
-    ) -> Dict[str, Any]:
+    async def receive(self) -> Dict[str, Any]:
         ...
 
     @abstractmethod

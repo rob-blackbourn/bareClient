@@ -24,14 +24,8 @@ from .http_protocol import HttpProtocol
 from .h11_protocol import H11Protocol
 from .h2_protocol import H2Protocol
 
-SendCallable = Callable[
-    [Dict[str, Any], Optional[float]],
-    Coroutine[Any, Any, None]
-]
-ReceiveCallable = Callable[
-    [Optional[int], Optional[float]],
-    Awaitable[Dict[str, Any]]
-]
+SendCallable = Callable[[Dict[str, Any]], Coroutine[Any, Any, None]]
+ReceiveCallable = Callable[[], Awaitable[Dict[str, Any]]]
 Response = Tuple[Dict[str, Any], AsyncIterator[bytes]]
 Application = Callable[[ReceiveCallable, SendCallable], Coroutine[Any, Any, Response]]
 

@@ -64,8 +64,8 @@ class RequestHandlerInstance:
             'body': body,
             'more_body': more_body
         }
-        await self.send(message, None)
-        connection = await self.receive(None, None)
+        await self.send(message)
+        connection = await self.receive()
 
         stream_id: Optional[int] = connection['stream_id']
 
@@ -85,13 +85,12 @@ class RequestHandlerInstance:
                 'more_body': more_body,
                 'stream_id': stream_id
             }
-            await self.send(message, None)
+            await self.send(message)
 
 
-        response = await self.receive(None, None)
+        response = await self.receive()
 
         reader = self._make_body_reader(
-            stream_id,
             response.get('more_body', False),
             header.content_encoding(response['headers'])
         )
@@ -100,11 +99,10 @@ class RequestHandlerInstance:
 
     def _make_body_reader(
             self,
-            stream_id: Optional[int],
             more_body: bool,
             content_encoding: Optional[List[bytes]]
     ) -> AsyncIterator[bytes]:
-        reader = self._body_reader(stream_id, more_body)
+        reader = self._body_reader(more_body)
         if content_encoding:
             for encoding in content_encoding:
                 if encoding in self.decompressors:
@@ -112,15 +110,15 @@ class RequestHandlerInstance:
                     return compression_reader_adapter(reader, decompressor())
         return reader
 
-    async def _body_reader(self, stream_id: Optional[int], more_body: bool) -> AsyncIterator[bytes]:
+    async def _body_reader(self, more_body: bool) -> AsyncIterator[bytes]:
         while more_body:
-            message = await self.receive(stream_id, None)
+            message = await self.receive()
             yield message.get('body', b'')
             more_body = message.get('more_body', False)
 
-    async def disconnect(self, stream_id: Optional[int]):
+    async def disconnect(self):
         print('read the disconnect')
-        message = await self.receive(stream_id, None)
+        message = await self.receive()
 
     async def close(self) -> None:
         pass

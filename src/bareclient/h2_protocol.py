@@ -27,9 +27,6 @@ class StreamState:
     """Captures the stream state"""
 
     def __init__(self) -> None:
-        self.raise_on_read_timeout = False
-        self.raise_on_write_timeout = True        
-        self.h2_events: List[h2.events.Event] = []
         self.window_update_received = asyncio.Event()
 
 class H2Protocol(HttpProtocol):
@@ -37,8 +34,8 @@ class H2Protocol(HttpProtocol):
 
     READ_NUM_BYTES = 4096
 
-    def __init__(self, reader, writer, bufsiz=1024, on_release: Optional[Callable] = None):
-        super().__init__(reader, writer, bufsiz=bufsiz)
+    def __init__(self, reader, writer, on_release: Optional[Callable] = None):
+        super().__init__(reader, writer)
         self.on_release = on_release
         self.h2_state = h2.connection.H2Connection()
         self.stream_states: Dict[int, StreamState] = {}
@@ -47,29 +44,25 @@ class H2Protocol(HttpProtocol):
         self.response_event = MessageEvent()
         self.pending: List[Task] = []
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
+        self.h2_events: List[h2.events.Event] = []
 
     async def send(
             self,
-            message: Dict[str, Any],
-            timeout: Optional[float] = None
+            message: Dict[str, Any]
     ):
         message_type: str = message['type']
 
         if message_type == 'http.request':
-            await self._send_request(message, timeout)
+            await self._send_request(message)
         elif message_type == 'http.request.body':
-            await self._send_request_body(message, timeout)
+            await self._send_request_body(message)
         elif message_type == 'http.disconnect':
             if self.on_close:
                 await self.on_close()
         else:
             raise Exception(f'unknown request type: {message_type}')
 
-    async def receive(
-            self,
-            stream_id: Optional[int] = None,
-            timeout: Optional[float] = None
-    ) -> Dict[str, Any]:
+    async def receive(self) -> Dict[str, Any]:
 
         message = await self.connection_event.wait_with_message()
         if message is not None:
@@ -79,14 +72,11 @@ class H2Protocol(HttpProtocol):
         if message is not None:
             return message
 
-        if stream_id is None:
-            raise Exception('missing stream id')
-
         while True:
-            event = await self.receive_event(stream_id, timeout)
+            event = await self.receive_event()
             if isinstance(event, h2.events.DataReceived):
                 self.h2_state.acknowledge_received_data(
-                    event.flow_controlled_length, stream_id
+                    event.flow_controlled_length, event.stream_id
                 )
                 return {
                     'type': 'http.response.body',
@@ -103,19 +93,17 @@ class H2Protocol(HttpProtocol):
 
     async def _send_request(
             self,
-            message: Dict[str, Any],
-            timeout: Optional[float]
+            message: Dict[str, Any]
     ) -> None:
         # Start sending the request.
         if not self.initialized:
-            self.initiate_connection()
+            self._initiate_connection()
 
         url = urlparse(message['url'])
-        stream_id = await self.send_headers(
+        stream_id = await self._send_headers(
             url,
             message['method'],
-            message.get('headers', []),
-            timeout
+            message.get('headers', [])
         )
         self.stream_states[stream_id] = StreamState()
         self.connection_event.set_with_message({
@@ -127,23 +115,21 @@ class H2Protocol(HttpProtocol):
         more_body = message.get('more_body', False)
 
         self._create_task(
-            self._send_request_data(stream_id, body, more_body, timeout)
+            self._send_request_data(stream_id, body, more_body)
         )
         self._create_task(
-            self.receive_response(stream_id, timeout)
+            self.receive_response()
         )
         self.on_close = functools.partial(self.response_closed, stream_id=stream_id)
 
     async def _send_request_body(
             self,
-            message: Dict[str, Any],
-            timeout: Optional[float]
+            message: Dict[str, Any]
     ) -> None:
         await self._send_request_data(
             message['stream_id'],
             message['body'],
-            message.get('more_body', False),
-            timeout
+            message.get('more_body', False)
         )
 
     def _create_task(self, coroutine) -> Task:
@@ -158,39 +144,33 @@ class H2Protocol(HttpProtocol):
 
 
     async def close(self) -> None:
-        await self.stream.close()
+        self.writer.close()
+        await self.writer.wait_closed()
 
-    def initiate_connection(self) -> None:
+    def _initiate_connection(self) -> None:
         self.h2_state.local_settings = h2.settings.Settings(
             client=True,
             initial_values={
-                # Disable PUSH_PROMISE frames from the server since we don't do anything
-                # with them for now.  Maybe when we support caching?
                 h2.settings.SettingCodes.ENABLE_PUSH: 0,
-                # These two are taken from h2 for safe defaults
                 h2.settings.SettingCodes.MAX_CONCURRENT_STREAMS: 100,
                 h2.settings.SettingCodes.MAX_HEADER_LIST_SIZE: 65536,
             },
         )
 
-        # Some websites (*cough* Yahoo *cough*) balk at this setting being
-        # present in the initial handshake since it's not defined in the original
-        # RFC despite the RFC mandating ignoring settings you don't know about.
         del self.h2_state.local_settings[
             h2.settings.SettingCodes.ENABLE_CONNECT_PROTOCOL
         ]
 
         self.h2_state.initiate_connection()
         data_to_send = self.h2_state.data_to_send()
-        self.stream.write_nowait(data_to_send)
+        self.writer.write(data_to_send)
         self.initialized = True
 
-    async def send_headers(
+    async def _send_headers(
             self,
             url: ParseResult,
             method: str,
-            headers: List[Header],
-            timeout: Optional[float]
+            headers: List[Header]
     ) -> int:
         stream_id = self.h2_state.get_next_available_stream_id()
         headers = [
@@ -202,7 +182,8 @@ class H2Protocol(HttpProtocol):
 
         self.h2_state.send_headers(stream_id, headers)
         data_to_send = self.h2_state.data_to_send()
-        await self.stream.write(data_to_send, timeout)
+        self.writer.write(data_to_send)
+        await self.writer.drain()
 
         return stream_id
 
@@ -210,23 +191,16 @@ class H2Protocol(HttpProtocol):
         self,
         stream_id: int,
         body: bytes,
-        more_body: bool,
-        timeout: Optional[float]
+        more_body: bool
     ) -> None:
-        try:
-            await self._send_data(stream_id, body, timeout)
-            if not more_body:
-                await self.end_stream(stream_id, timeout)
-        finally:
-            stream_state = self.stream_states[stream_id]
-            stream_state.raise_on_read_timeout = True
-            stream_state.raise_on_write_timeout = False
+        await self._send_data(stream_id, body)
+        if not more_body:
+            await self._end_stream(stream_id)
 
     async def _send_data(
             self,
             stream_id: int,
-            data: bytes,
-            timeout: Optional[float]
+            data: bytes
     ) -> None:
         while data:
             # The data will be divided into frames to send based on the flow control
@@ -248,32 +222,23 @@ class H2Protocol(HttpProtocol):
                 chunk, data = data[:chunk_size], data[chunk_size:]
                 self.h2_state.send_data(stream_id, chunk)
                 data_to_send = self.h2_state.data_to_send()
-                await self.stream.write(data_to_send, timeout)
+                self.writer.write(data_to_send)
+                await self.writer.drain()
 
-    async def end_stream(self, stream_id: int, timeout: Optional[float] = None) -> None:
+    async def _end_stream(self, stream_id: int) -> None:
         self.h2_state.end_stream(stream_id)
         data_to_send = self.h2_state.data_to_send()
-        await self.stream.write(data_to_send, timeout)
+        self.writer.write(data_to_send)
+        await self.writer.drain()
 
-    async def receive_response(
-            self,
-            stream_id: int,
-            timeout: float = None
-    ) -> None:
+    async def receive_response(self) -> None:
         """
         Read the response status and headers from the network.
         """
 
-        stream_state = self.stream_states[stream_id]
-
-        while True:
-            event = await self.receive_event(stream_id, timeout)
-
-            stream_state.raise_on_read_timeout = True
-            stream_state.raise_on_write_timeout = False
-
-            if isinstance(event, h2.events.ResponseReceived):
-                break
+        event: Optional[h2.events.Event] = None
+        while not isinstance(event, h2.events.ResponseReceived):
+            event = await self.receive_event()
 
         status_code = 200
         headers = []
@@ -291,21 +256,19 @@ class H2Protocol(HttpProtocol):
         
         self.response_event.set_with_message({
             'type': 'http.response',
+            'acgi': {
+                'version': "1.0"
+            },
+            'http_version': '2',
             'status_code': status_code,
             'headers': headers,
             'more_body': more_body,
-            'stream_id': stream_id
+            'stream_id': event.stream_id
         })
 
-    async def receive_event(
-            self,
-            stream_id: int,
-            timeout: Optional[float] = None
-    ) -> h2.events.Event:
-        stream_state = self.stream_states[stream_id]
-
-        while not stream_state.h2_events:
-            data = await self.stream.read(self.READ_NUM_BYTES, timeout, stream_state.raise_on_read_timeout)
+    async def receive_event(self) -> h2.events.Event:
+        while not self.h2_events:
+            data = await self.reader.read(self.READ_NUM_BYTES)
             events = self.h2_state.receive_data(data)
             for event in events:
                 event_stream_id = getattr(event, "stream_id", 0)
@@ -315,18 +278,19 @@ class H2Protocol(HttpProtocol):
 
                 if isinstance(event, h2.events.WindowUpdated):
                     if event_stream_id == 0:
-                        for stream_state in self.stream_states.values():
-                            stream_state.window_update_received.set()
+                        for state in self.stream_states.values():
+                            state.window_update_received.set()
                     else:
                         self.stream_states[event.stream_id].window_update_received.set()
 
                 if event_stream_id:
-                    self.stream_states[event.stream_id].h2_events.append(event)
+                    self.h2_events.append(event)
 
             data_to_send = self.h2_state.data_to_send()
-            await self.stream.write(data_to_send, timeout)
+            self.writer.write(data_to_send)
+            await self.writer.drain()
 
-        return self.stream_states[stream_id].h2_events.pop(0)
+        return self.h2_events.pop(0)
 
     async def response_closed(self, stream_id: int) -> None:
         del self.stream_states[stream_id]
@@ -347,4 +311,4 @@ class H2Protocol(HttpProtocol):
         return False
 
     def is_connection_dropped(self) -> bool:
-        return self.stream.at_eof()
+        return self.reader.at_eof()

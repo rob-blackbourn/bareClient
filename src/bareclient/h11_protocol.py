@@ -10,57 +10,38 @@ from urllib.parse import urlparse
 
 import h11
 
-from bareutils.compression import (
-    make_gzip_decompressobj,
-    make_deflate_decompressobj,
-    compression_reader_adapter
-)
-import bareutils.header as header
-
 from .http_protocol import HttpProtocol
 from .utils import get_target, MessageEvent
-
-DEFAULT_DECOMPRESSORS = {
-    b'gzip': make_gzip_decompressobj,
-    b'deflate': make_deflate_decompressobj
-}
 
 class H11Protocol(HttpProtocol):
     """An HTTP/1.1 protocol handler"""
 
     def __init__(self, reader, writer, bufsiz):
-        super().__init__(reader, writer, bufsiz)
-        self.conn = h11.Connection(our_role=h11.CLIENT)
+        super().__init__(reader, writer)
+        self.bufsiz = bufsiz
+        self.h11_state = h11.Connection(our_role=h11.CLIENT)
         self.is_initialised = False
         self.connection_event = MessageEvent()
         self.response_event = MessageEvent()
 
     def connect(self) -> None:
         if self.is_initialised:
-            self.conn.start_next_cycle()
+            self.h11_state.start_next_cycle()
 
-    async def send(
-            self,
-            message: Dict[str, Any],
-            timeout: Optional[float] = None
-    ) -> None:
+    async def send(self, message: Dict[str, Any]) -> None:
 
         request_type: str = message['type']
 
         if request_type == 'http.request':
-            await self._send_request(message, timeout)
+            await self._send_request(message)
         elif request_type == 'http.request.body':
-            await self._send_request_body(message, timeout)
+            await self._send_request_body(message)
         elif request_type == 'http.disconnect':
             await self._disconnect()
         else:
             raise Exception(f'unknown request type: {request_type}')
 
-    async def _send_request(
-            self,
-            message: Dict[str, Any],
-            timeout: Optional[float]
-    ) -> None:
+    async def _send_request(self, message: Dict[str, Any]) -> None:
 
         self.connect()
         self.is_initialised = True
@@ -73,8 +54,9 @@ class H11Protocol(HttpProtocol):
             headers=message.get('headers', [])
         )
 
-        buf = self.conn.send(request)
-        await self.stream.write(buf)
+        buf = self.h11_state.send(request)
+        self.writer.write(buf)
+        await self.writer.drain()
         self.connection_event.set_with_message({
             'type': 'http.response.connection',
             'stream_id': None            
@@ -82,37 +64,35 @@ class H11Protocol(HttpProtocol):
 
         body = message.get('body', b'')
         more_body = message.get('more_body', False)
-        await self._send_request_data(body, more_body, timeout)
+        await self._send_request_data(body, more_body)
         asyncio.create_task(self._receive_response())
 
-    async def _send_request_body(self, message: Dict[str, Any], timeout: Optional[float]) -> None:
+    async def _send_request_body(self, message: Dict[str, Any]) -> None:
         await self._send_request_data(
             message.get('body', b''),
-            message.get('more_body', False),
-            timeout
+            message.get('more_body', False)
         )
 
     async def _send_request_data(
             self,
             body: bytes,
-            more_body: Optional[bool],
-            timeout: Optional[float]
+            more_body: Optional[bool]
     ) -> None:
-        buf = self.conn.send(h11.Data(data=body))
-        self.stream.write_nowait(buf)
+        buf = self.h11_state.send(h11.Data(data=body))
+        self.writer.write(buf)
 
         if not more_body:
-            buf = self.conn.send(h11.EndOfMessage())
-            self.stream.write_nowait(buf)
+            buf = self.h11_state.send(h11.EndOfMessage())
+            self.writer.write(buf)
 
-        await self.stream.drain(timeout)
+        await self.writer.drain()
 
     async def _receive_response(self):
         while True:
-            event = self.conn.next_event()
+            event = self.h11_state.next_event()
             if event is h11.NEED_DATA:
-                buf = await self.stream.read(self.bufsiz)
-                self.conn.receive_data(buf)
+                buf = await self.reader.read(self.bufsiz)
+                self.h11_state.receive_data(buf)
             elif isinstance(event, h11.Response):
                 break
             elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
@@ -129,6 +109,10 @@ class H11Protocol(HttpProtocol):
 
         self.response_event.set_with_message({
             'type': 'http.response',
+            'acgi': {
+                'version': "1.0"
+            },
+            'http_version': '1.1',
             'status_code': event.status_code,
             'headers': event.headers,
             'more_body': more_body,
@@ -136,16 +120,12 @@ class H11Protocol(HttpProtocol):
         })
 
     async def _disconnect(self):
-        buf = self.conn.send(h11.EndOfMessage())
-        self.stream.write_nowait(buf)
-        await self.stream.drain()
+        buf = self.h11_state.send(h11.EndOfMessage())
+        self.writer.write(buf)
+        await self.writer.drain()
 
 
-    async def receive(
-            self,
-            stream_id: Optional[int] = None,
-            timeout: Optional[float] = None
-    ) -> Dict[str, Any]:
+    async def receive(self) -> Dict[str, Any]:
 
         message = await self.connection_event.wait_with_message()
         if message is not None:
@@ -156,9 +136,9 @@ class H11Protocol(HttpProtocol):
             return message
 
         while True:
-            event = self.conn.next_event()
+            event = self.h11_state.next_event()
             if event is h11.NEED_DATA:
-                self.conn.receive_data(await self.stream.read(self.bufsiz))
+                self.h11_state.receive_data(await self.reader.read(self.bufsiz))
             elif isinstance(event, h11.Data):
                 return {
                     'type': 'http.response.body',
