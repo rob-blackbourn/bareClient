@@ -5,8 +5,6 @@ from asyncio import StreamReader, StreamWriter, Lock, BaseTransport
 from functools import partial
 from typing import Any, Awaitable, Callable, Iterable, Optional
 
-from .timeout import TimeoutConfig, TimeoutFlag
-
 class Stream:
     """A wrapper for Streamreader and StreamWriter with timeout support"""
 
@@ -14,71 +12,73 @@ class Stream:
             self,
             reader: StreamReader,
             writer: StreamWriter,
-            timeout: TimeoutConfig
+            read_timeout: Optional[float],
+            write_timeout: Optional[float]
     ) -> None:
         self.reader = reader
         self.writer = writer
-        self.timeout = timeout
+        self.read_timeout = read_timeout
+        self.write_timeout = write_timeout
         self.read_lock = Lock()
 
     async def read(
             self,
             n: int = -1,
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> bytes:
         return await self._retry_reader(
             partial(self.reader.read, n),
             timeout,
-            flag
+            raise_on_timeout
         )
 
     async def readline(
             self,
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> bytes:
         return await self._retry_reader(
             self.reader.readline,
             timeout,
-            flag
+            raise_on_timeout
         )
 
     async def readexactly(
             self,
             n: int,
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> bytes:
         return await self._retry_reader(
             partial(self.reader.readexactly, n),
             timeout,
-            flag
+            raise_on_timeout
         )
 
     async def readuntil(
             self,
             separator: bytes = b'\n',
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> bytes:
         return await self._retry_reader(
             partial(self.reader.readuntil, separator),
             timeout,
-            flag
+            raise_on_timeout
         )
 
     async def _retry_reader(
             self,
             reader: Callable[[], Awaitable[bytes]],
-            timeout: Optional[TimeoutConfig],
-            flag: Optional[TimeoutFlag]
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> bytes:
         if timeout is None:
-            timeout = self.timeout
+            timeout = self.read_timeout
 
-        should_raise = flag is None or flag.raise_on_read_timeout
-        read_timeout = timeout.read_timeout if should_raise else 0.01
+        should_raise = raise_on_timeout is None or raise_on_timeout
+        read_timeout = timeout if should_raise else 0.01
 
         while True:
             try:
@@ -99,11 +99,11 @@ class Stream:
     async def write(
             self,
             data: bytes,
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> None:
         self.writer.write(data)
-        await self.drain(timeout, flag)
+        await self.drain(timeout, raise_on_timeout)
 
     def writelines_nowait(self, data: Iterable[bytes]) -> None:
         self.writer.writelines(data)
@@ -111,25 +111,25 @@ class Stream:
     async def writelines(
             self,
             data: Iterable[bytes],
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> None:
         self.writer.writelines(data)
-        await self.drain(timeout, flag)
+        await self.drain(timeout, raise_on_timeout)
 
     async def drain(
             self,
-            timeout: Optional[TimeoutConfig] = None,
-            flag: Optional[TimeoutFlag] = None
+            timeout: Optional[float] = None,
+            raise_on_timeout: Optional[bool] = None
     ) -> None:
         if timeout is None:
-            timeout = self.timeout
+            timeout = self.write_timeout
 
-        should_raise = flag is None or flag.raise_on_write_timeout
+        should_raise = raise_on_timeout is None or raise_on_timeout
 
         while True:
             try:
-                await asyncio.wait_for(self.writer.drain(), timeout.write_timeout)
+                await asyncio.wait_for(self.writer.drain(), timeout)
             except asyncio.TimeoutError:
                 if should_raise:
                     raise

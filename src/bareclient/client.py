@@ -16,21 +16,20 @@ from typing import (
 import urllib.parse
 from urllib.error import URLError
 
-import h11
-
 from baretypes import Headers, Content
 from bareutils.compression import Decompressor
 
 from .utils import (
     get_port,
-    get_target,
     create_ssl_context,
     get_negotiated_protocol
 )
 from .requester import Requester
 from .h11_requester import H11Requester
 from .h2_requester import H2Requester
-from .timeout import TimeoutConfig
+
+SendCallable = Callable[[Dict[str, Any], Optional[float]], Coroutine[Any, Any, Dict[str, Any]]]
+ReceiveCallable = Callable[[Optional[int], Optional[float]], Awaitable[Dict[str, Any]]]
 
 class HttpClient:
     """An asyncio HTTP client.
@@ -70,7 +69,7 @@ class HttpClient:
             headers: Headers = None,
             content: Optional[Content] = None,
             loop: Optional[AbstractEventLoop] = None,
-            bufsiz: int = 1024,
+            bufsiz: int = 8096,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
@@ -106,7 +105,7 @@ class HttpClient:
             raise URLError(f'Invalid scheme: {self.url.scheme}')
         self.requester: Optional[Requester] = None
 
-    async def __aenter__(self) -> Tuple[Callable[[Dict[str, Any], TimeoutConfig], Coroutine[Any, Any, Dict[str, Any]]], Callable[[TimeoutConfig], Awaitable[Dict[str, Any]]]]:
+    async def __aenter__(self) -> Tuple[SendCallable, ReceiveCallable]:
         """opens the context.
 
         .. code-block:: python

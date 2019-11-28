@@ -1,18 +1,15 @@
 """Requesters"""
 
-from asyncio import StreamReader
+import asyncio
 from typing import (
     Any,
-    AsyncIterator,
     Dict,
-    Optional,
-    Tuple
+    Optional
 )
-from urllib.parse import ParseResult, urlparse
+from urllib.parse import urlparse
 
 import h11
 
-from baretypes import Headers, Content
 from bareutils.compression import (
     make_gzip_decompressobj,
     make_deflate_decompressobj,
@@ -21,117 +18,171 @@ from bareutils.compression import (
 import bareutils.header as header
 
 from .requester import Requester
-from .utils import get_target
-from .stream import Stream
-from .timeout import TimeoutConfig
+from .utils import get_target, ResponseEvent
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
     b'deflate': make_deflate_decompressobj
 }
 
-async def body_reader(
-        conn: h11.Connection,
-        stream: Stream,
-        bufsiz: int
-) -> Content:
-    """A body reader
-
-    :param conn: The h11 connection
-    :type conn: h11.Connection
-    :param reader: A reader
-    :type reader: StreamReader
-    :param bufsiz: The size of the buffer
-    :type bufsiz: int
-    :raises ConnectionError: Raised if a response was not received
-    :raises ValueError: Raised for an unknown event
-    :return: The content
-    :rtype: Content
-    """
-    while True:
-        event = conn.next_event()
-        if event is h11.NEED_DATA:
-            conn.receive_data(await stream.read(bufsiz))
-        elif isinstance(event, h11.Data):
-            # noinspection PyUnresolvedReferences
-            yield event.data
-        elif isinstance(event, h11.EndOfMessage):
-            return
-        elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
-            raise ConnectionError('Failed to receive response')
-        else:
-            raise ValueError('Unknown event')
-
-
 class H11Requester(Requester):
     """An HTTP/1.1 requester"""
 
-    def __init__(self, reader, writer, bufsiz=1024, decompressors=None):
+    def __init__(self, reader, writer, bufsiz=8096, decompressors=None):
         super().__init__(reader, writer, bufsiz=bufsiz, decompressors=decompressors)
         self.conn = h11.Connection(our_role=h11.CLIENT)
         self.is_initialised = False
+        self.response_event = ResponseEvent()
 
-    async def connect(self) -> None:
+    def connect(self) -> None:
         if self.is_initialised:
             self.conn.start_next_cycle()
 
     async def send(
             self,
-            request: Dict[str, Any],
-            timeout: Optional[TimeoutConfig] = None
-    ) -> Dict[str, Any]:
-        self.connect()
+            message: Dict[str, Any],
+            stream_id: Optional[int] = None,
+            timeout: Optional[float] = None
+    ) -> None:
 
-        url = urlparse(request['url'])
+        request_type: str = message['type']
+
+        if request_type == 'http.request':
+            await self._send_request(message, timeout)
+        elif request_type == 'http.request.body':
+            if stream_id is None:
+                raise RuntimeError('http/2 requires a stream id')
+            await self._send_request_body(message, timeout)
+        elif request_type == 'http.disconnect':
+            await self._disconnect()
+        else:
+            raise Exception(f'unknown request type: {request_type}')
+
+    async def _send_request(
+            self,
+            message: Dict[str, Any],
+            timeout: Optional[float]
+    ) -> None:
+
+        self.connect()
+        self.is_initialised = True
+
+        url = urlparse(message['url'])
 
         request = h11.Request(
-            method=request['method'],
+            method=message['method'],
             target=get_target(url),
-            headers=request.get('headers', [])
+            headers=message.get('headers', [])
         )
 
         buf = self.conn.send(request)
         self.stream.write_nowait(buf)
-        content: Optional[AsyncIterator[bytes]] = request.get('content')
-        if content:
-            data = b''
-            async for value in content:
-                data += value
-            buf = self.conn.send(h11.Data(data=data))
-            self.stream.write_nowait(buf)
-        buf = self.conn.send(h11.EndOfMessage())
-        self.stream.write_nowait(buf)
-        await self.stream.drain()
 
+        body = message.get('body', b'')
+        more_body = message.get('more_body', False)
+        await self._send_request_data(body, more_body, timeout)
+        asyncio.create_task(self._receive_response())
+
+    async def _send_request_body(self, message: Dict[str, Any], timeout: Optional[float]) -> None:
+        await self._send_request_data(
+            message.get('body', b''),
+            message.get('more_body', False),
+            timeout
+        )
+
+    async def _send_request_data(
+            self,
+            body: bytes,
+            more_body: Optional[bool],
+            timeout: Optional[float]
+    ) -> None:
+        buf = self.conn.send(h11.Data(data=body))
+        self.stream.write_nowait(buf)
+
+        if not more_body:
+            buf = self.conn.send(h11.EndOfMessage())
+            self.stream.write_nowait(buf)
+
+        await self.stream.drain(timeout)
+
+    async def _receive_response(self):
         while True:
-            response = self.conn.next_event()
-            if response is h11.NEED_DATA:
+            event = self.conn.next_event()
+            if event is h11.NEED_DATA:
                 buf = await self.stream.read(self.bufsiz)
                 self.conn.receive_data(buf)
-            elif isinstance(response, h11.Response):
+            elif isinstance(event, h11.Response):
                 break
-            elif isinstance(response, (h11.ConnectionClosed, h11.EndOfMessage)):
+            elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
                 raise ConnectionError('Failed to receive response')
             else:
                 raise ValueError('Unknown event')
 
-        writer = body_reader(self.conn, self.stream, self.bufsiz)
-
         content_types = header.find(
-            b'content-encoding', response.headers, b'').split(b', ')
+            b'content-encoding', event.headers, b'').split(b', ')
         for content_type in content_types:
             if content_type in self.decompressors:
                 decompressor = self.decompressors[content_type]
                 writer = compression_reader_adapter(writer, decompressor())
                 break
 
-        return {
-            'response': response,
-            'content': writer
-        }
+        more_body = False
+        for k, v in event.headers:
+            if k == b'content-length' and int(v):
+                more_body = True
+            elif k == b'transfer-encoding' and v == b'chunked':
+                more_body = True
 
-    async def receive(self, stream_id: Optional[int] = None, timeout: Optional[TimeoutConfig] = None) -> Dict[str, Any]:
-        return {}
+        self.response_event.set_with_message({
+            'type': 'http.response',
+            'status_code': event.status_code,
+            'headers': event.headers,
+            'more_body': more_body,
+            'stream_id': None
+        })
+
+    async def _disconnect(self):
+        buf = self.conn.send(h11.EndOfMessage())
+        self.stream.write_nowait(buf)
+        await self.stream.drain()
+
+
+    async def receive(
+            self,
+            stream_id: Optional[int] = None,
+            timeout: Optional[float] = None
+    ) -> Dict[str, Any]:
+
+        message = await self.response_event.wait_with_message()
+        if message is not None:
+            return message
+
+        while True:
+            event = self.conn.next_event()
+            if event is h11.NEED_DATA:
+                self.conn.receive_data(await self.stream.read(self.bufsiz))
+            elif isinstance(event, h11.Data):
+                return {
+                    'type': 'http.response.body',
+                    'body': event.data,
+                    'more_body': True,
+                    'stream_id': None
+                }
+            elif isinstance(event, h11.EndOfMessage):
+                return {
+                    'type': 'http.response.body',
+                    'body': b'',
+                    'more_body': False,
+                    'stream_id': None
+                }
+            elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
+                return {
+                    'type': 'http.stream.disconnect',
+                    'stream_id': None
+                }
+            else:
+                raise ValueError('Unknown event')
+
 
     async def close(self) -> None:
         pass

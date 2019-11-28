@@ -2,11 +2,9 @@
 
 import asyncio
 from typing import List
-from bareutils import bytes_reader
 from baretypes import Header
 
 from bareclient import HttpClient
-from bareclient.timeout import TimeoutConfig
 
 
 async def main(url: str, headers: List[Header]) -> None:
@@ -22,7 +20,7 @@ async def main(url: str, headers: List[Header]) -> None:
         }
         await send(request)
 
-        message = await receive(TimeoutConfig())
+        message = await receive()
         print(message)
 
         while message.get('more_body', False):

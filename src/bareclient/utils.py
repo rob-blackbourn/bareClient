@@ -4,7 +4,7 @@ import asyncio
 from asyncio import StreamWriter, StreamReader
 import logging
 import ssl
-from typing import AnyStr, Optional
+from typing import Any, AnyStr, Dict, Optional
 from urllib.parse import ParseResult
 
 LOGGER = logging.getLogger(__name__)
@@ -48,8 +48,8 @@ def get_target(url: ParseResult) -> str:
         path += '#' + url.fragment
     return path
 
-PROTOCOLS = ["h2", "http/1.1"]
-# PROTOCOLS = ["http/1.1"]
+# PROTOCOLS = ["h2", "http/1.1"]
+PROTOCOLS = ["http/1.1"]
 
 def create_ssl_context(
         cafile: Optional[str] = None,
@@ -109,3 +109,18 @@ def get_authority(url: ParseResult) -> str:
         return url.hostname
     host, _port = url.netloc.split(':', maxsplit=1)
     return host
+
+class ResponseEvent(asyncio.Event):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.message: Optional[Dict[str, Any]] = None
+
+    def set_with_message(self, message: Dict[str, Any]) -> None:
+        self.message = message
+        super().set()
+
+    async def wait_with_message(self) -> Optional[Dict[str, Any]]:
+        await super().wait()
+        message, self.message = self.message, None
+        return message

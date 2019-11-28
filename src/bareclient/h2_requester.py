@@ -24,8 +24,7 @@ from bareutils.compression import (
 )
 
 from .requester import Requester
-from .utils import get_target, get_authority
-from .timeout import TimeoutConfig, TimeoutFlag
+from .utils import get_target, get_authority, ResponseEvent
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
@@ -50,25 +49,12 @@ class ProtocolError(HTTPError):
     Malformed HTTP.
     """
 
-class ResponseEvent(asyncio.Event):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.message: Optional[Dict[str, Any]] = None
-
-    def set_with_message(self, message: Dict[str, Any]) -> None:
-        self.message = message
-        super().set()
-
-    async def wait_with_message(self) -> Optional[Dict[str, Any]]:
-        await super().wait()
-        message, self.message = self.message, None
-        return message
 
 class StreamState:
 
     def __init__(self) -> None:
-        self.timeout_flag = TimeoutFlag()
+        self.raise_on_read_timeout = False
+        self.raise_on_write_timeout = True        
         self.h2_events: List[h2.events.Event] = []
         self.window_update_received = asyncio.Event()
 
@@ -89,25 +75,28 @@ class H2Requester(Requester):
 
     async def send(
             self,
-            request: Dict[str, Any],
-            timeout: Optional[TimeoutConfig] = None
+            message: Dict[str, Any],
+            stream_id: Optional[int] = None,
+            timeout: Optional[float] = None
     ):
-        request_type: str = request['type']
+        message_type: str = message['type']
 
-        if request_type == 'http.request':
-            await self._send_request(request, timeout or TimeoutConfig())
-        elif request_type == 'http.request.body':
-            await self._send_request_body(request, timeout or TimeoutConfig())
-        elif request_type == 'http.disconnect':
+        if message_type == 'http.request':
+            await self._send_request(message, timeout)
+        elif message_type == 'http.request.body':
+            if stream_id is None:
+                raise RuntimeError('http/2 requires a stream id')
+            await self._send_request_body(stream_id, message, timeout)
+        elif message_type == 'http.disconnect':
             if self.on_close:
                 await self.on_close()
         else:
-            raise Exception(f'unknown request type: {request_type}')
+            raise Exception(f'unknown request type: {message_type}')
 
     async def receive(
             self,
             stream_id: Optional[int] = None,
-            timeout: Optional[TimeoutConfig] = None
+            timeout: Optional[float] = None
     ) -> Dict[str, Any]:
 
         message = await self.response_event.wait_with_message()
@@ -136,23 +125,27 @@ class H2Requester(Requester):
                 }
         raise Exception('Closed')
 
-    async def _send_request(self, request: Dict[str, Any], timeout: TimeoutConfig) -> None:
+    async def _send_request(
+            self,
+            message: Dict[str, Any],
+            timeout: Optional[float]
+    ) -> None:
         # Start sending the request.
         if not self.initialized:
             self.initiate_connection()
 
-        url = urlparse(request['url'])
+        url = urlparse(message['url'])
         stream_id = await self.send_headers(
             url,
-            request['method'],
-            request.get('headers', []),
+            message['method'],
+            message.get('headers', []),
             timeout
         )
 
         self.stream_states[stream_id] = StreamState()
 
-        body = request.get('body', b'')
-        more_body = request.get('more_body', False)
+        body = message.get('body', b'')
+        more_body = message.get('more_body', False)
 
         self._create_task(
             self._send_request_data(stream_id, body, more_body, timeout)
@@ -162,9 +155,14 @@ class H2Requester(Requester):
         )
         self.on_close = functools.partial(self.response_closed, stream_id=stream_id)
 
-    async def _send_request_body(self, message: Dict[str, Any], timeout: TimeoutConfig) -> None:
+    async def _send_request_body(
+            self,
+            stream_id: int,
+            message: Dict[str, Any],
+            timeout: Optional[float]
+    ) -> None:
         await self._send_request_data(
-            message['stream_id'],
+            stream_id,
             message['body'],
             message.get('more_body', False),
             timeout
@@ -217,7 +215,7 @@ class H2Requester(Requester):
             url: ParseResult,
             method: str,
             headers: List[Header],
-            timeout: TimeoutConfig
+            timeout: Optional[float]
     ) -> int:
         stream_id = self.h2_state.get_next_available_stream_id()
         headers = [
@@ -238,21 +236,22 @@ class H2Requester(Requester):
         stream_id: int,
         body: bytes,
         more_body: bool,
-        timeout: TimeoutConfig
+        timeout: Optional[float]
     ) -> None:
         try:
-            await self.send_data(stream_id, body, timeout)
+            await self._send_data(stream_id, body, timeout)
             if not more_body:
                 await self.end_stream(stream_id, timeout)
         finally:
-            # Once we've sent some data we should enable read timeouts.
-            self.stream_states[stream_id].timeout_flag.set_read_timeouts()
+            stream_state = self.stream_states[stream_id]
+            stream_state.raise_on_read_timeout = True
+            stream_state.raise_on_write_timeout = False
 
-    async def send_data(
+    async def _send_data(
             self,
             stream_id: int,
             data: bytes,
-            timeout: TimeoutConfig
+            timeout: Optional[float]
     ) -> None:
         while data:
             # The data will be divided into frames to send based on the flow control
@@ -276,7 +275,7 @@ class H2Requester(Requester):
                 data_to_send = self.h2_state.data_to_send()
                 await self.stream.write(data_to_send, timeout)
 
-    async def end_stream(self, stream_id: int, timeout: TimeoutConfig = None) -> None:
+    async def end_stream(self, stream_id: int, timeout: Optional[float] = None) -> None:
         self.h2_state.end_stream(stream_id)
         data_to_send = self.h2_state.data_to_send()
         await self.stream.write(data_to_send, timeout)
@@ -284,49 +283,54 @@ class H2Requester(Requester):
     async def receive_response(
             self,
             stream_id: int,
-            timeout: TimeoutConfig = None
+            timeout: float = None
     ) -> None:
         """
         Read the response status and headers from the network.
         """
+
+        stream_state = self.stream_states[stream_id]
+
         while True:
             event = await self.receive_event(stream_id, timeout)
-            # As soon as we start seeing response events, we should enable
-            # read timeouts, if we haven't already.
-            self.stream_states[stream_id].timeout_flag.set_read_timeouts()
-            if not isinstance(event, h2.events.ResponseReceived):
-                continue
 
-            status_code = 200
-            headers = []
-            more_body = False
-            for k, v in event.headers:
-                if k == b":status":
-                    status_code = int(v.decode("ascii", errors="ignore"))
-                elif not k.startswith(b":"):
-                    headers.append((k, v))
-                    # TODO: is it better to check stream_ended?
-                    if k == b'content-length' and int(v):
-                        more_body = True
-                    elif k == b'transfer-encoding' and v == b'chunked':
-                        more_body = True
-            self.response_event.set_with_message({
-                'type': 'http.response',
-                'status_code': status_code,
-                'headers': headers,
-                'more_body': more_body,
-                'stream_id': stream_id
-            })
-            break
+            stream_state.raise_on_read_timeout = True
+            stream_state.raise_on_write_timeout = False
+
+            if isinstance(event, h2.events.ResponseReceived):
+                break
+
+        status_code = 200
+        headers = []
+        more_body = False
+        for k, v in event.headers:
+            if k == b":status":
+                status_code = int(v.decode("ascii", errors="ignore"))
+            elif not k.startswith(b":"):
+                headers.append((k, v))
+                # TODO: is it better to check stream_ended?
+                if k == b'content-length' and int(v):
+                    more_body = True
+                elif k == b'transfer-encoding' and v == b'chunked':
+                    more_body = True
+        
+        self.response_event.set_with_message({
+            'type': 'http.response',
+            'status_code': status_code,
+            'headers': headers,
+            'more_body': more_body,
+            'stream_id': stream_id
+        })
 
     async def receive_event(
             self,
             stream_id: int,
-            timeout: TimeoutConfig = None
+            timeout: Optional[float] = None
     ) -> h2.events.Event:
-        while not self.stream_states[stream_id].h2_events:
-            flag = self.stream_states[stream_id].timeout_flag
-            data = await self.stream.read(self.READ_NUM_BYTES, timeout, flag=flag)
+        stream_state = self.stream_states[stream_id]
+
+        while not stream_state.h2_events:
+            data = await self.stream.read(self.READ_NUM_BYTES, timeout, stream_state.raise_on_read_timeout)
             events = self.h2_state.receive_data(data)
             for event in events:
                 event_stream_id = getattr(event, "stream_id", 0)

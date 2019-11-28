@@ -9,9 +9,7 @@ from typing import (
     Optional,
     Type
 )
-from urllib.parse import ParseResult
 
-from baretypes import Headers, Content
 from bareutils.compression import (
     make_gzip_decompressobj,
     make_deflate_decompressobj,
@@ -19,12 +17,13 @@ from bareutils.compression import (
 )
 
 from .stream import Stream
-from .timeout import TimeoutConfig, DEFAULT_TIMEOUT_CONFIG
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
     b'deflate': make_deflate_decompressobj
 }
+
+DEFAULT_TIMEOUT = 5.0
 
 class Requester(metaclass=ABCMeta):
     """A requester"""
@@ -34,7 +33,8 @@ class Requester(metaclass=ABCMeta):
             reader: StreamReader,
             writer: StreamWriter,
             bufsiz: int = 1024,
-            timeout: TimeoutConfig = DEFAULT_TIMEOUT_CONFIG,
+            read_timeout = DEFAULT_TIMEOUT,
+            write_timeout = DEFAULT_TIMEOUT,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None
     ) -> None:
         """Requests HTTP from a session.
@@ -46,7 +46,8 @@ class Requester(metaclass=ABCMeta):
         self.stream = Stream(
             reader,
             writer,
-            timeout
+            read_timeout,
+            write_timeout
         )
         self.bufsiz = bufsiz
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
@@ -54,16 +55,17 @@ class Requester(metaclass=ABCMeta):
     @abstractmethod
     async def send(
             self,
-            request: Dict[str, Any],
-            timeout: Optional[TimeoutConfig] = None
-    ) -> Dict[str, Any]:
+            message: Dict[str, Any],
+            stream_id: Optional[int] = None,
+            timeout: Optional[float] = None
+    ) -> None:
         ...
 
     @abstractmethod
     async def receive(
             self,
             stream_id: Optional[int] = None,
-            timeout: Optional[TimeoutConfig] = None
+            timeout: Optional[float] = None
     ) -> Dict[str, Any]:
         ...
 
