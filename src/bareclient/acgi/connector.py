@@ -62,6 +62,8 @@ async def connect(
     :type loop: Optional[AbstractEventLoop], optional
     :param h11_bufsiz: The HTTP/1.1 buffer size, defaults to 8096
     :type h11_bufsiz: int, optional
+    :param protocols: The supported HTTP protocols
+    :type protocols: Optional[List[str]], optional
     :raises URLError: Raise for an invalid url
     :return: The response message and an async iterator to retrieve the body.
     :rtype: Tuple[Dict[str, Any], AsyncIterator[bytes]]

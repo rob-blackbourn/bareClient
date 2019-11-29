@@ -20,7 +20,8 @@ import h2.settings
 from baretypes import Header
 
 from .http_protocol import HttpProtocol
-from .utils import get_target, get_authority, MessageEvent, ResetEvent
+from .utils import get_target, get_authority
+from .asyncio_events import MessageEvent, ResetEvent
 
 
 class H2Protocol(HttpProtocol):
