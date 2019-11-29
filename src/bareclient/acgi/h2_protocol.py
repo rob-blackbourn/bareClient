@@ -221,17 +221,11 @@ class H2Protocol(HttpProtocol):
 
         status_code = 200
         headers: List[Header] = []
-        more_body = False
         for name, value in event.headers:
             if name == b":status":
                 status_code = int(value)
             elif not name.startswith(b":"):
                 headers.append((name, value))
-                # TODO: is it better to check stream_ended?
-                if name == b'content-length' and int(value):
-                    more_body = True
-                elif name == b'transfer-encoding' and value == b'chunked':
-                    more_body = True
 
         self.response_event.set_with_message({
             'type': 'http.response',
@@ -241,7 +235,7 @@ class H2Protocol(HttpProtocol):
             'http_version': '2',
             'status_code': status_code,
             'headers': headers,
-            'more_body': more_body,
+            'more_body': event.stream_ended is None,
             'stream_id': event.stream_id
         })
 

@@ -1,7 +1,6 @@
 """Exports from bareclient"""
 
 from .client import HttpClient
-# from .session import HttpSession
 from .helpers import (
     request,
     get,
@@ -14,7 +13,6 @@ from .helpers import (
 
 __all__ = [
     'HttpClient',
-    # 'HttpSession',
     'request',
     'get',
     'get_text',

@@ -10,7 +10,7 @@ from bareclient import HttpClient
 async def main(url: str, headers: List[Header]) -> None:
     async with HttpClient(url, method='GET', headers=headers) as (response, body):
         print(response)
-        if response.status_code == 200:
+        if response['status_code'] == 200:
             async for part in body:
                 print(part)
 
