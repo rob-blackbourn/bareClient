@@ -20,25 +20,18 @@ import h2.settings
 from baretypes import Header
 
 from .http_protocol import HttpProtocol
-from .utils import get_target, get_authority, MessageEvent
+from .utils import get_target, get_authority, MessageEvent, ResetEvent
 
-
-class StreamState:
-    """Captures the stream state"""
-
-    def __init__(self) -> None:
-        self.window_update_received = asyncio.Event()
 
 class H2Protocol(HttpProtocol):
     """An HTTP/2 protocol handler"""
 
     READ_NUM_BYTES = 4096
 
-    def __init__(self, reader, writer, on_release: Optional[Callable] = None):
+    def __init__(self, reader, writer):
         super().__init__(reader, writer)
-        self.on_release = on_release
         self.h2_state = h2.connection.H2Connection()
-        self.stream_states: Dict[int, StreamState] = {}
+        self.window_update_event: Dict[int, ResetEvent] = {}
         self.initialized = False
         self.connection_event = MessageEvent()
         self.response_event = MessageEvent()
@@ -60,7 +53,7 @@ class H2Protocol(HttpProtocol):
             if self.on_close:
                 await self.on_close()
         else:
-            raise Exception(f'unknown request type: {message_type}')
+            raise RuntimeError(f'unknown request type: {message_type}')
 
     async def receive(self) -> Dict[str, Any]:
 
@@ -89,7 +82,7 @@ class H2Protocol(HttpProtocol):
                     'type': 'http.stream.disconnect',
                     'stream_id': event.stream_id
                 }
-        raise Exception('Closed')
+        raise RuntimeError('Closed')
 
     async def _send_request(
             self,
@@ -105,7 +98,7 @@ class H2Protocol(HttpProtocol):
             message['method'],
             message.get('headers', [])
         )
-        self.stream_states[stream_id] = StreamState()
+        self.window_update_event[stream_id] = ResetEvent()
         self.connection_event.set_with_message({
             'type': 'http.response.connection',
             'stream_id': stream_id
@@ -198,21 +191,14 @@ class H2Protocol(HttpProtocol):
             data: bytes
     ) -> None:
         while data:
-            # The data will be divided into frames to send based on the flow control
-            # window and the maximum frame size. Because the flow control window
-            # can decrease in size, even possibly to zero, this will loop until all the
-            # data is sent. In http2 specification:
-            # https://tools.ietf.org/html/rfc7540#section-6.9
-            flow_control = self.h2_state.local_flow_control_window(stream_id)
+            window_size = self.h2_state.local_flow_control_window(stream_id)
             chunk_size = min(
-                len(data), flow_control, self.h2_state.max_outbound_frame_size
+                len(data),
+                window_size,
+                self.h2_state.max_outbound_frame_size
             )
             if chunk_size == 0:
-                # this means that the flow control window is 0 (either for the stream
-                # or the connection one), and no data can be sent until the flow control
-                # window is updated.
-                await self.stream_states[stream_id].window_update_received.wait()
-                self.stream_states[stream_id].window_update_received.clear()
+                await self.window_update_event[stream_id].wait()
             else:
                 chunk, data = data[:chunk_size], data[chunk_size:]
                 self.h2_state.send_data(stream_id, chunk)
@@ -233,7 +219,7 @@ class H2Protocol(HttpProtocol):
             event = await self._receive_event()
 
         status_code = 200
-        headers = []
+        headers: List[Header] = []
         more_body = False
         for name, value in event.headers:
             if name == b":status":
@@ -263,20 +249,14 @@ class H2Protocol(HttpProtocol):
             data = await self.reader.read(self.READ_NUM_BYTES)
             events = self.h2_state.receive_data(data)
             for event in events:
-                event_stream_id = getattr(event, "stream_id", 0)
-
-                if hasattr(event, "error_code"):
-                    raise RuntimeError(event)
-
                 if isinstance(event, h2.events.WindowUpdated):
-                    if event_stream_id == 0:
-                        for state in self.stream_states.values():
-                            state.window_update_received.set()
+                    if event.stream_id == 0:
+                        for update_event in self.window_update_event.values():
+                            update_event.set()
                     else:
-                        self.stream_states[event.stream_id].window_update_received.set()
+                        self.window_update_event[event.stream_id].set()
 
-                if event_stream_id:
-                    self.h2_events.append(event)
+                self.h2_events.append(event)
 
             data_to_send = self.h2_state.data_to_send()
             self.writer.write(data_to_send)
@@ -285,7 +265,7 @@ class H2Protocol(HttpProtocol):
         return self.h2_events.pop(0)
 
     async def _response_closed(self, stream_id: int) -> None:
-        del self.stream_states[stream_id]
+        del self.window_update_event[stream_id]
 
         for task in self.pending:
             if not task.done():
@@ -294,9 +274,6 @@ class H2Protocol(HttpProtocol):
                     await task
                 except asyncio.CancelledError:
                     pass
-
-        if not self.stream_states and self.on_release is not None:
-            await self.on_release()
 
         self.writer.close()
         await self.writer.wait_closed()

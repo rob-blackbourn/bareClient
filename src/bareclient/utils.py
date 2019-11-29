@@ -146,3 +146,10 @@ class NullIter(Generic[T]):
 
     async def __anext__(self) -> T:
         raise StopAsyncIteration
+
+class ResetEvent(asyncio.Event):
+    """An event which automatically clears after being set"""
+
+    def set(self) -> None:
+        super().set()
+        super().clear()
