@@ -34,8 +34,8 @@ class H2Protocol(HttpProtocol):
         self.h2_state = h2.connection.H2Connection()
         self.window_update_event: Dict[int, ResetEvent] = {}
         self.initialized = False
-        self.connection_event = MessageEvent()
-        self.response_event = MessageEvent()
+        self.connection_event: MessageEvent[Dict[str, Any]] = MessageEvent()
+        self.response_event: MessageEvent[Dict[str, Any]] = MessageEvent()
         self.pending: List[Task] = []
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
         self.h2_events: List[h2.events.Event] = []

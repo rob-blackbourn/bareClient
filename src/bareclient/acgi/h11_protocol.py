@@ -22,8 +22,8 @@ class H11Protocol(HttpProtocol):
         self._bufsiz = bufsiz
         self._h11_state = h11.Connection(our_role=h11.CLIENT)
         self._is_initialised = False
-        self._connection_event = MessageEvent()
-        self._response_event = MessageEvent()
+        self._connection_event: MessageEvent[Dict[str, Any]] = MessageEvent()
+        self._response_event: MessageEvent[Dict[str, Any]] = MessageEvent()
         self._is_message_ended = True
 
     def _connect(self) -> None:
