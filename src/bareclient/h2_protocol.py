@@ -183,10 +183,10 @@ class H2Protocol(HttpProtocol):
         return stream_id
 
     async def _send_request_data(
-        self,
-        stream_id: int,
-        body: bytes,
-        more_body: bool
+            self,
+            stream_id: int,
+            body: bytes,
+            more_body: bool
     ) -> None:
         await self._send_data(stream_id, body)
         if not more_body:
@@ -235,17 +235,17 @@ class H2Protocol(HttpProtocol):
         status_code = 200
         headers = []
         more_body = False
-        for k, v in event.headers:
-            if k == b":status":
-                status_code = int(v.decode("ascii", errors="ignore"))
-            elif not k.startswith(b":"):
-                headers.append((k, v))
+        for name, value in event.headers:
+            if name == b":status":
+                status_code = int(value)
+            elif not name.startswith(b":"):
+                headers.append((name, value))
                 # TODO: is it better to check stream_ended?
-                if k == b'content-length' and int(v):
+                if name == b'content-length' and int(value):
                     more_body = True
-                elif k == b'transfer-encoding' and v == b'chunked':
+                elif name == b'transfer-encoding' and value == b'chunked':
                     more_body = True
-        
+
         self.response_event.set_with_message({
             'type': 'http.response',
             'acgi': {
@@ -300,10 +300,3 @@ class H2Protocol(HttpProtocol):
 
         self.writer.close()
         await self.writer.wait_closed()
-
-    @property
-    def is_closed(self) -> bool:
-        return False
-
-    def is_connection_dropped(self) -> bool:
-        return self.reader.at_eof()

@@ -15,12 +15,11 @@ from typing import (
 from bareutils.compression import (
     make_gzip_decompressobj,
     make_deflate_decompressobj,
-    compression_reader_adapter,
     Decompressor
 )
 from baretypes import Header, Content
 from .requester import RequestHandler
-from .main import start
+from .connector import connect
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,
@@ -39,7 +38,7 @@ class HttpClient:
             headers: Optional[List[Header]] = None,
             content: Optional[Content] = None,
             loop: Optional[AbstractEventLoop] = None,
-            bufsiz: int = 8096,
+            h11_bufsiz: int = 8096,
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
@@ -50,7 +49,7 @@ class HttpClient:
         self.headers = headers
         self.content = content
         self.loop = loop
-        self.bufsiz = bufsiz
+        self.h11_bufsiz = h11_bufsiz
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
@@ -65,14 +64,14 @@ class HttpClient:
             self.content,
             self.decompressors
         )
-        response, body = await start(
+        response, body = await connect(
             self.url,
             self.handler,
             cafile=self.cafile,
             capath=self.capath,
             cadata=self.cadata,
             loop=self.loop,
-            bufsiz=self.bufsiz
+            h11_bufsiz=self.h11_bufsiz
         )
         return response, body
 

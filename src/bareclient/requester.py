@@ -18,8 +18,9 @@ from bareutils.compression import (
 )
 import bareutils.header as header
 
-from .main import ReceiveCallable, SendCallable
+from .connector import ReceiveCallable, SendCallable
 from .utils import NullIter
+
 
 class RequestHandlerInstance:
     """The request handler"""
@@ -34,6 +35,23 @@ class RequestHandlerInstance:
             receive: ReceiveCallable,
             decompressors: Mapping[bytes, Type[Decompressor]]
     ) -> None:
+        """Initialise the request handler instance
+
+        :param url: The url
+        :type url: str
+        :param method: The request method
+        :type method: str
+        :param headers: The headers
+        :type headers: Optional[List[Header]]
+        :param content: The content
+        :type content: Optional[AsyncIterable[bytes]]
+        :param send: The function to send data
+        :type send: SendCallable
+        :param receive: The function to receive data
+        :type receive: ReceiveCallable
+        :param decompressors: The available decompressors
+        :type decompressors: Mapping[bytes, Type[Decompressor]]
+        """
         self.url = url
         self.method = method
         self.headers = headers or []
@@ -43,9 +61,17 @@ class RequestHandlerInstance:
         self.decompressors = decompressors
 
     async def process(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+        """Process the request
+
+        :return: The response message an an async iterator to read the body
+        :rtype: Tuple[Dict[str, Any], AsyncIterator[bytes]]
+        """
 
         content_list: List[bytes] = []
-        content_iter: AsyncIterator[bytes] = NullIter() if self.content is None else self.content.__aiter__()
+        content_iter: AsyncIterator[bytes] = (
+            NullIter() if self.content is None else
+            self.content.__aiter__()
+        )
         try:
             while len(content_list) < 2:
                 body = await content_iter.__anext__()
@@ -117,12 +143,14 @@ class RequestHandlerInstance:
             more_body = message.get('more_body', False)
 
     async def close(self) -> None:
+        """Close the request"""
         await self.send({
             'type': 'http.disconnect'
         })
 
 
 class RequestHandler:
+    """A request handler"""
 
     def __init__(
             self,
@@ -132,6 +160,19 @@ class RequestHandler:
             content: Optional[AsyncIterable[bytes]],
             decompressors: Mapping[bytes, Type[Decompressor]]
     ) -> None:
+        """Initialise the request handler
+
+        :param url: The url
+        :type url: str
+        :param method: The request method
+        :type method: str
+        :param headers: The headers
+        :type headers: Optional[List[Header]]
+        :param content: The request content
+        :type content: Optional[AsyncIterable[bytes]]
+        :param decompressors: The available decompressors
+        :type decompressors: Mapping[bytes, Type[Decompressor]]
+        """
         self.url = url
         self.method = method
         self.headers = headers or []
@@ -139,7 +180,20 @@ class RequestHandler:
         self.instance: Optional[RequestHandlerInstance] = None
         self.decompressors = decompressors
 
-    async def __call__(self, receive: ReceiveCallable, send: SendCallable) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+    async def __call__(
+            self,
+            receive: ReceiveCallable,
+            send: SendCallable
+    ) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+        """Call the request handle instance
+
+        :param receive: The function to receive data
+        :type receive: ReceiveCallable
+        :param send: The function to send data
+        :type send: SendCallable
+        :return: The response message and an async iterator to read the body
+        :rtype: Tuple[Dict[str, Any], AsyncIterator[bytes]]
+        """
         self.instance = RequestHandlerInstance(
             self.url,
             self.method,
@@ -153,7 +207,6 @@ class RequestHandler:
         return response, body
 
     async def close(self):
+        """Close the request"""
         if self.instance is not None:
             await self.instance.close()
-
-

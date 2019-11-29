@@ -17,6 +17,7 @@ async def main(url: str, headers: List[Header]) -> None:
 
     print('complete')
 
+# URL = 'https://docs.python.org/3/library/cgi.html'
 URL = 'https://docs.python.org/3/library/cgi.html'
 HEADERS = [
     (b'host', b'docs.python.org'),

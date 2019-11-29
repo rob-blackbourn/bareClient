@@ -26,11 +26,13 @@ from .h2_protocol import H2Protocol
 
 SendCallable = Callable[[Dict[str, Any]], Coroutine[Any, Any, None]]
 ReceiveCallable = Callable[[], Awaitable[Dict[str, Any]]]
-Response = Tuple[Dict[str, Any], AsyncIterator[bytes]]
-Application = Callable[[ReceiveCallable, SendCallable], Coroutine[Any, Any, Response]]
+Application = Callable[
+    [ReceiveCallable, SendCallable],
+    Coroutine[Any, Any, Tuple[Dict[str, Any], AsyncIterator[bytes]]]
+]
 
 
-async def start(
+async def connect(
         url: str,
         application: Application,
         *,
@@ -38,8 +40,28 @@ async def start(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
-        bufsiz: int = 8096
-) -> Response:
+        h11_bufsiz: int = 8192
+) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+    """Connect to the web server and run the application
+
+    :param url: The url to connect to
+    :type url: str
+    :param application: The application to run
+    :type application: Application
+    :param cafile: Passed to ssl.create_default_context, defaults to None
+    :type cafile: Optional[str], optional
+    :param capath: Passed to ssl.create_default_context, defaults to None
+    :type capath: Optional[str], optional
+    :param cadata: Passed to ssl.create_default_context, defaults to None
+    :type cadata: Optional[str], optional
+    :param loop: The asyncio event loop, defaults to None
+    :type loop: Optional[AbstractEventLoop], optional
+    :param h11_bufsiz: The HTTP/1.1 buffer size, defaults to 8096
+    :type h11_bufsiz: int, optional
+    :raises URLError: Raise for an invalid url
+    :return: The response message and an async iterator to retrieve the body.
+    :rtype: Tuple[Dict[str, Any], AsyncIterator[bytes]]
+    """
     parsed_url = urllib.parse.urlparse(url)
     if parsed_url.scheme == 'http':
         ssl_context: Optional[ssl.SSLContext] = None
@@ -54,10 +76,10 @@ async def start(
 
     hostname = parsed_url.hostname
     if hostname is None:
-        raise RuntimeError('unspecified hostname')
+        raise URLError('unspecified hostname')
     port = get_port(parsed_url)
     if port is None:
-        raise RuntimeError('unspecified port')
+        raise URLError('unspecified port')
 
     reader, writer = await open_connection(
         hostname,
@@ -71,6 +93,6 @@ async def start(
     if negotiated_protocol == 'h2':
         http_protocol: HttpProtocol = H2Protocol(reader, writer)
     else:
-        http_protocol = H11Protocol(reader, writer, bufsiz)
+        http_protocol = H11Protocol(reader, writer, h11_bufsiz)
 
     return await application(http_protocol.receive, http_protocol.send)
