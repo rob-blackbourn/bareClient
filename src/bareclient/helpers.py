@@ -2,7 +2,7 @@
 
 from asyncio import AbstractEventLoop
 import json
-from typing import Any, AnyStr, Callable, Mapping, List, Optional, Union
+from typing import Any, Callable, Mapping, List, Optional, Union
 from urllib.parse import urlparse
 
 from baretypes import Headers
@@ -25,7 +25,7 @@ async def request(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None,
+        cadata: Optional[str] = None,
         chunk_size: int = -1
 ) -> bytes:
     """Gets bytes from a url.
@@ -71,15 +71,15 @@ async def request(
 
     async with HttpClient(
             url,
-            method,
-            headers,
+            method=method,
+            headers=headers,
             content=data,
             loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata
     ) as (response, body):
-        if response.status_code < 200 or response.status_code >= 400:
+        if response['status_code'] < 200 or response['status_code'] >= 400:
             raise RuntimeError('Request failed')
         buf = b''
         async for part in body:
@@ -94,7 +94,7 @@ async def get(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> bytes:
     """Gets bytes from a url.
 
@@ -127,7 +127,7 @@ async def get_text(
         encoding: str = 'utf-8',
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> str:
     """Gets text from a url.
 
@@ -167,7 +167,7 @@ async def get_json(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> JsonType:
     """Gets a json object from a url.
 
@@ -207,7 +207,7 @@ async def post(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> bytes:
     """Posts bytes to a url.
 
@@ -247,7 +247,7 @@ async def post_text(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> str:
     """Posts text to a url.
 
@@ -299,7 +299,7 @@ async def post_json(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[AnyStr] = None
+        cadata: Optional[str] = None
 ) -> Optional[JsonType]:
     """Posts text to a url.
 

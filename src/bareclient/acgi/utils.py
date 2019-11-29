@@ -4,7 +4,7 @@ import asyncio
 from asyncio import StreamWriter
 import logging
 import ssl
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Any, Dict, List, Optional
 from urllib.parse import ParseResult
 
 LOGGER = logging.getLogger(__name__)
@@ -48,13 +48,11 @@ def get_target(url: ParseResult) -> str:
         path += '#' + url.fragment
     return path
 
-PROTOCOLS = ["h2", "http/1.1"]
-# PROTOCOLS = ["http/1.1"]
-
 def create_ssl_context(
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cafile: Optional[str],
+        capath: Optional[str],
+        cadata: Optional[str],
+        protocols: List[str]
 ) -> ssl.SSLContext:
     """Create an ssl context suitable for https
 
@@ -65,7 +63,9 @@ def create_ssl_context(
         format, defaults to None
     :type capath: Optional[str], optional
     :param cadata: The data for a PEM encoded certificate, defaults to None
-    :type cadata: Optional[AnyStr], optional
+    :type cadata: Optional[str], optional
+    :param protocols: The supported protocols
+    :type cadata: List[str]
     :return: An ssl context
     :rtype: ssl.SSLContext
     """
@@ -80,9 +80,9 @@ def create_ssl_context(
     )
     ctx.options |= ssl.OP_NO_COMPRESSION
     ctx.set_ciphers("ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20")
-    ctx.set_alpn_protocols(PROTOCOLS)
+    ctx.set_alpn_protocols(protocols)
     try:
-        ctx.set_npn_protocols(PROTOCOLS)
+        ctx.set_npn_protocols(protocols)
     except NotImplementedError:
         LOGGER.debug("Can't set npn protocols")
     return ctx

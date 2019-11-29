@@ -9,6 +9,7 @@ from typing import (
     Callable,
     Coroutine,
     Dict,
+    List,
     Optional,
     Tuple
 )
@@ -31,6 +32,8 @@ Application = Callable[
     Coroutine[Any, Any, Tuple[Dict[str, Any], AsyncIterator[bytes]]]
 ]
 
+DEFAULT_PROTOCOLS = ["h2", "http/1.1"]
+# DEFAULT_PROTOCOLS = ["http/1.1"]
 
 async def connect(
         url: str,
@@ -40,7 +43,8 @@ async def connect(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         loop: Optional[AbstractEventLoop] = None,
-        h11_bufsiz: int = 8192
+        h11_bufsiz: int = 8192,
+        protocols: Optional[List[str]] = None
 ) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
     """Connect to the web server and run the application
 
@@ -67,9 +71,10 @@ async def connect(
         ssl_context: Optional[ssl.SSLContext] = None
     elif parsed_url.scheme == 'https':
         ssl_context = create_ssl_context(
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata
+            cafile,
+            capath,
+            cadata,
+            protocols or DEFAULT_PROTOCOLS
         )
     else:
         raise URLError(f'Invalid scheme: {parsed_url.scheme}')

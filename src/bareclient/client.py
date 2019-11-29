@@ -42,7 +42,8 @@ class HttpClient:
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None
+            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+            protocols: Optional[List[str]] = None
     ) -> None:
         self.url = url
         self.method = method
@@ -55,6 +56,7 @@ class HttpClient:
         self.cadata = cadata
         self.handler: Optional[RequestHandler] = None
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
+        self.protocols = protocols
 
     async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
         self.handler = RequestHandler(
@@ -71,7 +73,8 @@ class HttpClient:
             capath=self.capath,
             cadata=self.cadata,
             loop=self.loop,
-            h11_bufsiz=self.h11_bufsiz
+            h11_bufsiz=self.h11_bufsiz,
+            protocols=self.protocols
         )
         return response, body
 
