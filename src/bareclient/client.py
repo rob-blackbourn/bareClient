@@ -19,7 +19,7 @@ from bareutils.compression import (
 )
 from baretypes import Header, Content
 from .requester import RequestHandler
-from .connector import connect
+from .acgi import connect
 
 DEFAULT_DECOMPRESSORS = {
     b'gzip': make_gzip_decompressobj,

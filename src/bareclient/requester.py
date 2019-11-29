@@ -18,7 +18,7 @@ from bareutils.compression import (
 )
 import bareutils.header as header
 
-from .connector import ReceiveCallable, SendCallable
+from .acgi import ReceiveCallable, SendCallable
 from .utils import NullIter
 
 
