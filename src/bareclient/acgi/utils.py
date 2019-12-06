@@ -47,6 +47,13 @@ def get_target(url: ParseResult) -> str:
         path += '#' + url.fragment
     return path
 
+def get_authority(url: ParseResult) -> str:
+    """Get the http/2 authority"""
+    if isinstance(url.hostname, str):
+        return url.hostname
+    host, _port = url.netloc.split(':', maxsplit=1)
+    return host
+
 def create_ssl_context(
         cafile: Optional[str],
         capath: Optional[str],
@@ -101,10 +108,3 @@ def get_negotiated_protocol(writer: StreamWriter) -> Optional[str]:
     if negotiated_protocol is None:
         negotiated_protocol = ssl_object.selected_npn_protocol()
     return negotiated_protocol
-
-def get_authority(url: ParseResult) -> str:
-    """Get the http/2 authority"""
-    if isinstance(url.hostname, str):
-        return url.hostname
-    host, _port = url.netloc.split(':', maxsplit=1)
-    return host
