@@ -6,7 +6,9 @@ from asyncio import AbstractEventLoop
 from datetime import datetime
 from typing import (
     Any,
+    AsyncContextManager,
     AsyncIterator,
+    Callable,
     Dict,
     List,
     Mapping,
@@ -22,12 +24,17 @@ from bareutils.compression import Decompressor
 from .client import DEFAULT_DECOMPRESSORS, HttpClient
 from .utils import (
     Cookie,
-    CookieCache,
     extract_cookies,
     extract_cookies_from_response,
     gather_cookies
 )
 from .acgi.utils import get_authority
+
+HttpClientFactory = Callable[
+    [],
+    AsyncContextManager[Tuple[Dict[str, Any], AsyncIterator[bytes]]]
+]
+
 
 class HttpSessionInstance:
     """An HTTP session instance"""
@@ -41,12 +48,13 @@ class HttpSessionInstance:
         self.client = client
 
     async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
-        async with self.client as (response, body):
-            self.session._extract_cookies(response)
-            return response, body
+        response, body = await self.client.__aenter__()
+        self.session._extract_cookies(response)
+        return response, body
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        pass
+        await self.client.__aexit__(exc_type, exc_val, exc_tb)
+
 
 class HttpSession:
     """An HTTP Session"""
@@ -63,7 +71,7 @@ class HttpSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            protocols: Optional[List[str]] = None            
+            protocols: Optional[List[str]] = None
     ) -> None:
         self.url = url
         self.headers = headers or []
@@ -74,7 +82,7 @@ class HttpSession:
         self.cadata = cadata
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
-        self.cookies = extract_cookies(dict(), cookies or dict(), datetime.utcnow())
+        self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
         parsed_url = urlparse(url)
         self.scheme = parsed_url.scheme.encode('ascii')
         self.domain = get_authority(parsed_url).encode('ascii')
@@ -121,7 +129,8 @@ class HttpSession:
 
     def _extract_cookies(self, response: Dict[str, Any]) -> None:
         now = datetime.utcnow()
-        self.cookies = extract_cookies_from_response(self.cookies, response, now)
+        self.cookies = extract_cookies_from_response(
+            self.cookies, response, now)
 
     def _gather_cookies(
         self,

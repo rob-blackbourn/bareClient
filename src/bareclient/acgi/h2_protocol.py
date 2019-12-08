@@ -21,7 +21,7 @@ from baretypes import Header
 
 from .http_protocol import HttpProtocol
 from .utils import get_target, get_authority
-from .asyncio_events import MessageEvent, ResetEvent
+from .asyncio_events import ResetEvent
 
 
 class H2Protocol(HttpProtocol):
@@ -34,8 +34,8 @@ class H2Protocol(HttpProtocol):
         self.h2_state = h2.connection.H2Connection()
         self.window_update_event: Dict[int, ResetEvent] = {}
         self.initialized = False
-        self.connection_event: MessageEvent[Dict[str, Any]] = MessageEvent()
-        self.response_event: MessageEvent[Dict[str, Any]] = MessageEvent()
+        self.responses: asyncio.Queue = asyncio.Queue()
+        self.response_task: asyncio.Task = None
         self.pending: List[Task] = []
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
         self.h2_events: List[h2.events.Event] = []
@@ -57,33 +57,7 @@ class H2Protocol(HttpProtocol):
             raise RuntimeError(f'unknown request type: {message_type}')
 
     async def receive(self) -> Dict[str, Any]:
-
-        message = await self.connection_event.wait_with_message()
-        if message is not None:
-            return message
-
-        message = await self.response_event.wait_with_message()
-        if message is not None:
-            return message
-
-        while True:
-            event = await self._receive_event()
-            if isinstance(event, h2.events.DataReceived):
-                self.h2_state.acknowledge_received_data(
-                    event.flow_controlled_length, event.stream_id
-                )
-                return {
-                    'type': 'http.response.body',
-                    'body': event.data,
-                    'more_body': event.stream_ended is None,
-                    'stream_id': event.stream_id
-                }
-            elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
-                return {
-                    'type': 'http.stream.disconnect',
-                    'stream_id': event.stream_id
-                }
-        raise RuntimeError('Closed')
+        return await self.responses.get()
 
     async def _send_request(
             self,
@@ -100,7 +74,7 @@ class H2Protocol(HttpProtocol):
             message.get('headers', [])
         )
         self.window_update_event[stream_id] = ResetEvent()
-        self.connection_event.set_with_message({
+        await self.responses.put({
             'type': 'http.response.connection',
             'stream_id': stream_id
         })
@@ -111,10 +85,9 @@ class H2Protocol(HttpProtocol):
         self._create_task(
             self._send_request_data(stream_id, body, more_body)
         )
-        self._create_task(
-            self._receive_response()
-        )
-        self.on_close = functools.partial(self._response_closed, stream_id=stream_id)
+        self.response_task = asyncio.create_task(self._receive_response())
+        self.on_close = functools.partial(
+            self._response_closed, stream_id=stream_id)
 
     async def _send_request_body(
             self,
@@ -227,7 +200,7 @@ class H2Protocol(HttpProtocol):
             elif not name.startswith(b":"):
                 headers.append((name, value))
 
-        self.response_event.set_with_message({
+        await self.responses.put({
             'type': 'http.response',
             'acgi': {
                 'version': "1.0"
@@ -238,6 +211,26 @@ class H2Protocol(HttpProtocol):
             'more_body': event.stream_ended is None,
             'stream_id': event.stream_id
         })
+
+        is_connected = True
+        while is_connected:
+            event = await self._receive_event()
+            if isinstance(event, h2.events.DataReceived):
+                self.h2_state.acknowledge_received_data(
+                    event.flow_controlled_length, event.stream_id
+                )
+                await self.responses.put({
+                    'type': 'http.response.body',
+                    'body': event.data,
+                    'more_body': event.stream_ended is None,
+                    'stream_id': event.stream_id
+                })
+            elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
+                await self.responses.put({
+                    'type': 'http.stream.disconnect',
+                    'stream_id': event.stream_id
+                })
+                is_connected = False
 
     async def _receive_event(self) -> h2.events.Event:
         while not self.h2_events:
@@ -261,6 +254,13 @@ class H2Protocol(HttpProtocol):
 
     async def _response_closed(self, stream_id: int) -> None:
         del self.window_update_event[stream_id]
+
+        await self.response_task
+
+        while self.responses.qsize():
+            message = await self.responses.get()
+            if message['type'] == 'http.stream.disconnect':
+                is_done = True
 
         for task in self.pending:
             if not task.done():

@@ -1,18 +1,25 @@
 """Simple GET"""
 
 import asyncio
-from typing import List
-from baretypes import Header
+import logging
 
 from bareclient import HttpSession
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 async def main() -> None:
-    session = HttpSession('https://ugsb-rbla01.bhdgsystematic.com:9009')
-    headers = [(b'host', b'ugsb-rbla01.bhdgsystematic.com'), (b'connection', b'close')]
+    session = HttpSession(
+        'https://shadow.jetblack.net:9009',
+        capath='/etc/ssl/certs'
+    )
+    headers = [
+        (b'host', b'shadow.jetblack.net'),
+        (b'connection', b'close')
+    ]
     async with session.request('/empty', method='GET', headers=headers) as (response, body):
         print(response)
-        if response['status_code'] == 200:
+        if response['status_code'] == 204:
             async for part in body:
                 print(part)
 

@@ -12,6 +12,7 @@
       "aenter",
       "aexit",
       "alpn",
+      "bareutils",
       "bufsiz",
       "cadata",
       "capath"
