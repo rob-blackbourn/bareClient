@@ -29,24 +29,24 @@ The basic usage is to create an ``HttpClient``.
 .. code-block:: python
 
     import asyncio
+    from typing import List
+    from baretypes import Header
+
     from bareclient import HttpClient
-    import ssl
 
 
-    async def main(url, headers, ssl):
-        async with HttpClient(url, method='GET', headers=headers, ssl=ssl) as (response, body):
+    async def main(url: str, headers: List[Header]) -> None:
+        async with HttpClient(url, method='GET', headers=headers) as (response, body):
             print(response)
-            if response.status_code == 200:
+            if response['status_code'] == 200:
                 async for part in body:
                     print(part)
 
 
-    url = 'https://docs.python.org/3/library/cgi.html'
-    headers = [(b'host', b'docs.python.org'), (b'connection', b'close')]
-    ssl_context = ssl.SSLContext()
+    URL = 'https://docs.python.org/3/library/cgi.html'
+    HEADERS = [(b'host', b'docs.python.org'), (b'connection', b'close')]
 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(url, headers, ssl_context))
+    asyncio.run(main(URL, HEADERS))
 
 
 There is also an ``HttpSession`` for keep-alive connections.
