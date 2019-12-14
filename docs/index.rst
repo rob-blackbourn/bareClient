@@ -54,27 +54,35 @@ There is also an ``HttpSession`` for keep-alive connections.
 .. code-block:: python
 
     import asyncio
+    import logging
+
+    import bareutils.response_code as response_code
     from bareclient import HttpSession
-    import ssl
+
+    logging.basicConfig(level=logging.DEBUG)
 
 
-    async def main(url, headers, paths, ssl):
-        async with HttpSession(url, ssl=ssl) as requester:
-            for path in paths:
-                response, body = await requester.request(path, method='GET', headers=headers)
+    async def main() -> None:
+        session = HttpSession(
+            'https://shadow.jetblack.net:9009',
+            capath='/etc/ssl/certs'
+        )
+        headers = [
+            (b'host', b'shadow.jetblack.net'),
+            (b'connection', b'close')
+        ]
+        for path in ['/example1', '/example2', '/empty']:
+            async with session.request(path, method='GET', headers=headers) as (response, body):
                 print(response)
-                if response.status_code == 200:
-                    async for part in body:
-                        print(part)
+                if not response_code.is_successful(response['status_code']):
+                    print("failed")
+                else:
+                    if response['status_code'] == response_code.OK:
+                        async for part in body:
+                            print(part)
 
 
-    url = 'https://docs.python.org'
-    headers = [(b'host', b'docs.python.org'), (b'connection', b'keep-alive')]
-    paths = ['/3/library/cgi.html', '/3/library/urllib.parse.html']
-    ssl_context = ssl.SSLContext()
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(url, headers, paths, ssl_context))
+    asyncio.run(main())
 
 Finally there is a single helper function to get json.
 
