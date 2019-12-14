@@ -1,4 +1,4 @@
-"""The Client"""
+"""Connections"""
 
 from asyncio import AbstractEventLoop, open_connection
 import ssl
@@ -34,6 +34,7 @@ Application = Callable[
 
 DEFAULT_PROTOCOLS = ["h2", "http/1.1"]
 # DEFAULT_PROTOCOLS = ["http/1.1"]
+
 
 async def connect(
         url: str,
@@ -95,7 +96,8 @@ async def connect(
         ssl=ssl_context
     )
 
-    negotiated_protocol = get_negotiated_protocol(writer) if ssl_context else None
+    negotiated_protocol = get_negotiated_protocol(
+        writer) if ssl_context else None
 
     if negotiated_protocol == 'h2':
         http_protocol: HttpProtocol = H2Protocol(reader, writer)

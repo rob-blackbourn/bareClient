@@ -1,4 +1,4 @@
-"""The Client"""
+"""The HTTP Client"""
 
 from asyncio import AbstractEventLoop
 from typing import (

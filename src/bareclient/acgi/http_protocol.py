@@ -1,8 +1,9 @@
-"""The requester base class"""
+"""A handler for HTTP protocols"""
 
 from abc import ABCMeta, abstractmethod
 from asyncio import StreamReader, StreamWriter
 from typing import Any, Dict
+
 
 class HttpProtocol(metaclass=ABCMeta):
     """The base class for HTTP protocol handlers"""

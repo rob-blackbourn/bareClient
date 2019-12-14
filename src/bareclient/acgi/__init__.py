@@ -1,4 +1,4 @@
-"""ACGI"""
+"""ACGI exports"""
 
 from .connector import connect, ReceiveCallable, SendCallable
 

@@ -15,11 +15,14 @@
     "acgi",
     "aenter",
     "aexit",
+    "aiter",
     "alpn",
+    "anext",
     "bareutils",
     "bufsiz",
     "cadata",
     "capath",
+    "initialised",
     "qsize"
   ],
   "python.testing.pytestArgs": [

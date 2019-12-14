@@ -1,4 +1,4 @@
-"""Requesters"""
+"""A handler for the HTTP/1.1 protocol"""
 
 import asyncio
 from typing import (
@@ -13,6 +13,7 @@ import h11
 from .http_protocol import HttpProtocol
 from .utils import get_target
 from .asyncio_events import MessageEvent
+
 
 class H11Protocol(HttpProtocol):
     """An HTTP/1.1 protocol handler"""

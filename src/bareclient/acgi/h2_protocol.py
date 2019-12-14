@@ -1,4 +1,4 @@
-"""Requesters"""
+"""A handler for the HTTP/2 protocol"""
 
 import asyncio
 from asyncio import Task
