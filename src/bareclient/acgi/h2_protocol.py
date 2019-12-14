@@ -255,12 +255,10 @@ class H2Protocol(HttpProtocol):
     async def _response_closed(self, stream_id: int) -> None:
         del self.window_update_event[stream_id]
 
+        # Drain responses to allow the socket to close cleanly.
         await self.response_task
-
         while self.responses.qsize():
-            message = await self.responses.get()
-            if message['type'] == 'http.stream.disconnect':
-                is_done = True
+            await self.responses.get()
 
         for task in self.pending:
             if not task.done():

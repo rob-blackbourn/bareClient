@@ -1,26 +1,31 @@
 {
-    "editor.formatOnSave": true,
-    "python.pythonPath": ".venv/bin/python",
-    "python.linting.pylintUseMinimalCheckers": false,
-    "python.linting.pylintEnabled": true,
-    "python.linting.mypyEnabled": true,
-    "cSpell.words": [
-      "AESGCM",
-      "Decompressor",
-      "ECDHE",
-      "acgi",
-      "aenter",
-      "aexit",
-      "alpn",
-      "bareutils",
-      "bufsiz",
-      "cadata",
-      "capath"
-    ],
-    "python.testing.pytestArgs": [
-      "tests"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
-    "python.testing.pytestEnabled": true
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "editor.formatOnSave": true,
+  "python.pythonPath": ".venv/bin/python",
+  "python.linting.pylintUseMinimalCheckers": false,
+  "python.linting.pylintEnabled": true,
+  "python.linting.mypyEnabled": true,
+  "cSpell.words": [
+    "AESGCM",
+    "Decompressor",
+    "ECDHE",
+    "acgi",
+    "aenter",
+    "aexit",
+    "alpn",
+    "bareutils",
+    "bufsiz",
+    "cadata",
+    "capath",
+    "qsize"
+  ],
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true
 }

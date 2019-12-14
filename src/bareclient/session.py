@@ -41,15 +41,15 @@ class HttpSessionInstance:
 
     def __init__(
             self,
-            session: HttpSession,
-            client: HttpClient
+            client: HttpClient,
+            update_session: Callable[[Dict[str, Any]], None]
     ) -> None:
-        self.session = session
         self.client = client
+        self.update_session = update_session
 
     async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
         response, body = await self.client.__aenter__()
-        self.session._extract_cookies(response)
+        self.update_session(response)
         return response, body
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -95,6 +95,19 @@ class HttpSession:
             headers: Optional[List[Header]] = None,
             content: Optional[Content] = None
     ) -> HttpSessionInstance:
+        """Make an HTTP request
+
+        :param path: The path excluding the scheme and host part
+        :type path: str
+        :param method: The HTTP method, defaults to 'GET'
+        :type method: str, optional
+        :param headers: Optional headers, defaults to None
+        :type headers: Optional[List[Header]], optional
+        :param content: Optional content, defaults to None
+        :type content: Optional[Content], optional
+        :return: A context instance yielding the response and body.
+        :rtype: HttpSessionInstance
+        """
         combined_headers = self.headers
         if headers:
             combined_headers = combined_headers + headers
@@ -125,7 +138,7 @@ class HttpSession:
             protocols=self.protocols
         )
 
-        return HttpSessionInstance(self, client)
+        return HttpSessionInstance(client, self._extract_cookies)
 
     def _extract_cookies(self, response: Dict[str, Any]) -> None:
         now = datetime.utcnow()
@@ -133,10 +146,10 @@ class HttpSession:
             self.cookies, response, now)
 
     def _gather_cookies(
-        self,
-        scheme: bytes,
-        domain: bytes,
-        path: bytes
+            self,
+            scheme: bytes,
+            domain: bytes,
+            path: bytes
     ) -> bytes:
         now = datetime.utcnow()
         return gather_cookies(
