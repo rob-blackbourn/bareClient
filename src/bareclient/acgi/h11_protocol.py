@@ -76,6 +76,7 @@ class H11Protocol(HttpProtocol):
         await self.writer.drain()
         self._connection_event.set_with_message({
             'type': 'http.response.connection',
+            'http_version': 'h11',
             'stream_id': None
         })
 

@@ -76,6 +76,7 @@ class H2Protocol(HttpProtocol):
         self.window_update_event[stream_id] = ResetEvent()
         await self.responses.put({
             'type': 'http.response.connection',
+            'http_version': 'h2',
             'stream_id': stream_id
         })
 
