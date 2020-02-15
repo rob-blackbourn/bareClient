@@ -15,13 +15,10 @@ async def main(url: str) -> None:
     async with HttpClient(
             url,
             method='POST',
-            headers=[
-                (b'content-type', b'application/json'),
-                (b'content-length', str(len(body)).encode('ascii'))
-            ],
+            headers=[(b'content-type', b'application/json')],
             content=text_writer(body)
     ) as response:
         if response_code.is_successful(response['status_code']):
             print("OK")
 
-asyncio.run(main('http://localhost:9009/test/api/info'))
+asyncio.run(main('https://beast.jetblack.net:9009/test/api/info'))

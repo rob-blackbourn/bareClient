@@ -25,6 +25,39 @@ The `HttpClient` provides an async context yielding a response or type
 `Mapping[str, Any]` which loosely follows the semantics of ASGI message
 passing.
 
+## POST
+
+The following code demonstrates a simle `POST` request.
+
+```python
+import asyncio
+import json
+from bareutils import text_writer
+import bareutils.response_code as response_code
+
+from bareclient import HttpClient
+
+
+async def main(url: str) -> None:
+    obj = {'name': 'Rob'}
+    body = json.dumps(obj)
+
+    async with HttpClient(
+            url,
+            method='POST',
+            headers=[(b'content-type', b'application/json')],
+            content=text_writer(body)
+    ) as response:
+        if response_code.is_successful(response['status_code']):
+            print("OK")
+
+asyncio.run(main('http://localhost:9009/test/api/info'))
+```
+
+Note that the body content is provided with the `test_writer` utility which
+turns the payload into an async iterator.
+
+
 ## Request
 
 The request is specified in the arguments to `HttpClient`.

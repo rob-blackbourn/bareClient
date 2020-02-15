@@ -1,6 +1,6 @@
 # Welcome
 
-A simple asyncio http client.
+A simple asyncio http client support HTTP versions 1.0, 1.1 and 2.
 
 ## Description
 

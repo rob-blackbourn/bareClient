@@ -218,8 +218,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../.." title="Lightweight Asyncio HTTP Client" class="md-nav__link">
-      Lightweight Asyncio HTTP Client
+    <a href="../.." title="Welcome" class="md-nav__link">
+      Welcome
     </a>
   </li>
 
@@ -261,8 +261,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../../user-guide/usage/" title="Usage" class="md-nav__link">
-      Usage
+    <a href="../../user-guide/client/" title="Client" class="md-nav__link">
+      Client
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../user-guide/session/" title="Session" class="md-nav__link">
+      Session
     </a>
   </li>
 
@@ -1092,8 +1104,31 @@
 <a class="headerlink" href="#class-httpclient" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h4>
 <p>Initialise an HTTP client</p>
-<code class="autodoc-signature"><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">HttpClient</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">HttpClient</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">*</var><span class="autodoc-punctuation"> (optional)</span><p></p>
 <var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The HTTP method. Defaults to 'GET'.</p>
@@ -1139,8 +1174,29 @@ to None.</p>
 <a class="headerlink" href="#class-httpsession" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_1">Summary<a class="headerlink" href="#summary_1" title="Permanent link">&para;</a></h4>
 <p>Initialise an HTTP session</p>
-<code class="autodoc-signature"><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">HttpSession</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cookies</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">HttpSession</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cookies</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">*</var><span class="autodoc-punctuation"> (optional)</span><p></p>
 <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><p>The headers. Defaults to
@@ -1178,8 +1234,19 @@ Defaults to None.</p>
 <a class="headerlink" href="#method-httpsessionrequest" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_2">Summary<a class="headerlink" href="#summary_2" title="Permanent link">&para;</a></h4>
 <p>Make an HTTP request</p>
-<code class="autodoc-signature"><span class="autodoc-qualifier">HttpSession</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">request</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">path</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-qualifier">HttpSession</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">request</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">path</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">HttpSessionInstance</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">path</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The path excluding the scheme and host part</p>
 <var class="autodoc-varname">*</var><span class="autodoc-punctuation"> (optional)</span><p></p>
@@ -1214,8 +1281,8 @@ None. Defaults to None.</p>
 <p>
 <div class="autodoc-module">
 <h3 class="autodoc-title" id="module-bareclienthelpers">
-        <span class="autodoc-title-type">module </span><span class="autodoc-title-name">bareclient.helpers</span>
-    <a class="headerlink" href="#module-bareclienthelpers" title="Permanent link">&para;</a></h3>
+      <span class="autodoc-title-type">module </span><span class="autodoc-title-name">bareclient.helpers</span>
+  <a class="headerlink" href="#module-bareclienthelpers" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_3">Summary<a class="headerlink" href="#summary_3" title="Permanent link">&para;</a></h4>
 <p>Helpers</p>
 <div class="autodoc-attributes">
@@ -1233,8 +1300,23 @@ None. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientget" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_4">Summary<a class="headerlink" href="#summary_4" title="Permanent link">&para;</a></h4>
 <p>Issues a GET request</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">get</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">get</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
 <var class="autodoc-varname">*</var><span class="autodoc-punctuation"> (optional)</span><p></p>
@@ -1272,8 +1354,25 @@ certificates. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientget_json" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_5">Summary<a class="headerlink" href="#summary_5" title="Permanent link">&para;</a></h4>
 <p>Issues a GET request returning a JSON object</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">get_json</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">get_json</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">Any</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_4">Parameters<a class="headerlink" href="#parameters_4" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
 <var class="autodoc-varname">*</var><span class="autodoc-punctuation"> (optional)</span><p></p>
@@ -1313,8 +1412,25 @@ certificates. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientget_text" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_6">Summary<a class="headerlink" href="#summary_6" title="Permanent link">&para;</a></h4>
 <p>Issues a GET request returning a string</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">get_text</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">get_text</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">str</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_5">Parameters<a class="headerlink" href="#parameters_5" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
 <var class="autodoc-varname">*</var><span class="autodoc-punctuation"> (optional)</span><p></p>
@@ -1353,8 +1469,25 @@ certificates. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientpost" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_7">Summary<a class="headerlink" href="#summary_7" title="Permanent link">&para;</a></h4>
 <p>Issues a POST request</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">post</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">bytes</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">post</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">bytes</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_6">Parameters<a class="headerlink" href="#parameters_6" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
 <var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">bytes</span><span class="autodoc-punctuation"> (optional)</span><p>The body content</p>
@@ -1393,8 +1526,29 @@ certificates. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientpost_json" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_8">Summary<a class="headerlink" href="#summary_8" title="Permanent link">&para;</a></h4>
 <p>Issues a POST request with a JSON payload</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">post_json</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">obj</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">dumps</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[Any]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">post_json</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">obj</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">dumps</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[Any]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">Optional[Any]</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_7">Parameters<a class="headerlink" href="#parameters_7" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
 <var class="autodoc-varname">obj</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation"> (optional)</span><p>The JSON payload</p>
@@ -1437,8 +1591,27 @@ certificates. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientpost_text" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_9">Summary<a class="headerlink" href="#summary_9" title="Permanent link">&para;</a></h4>
 <p>Issues a POST request with a str body</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">post_text</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">text</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">post_text</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">text</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_8">Parameters<a class="headerlink" href="#parameters_8" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
 <var class="autodoc-varname">text</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p></p>
@@ -1478,8 +1651,29 @@ certificates. Defaults to None.</p>
 <a class="headerlink" href="#async-function-bareclientrequest" title="Permanent link">&para;</a></h3>
 <h4 class="autodoc-title" id="summary_10">Summary<a class="headerlink" href="#summary_10" title="Permanent link">&para;</a></h4>
 <p>Gets bytes from a url.</p>
-<code class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">request</var><span class="autodoc-punctuation">(</span><var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">*</var><span class="autodoc-punctuation">, </span><var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[bytes]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">, </span><var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">)</span></code>
-  <div class="autodoc-parameters">
+<div class="autodoc-signature"><span class="autodoc-keyword">async</span><span> </span><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">request</var><span class="autodoc-punctuation">(</span><br />
+<div class="autodoc-argument">
+        <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[bytes]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span></div>
+<span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
+<div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_9">Parameters<a class="headerlink" href="#parameters_9" title="Permanent link">&para;</a></h4>
 <var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url to get.</p>
 <var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The HTTP method (eg. 'GET', 'POST', etc).</p>
@@ -1547,7 +1741,7 @@ as a single chunk.. Defaults to -1.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../../user-guide/usage/" title="Usage" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../../user-guide/session/" title="Session" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1556,7 +1750,7 @@ as a single chunk.. Defaults to -1.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Usage
+                Session
               </span>
             </div>
           </a>

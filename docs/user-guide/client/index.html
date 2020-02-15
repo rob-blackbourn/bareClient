@@ -38,7 +38,7 @@
     
     
       
-        <title>Usage - bareClient</title>
+        <title>Client - bareClient</title>
       
     
     
@@ -81,7 +81,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#usage" tabindex="0" class="md-skip">
+      <a href="#client" tabindex="0" class="md-skip">
         Skip to content
       </a>
     
@@ -107,7 +107,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                Usage
+                Client
               
             </span>
           
@@ -218,8 +218,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../.." title="Lightweight Asyncio HTTP Client" class="md-nav__link">
-      Lightweight Asyncio HTTP Client
+    <a href="../.." title="Welcome" class="md-nav__link">
+      Welcome
     </a>
   </li>
 
@@ -271,10 +271,79 @@
       
     
     
-    <a href="./" title="Usage" class="md-nav__link md-nav__link--active">
-      Usage
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Client
+      </label>
+    
+    <a href="./" title="Client" class="md-nav__link md-nav__link--active">
+      Client
     </a>
     
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    GET
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post" class="md-nav__link">
+    POST
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request" class="md-nav__link">
+    Request
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response" class="md-nav__link">
+    Response
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../session/" title="Session" class="md-nav__link">
+      Session
+    </a>
   </li>
 
         
@@ -336,6 +405,50 @@
     
   
   
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get" class="md-nav__link">
+    GET
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post" class="md-nav__link">
+    POST
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#request" class="md-nav__link">
+    Request
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response" class="md-nav__link">
+    Response
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -347,79 +460,124 @@
               
                 
                 
-                <h1 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h1>
+                <h1 id="client">Client<a class="headerlink" href="#client" title="Permanent link">&para;</a></h1>
 <p>The basic usage is to create an <code>HttpClient</code>.</p>
+<h2 id="get">GET<a class="headerlink" href="#get" title="Permanent link">&para;</a></h2>
+<p>The following example demonstrates a simple <code>GET</code> request.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
-<span class="kn">from</span> <span class="nn">baretypes</span> <span class="kn">import</span> <span class="n">Header</span>
-
 <span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="n">HttpClient</span>
 
 
-<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">headers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Header</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;more_body&#39;</span><span class="p">]:</span>
             <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
 
-<span class="n">URL</span> <span class="o">=</span> <span class="s1">&#39;https://docs.python.org/3/library/cgi.html&#39;</span>
-<span class="n">HEADERS</span> <span class="o">=</span> <span class="kc">None</span>
-
-<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="n">HEADERS</span><span class="p">))</span>
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">&#39;https://docs.python.org/3/library/cgi.html&#39;</span><span class="p">))</span>
 </code></pre></div>
 
 
-<p>There is also an <code>HttpSession</code>.</p>
+<p>The <code>HttpClient</code> provides an async context yielding a response or type
+<code>Mapping[str, Any]</code> which loosely follows the semantics of ASGI message
+passing.</p>
+<h2 id="post">POST<a class="headerlink" href="#post" title="Permanent link">&para;</a></h2>
+<p>The following code demonstrates a simle <code>POST</code> request.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">bareutils</span> <span class="kn">import</span> <span class="n">text_writer</span>
 <span class="kn">import</span> <span class="nn">bareutils.response_code</span> <span class="k">as</span> <span class="nn">response_code</span>
-<span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="n">HttpSession</span>
 
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-
-
-<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">session</span> <span class="o">=</span> <span class="n">HttpSession</span><span class="p">(</span>
-        <span class="s1">&#39;https://shadow.jetblack.net:9009&#39;</span><span class="p">,</span>
-        <span class="n">capath</span><span class="o">=</span><span class="s1">&#39;/etc/ssl/certs&#39;</span>
-    <span class="p">)</span>
-    <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;shadow.jetblack.net&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;connection&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;close&#39;</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;/example1&#39;</span><span class="p">,</span> <span class="s1">&#39;/example2&#39;</span><span class="p">,</span> <span class="s1">&#39;/empty&#39;</span><span class="p">]:</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">response_code</span><span class="o">.</span><span class="n">OK</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;more_body&#39;</span><span class="p">]:</span>
-                    <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
-
-
-<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
-</code></pre></div>
-
-
-<p>Finally there is a single helper function to get json.</p>
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-
-<span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="n">get_json</span>
+<span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="n">HttpClient</span>
 
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get some JSON&quot;&quot;&quot;</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_json</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">[(</span><span class="sa">b</span><span class="s1">&#39;accept-encoding&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;gzip&#39;</span><span class="p">)])</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;Rob&#39;</span><span class="p">}</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span>
+            <span class="n">url</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="p">[(</span><span class="sa">b</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;application/json&#39;</span><span class="p">)],</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">text_writer</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">&#39;http://localhost:9009/test/api/info&#39;</span><span class="p">))</span>
+</code></pre></div>
 
 
-<span class="n">URL</span> <span class="o">=</span> <span class="s1">&#39;https://jsonplaceholder.typicode.com/todos/1&#39;</span>
+<p>Note that the body content is provided with the <code>test_writer</code> utility which
+turns the payload into an async iterator.</p>
+<h2 id="request">Request<a class="headerlink" href="#request" title="Permanent link">&para;</a></h2>
+<p>The request is specified in the arguments to <code>HttpClient</code>.</p>
+<p>The first argument is the <code>url</code>. The remaining are keyword arguments:</p>
+<p>Keyword arguments:</p>
+<ul>
+<li><strong><code>method</code></strong> (str, optional): The HTTP method. Defaults to 'GET'.</li>
+<li><strong><code>headers</code></strong> (Optional[List[Header]], optional): The headers. Defaults to
+    None.</li>
+<li><strong><code>content</code></strong> (Optional[Content], optional): The body content. Defaults to
+    None.</li>
+<li><strong><code>loop</code></strong> (Optional[AbstractEventLoop], optional): The optional asyncio
+    event loop. Defaults to None.</li>
+<li><strong><code>h11_bufsiz</code></strong> (int, optional): The HTTP/1 buffer size. Defaults to
+    8096.</li>
+<li><strong><code>cafile</code></strong> (Optional[str], optional): The path to a file of concatenated
+    CA certificates in PEM format. Defaults to None.</li>
+<li><strong><code>capath</code></strong> (Optional[str], optional): The path to a directory containing
+    several CA certificates in PEM format. Defaults to None.</li>
+<li><strong><code>cadata</code></strong> (Optional[str], optional): Either an ASCII string of one or
+    more PEM-encoded certificates or a bytes-like object of
+    DER-encoded certificates. Defaults to None.</li>
+<li><strong><code>decompressors</code></strong> (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+    The decompressors. Defaults to None.</li>
+<li><strong><code>protocols</code></strong> (Optional[List[str]], optional): The protocols. Defaults
+    to None.</li>
+</ul>
+<h2 id="response">Response<a class="headerlink" href="#response" title="Permanent link">&para;</a></h2>
+<p>The response is yielded in the <code>HttpClient</code> async context.</p>
+<p>Keys:</p>
+<ul>
+<li><strong><code>type</code></strong> (<em>Unicode string</em>) - Currently the only response is
+    <code>"http.response"</code>.</li>
+<li><strong><code>acgi["version"]</code></strong> (<em>Unicode string</em>) - Version of the ACGI spec.</li>
+<li><strong><code>http_version</code></strong> (<em>Unicode string</em>) - One of <code>"1.0"</code>, <code>"1.1"</code> or <code>"2"</code>.</li>
+<li><strong><code>stream_id</code></strong> (<em>int</em>) - The HTTP/2 stream id, otherwise None.</li>
+<li><strong><code>status_code</code></strong> (<em>int</em>) - The HTTP status code.</li>
+<li><strong><code>headers</code></strong> (<em>Iterable[[byte string, byte string]]</em>) - A iterable of [name,
+    value] two-item iterables, where name is the header name, and value is the
+    header value. Order must be preserved in the HTTP response. Header names
+    must be lowercased. Optional; defaults to an empty list. Pseudo headers
+    (present in HTTP/2 and HTTP/3) must not be present.</li>
+<li><strong><code>more_body</code></strong> (<em>bool</em>) - Signifies if the body has more content.</li>
+<li><strong><code>body</code></strong> (<em>AsyncIterable[byte string]</em>) - The body content.</li>
+</ul>
+<p>For the above request the response might look as follows:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;http.response&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;acgi&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">},</span> 
+    <span class="s1">&#39;http_version&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;stream_id&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;status_code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="s1">&#39;headers&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;text/html&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;content-length&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;53727&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;last-modified&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;Sat, 15 Feb 2020 0...26:32 GMT&#39;</span><span class="p">),</span>
+        <span class="o">...</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;more_body&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">async_generator</span> <span class="n">obj</span><span class="o">...</span><span class="mi">5</span><span class="n">ede8f320</span><span class="o">&gt;</span><span class="p">,</span> 
+<span class="p">}</span>
+</code></pre></div>
 
-<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="n">URL</span><span class="p">))</span>
+
+<h2 id="response-body">Response Body<a class="headerlink" href="#response-body" title="Permanent link">&para;</a></h2>
+<p>The response body (<code>response["body"]</code>) can be iterated over asynchronusly.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 </code></pre></div>
                 
                   
@@ -457,13 +615,13 @@
           </a>
         
         
-          <a href="../../api/bareclient/" title="bareclient" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../session/" title="Session" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                bareclient
+                Session
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

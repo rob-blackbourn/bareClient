@@ -17,7 +17,8 @@ nav:
     - index.md
     - User Guide:
           - user-guide/installation.md
-          - user-guide/usage.md
+          - user-guide/client.md
+          - user-guide/session.md
     - API:
           - bareclient: api/bareclient.md
 
