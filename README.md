@@ -6,10 +6,12 @@ The docs are [here](https://rob-blackbourn.github.io/bareClient/).
 
 ## Description
 
-This package provides the asyncio transport for [h11](https://h11.readthedocs.io/en/latest/index.html),
+This package provides the asyncio transport for
+[h11](https://h11.readthedocs.io/en/latest/index.html),
 and [h2](https://python-hyper.org/projects/h2/en/stable/).
 
-It makes little attempt to provide any helpful features.
+It makes little attempt to provide any helpful features which might do
+unnecessary work.
 
 ## Installation
 
@@ -25,31 +27,29 @@ The basic usage is to create an `HttpClient`.
 
 ```python
 import asyncio
+from typing import List, Optional
+from baretypes import Header
+
 from bareclient import HttpClient
-import ssl
 
 
-async def main(url, headers, ssl):
-    async with HttpClient(url, method='GET', headers=headers, ssl=ssl) as (response, body):
+async def main(url: str, headers: Optional[List[Header]]) -> None:
+    async with HttpClient(url, method='GET', headers=headers) as response:
         print(response)
-        if response.status_code == 200:
-            async for part in body():
+        if response['status_code'] == 200 and response['more_body']:
+            async for part in response['body']:
                 print(part)
 
 
-url = 'https://docs.python.org/3/library/cgi.html'
-headers = [(b'host', b'docs.python.org'), (b'connection', b'close')]
-ssl_context = ssl.SSLContext()
+URL = 'https://docs.python.org/3/library/cgi.html'
+HEADERS = None
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(url, headers, ssl_context))
+asyncio.run(main(URL, HEADERS))
 ```
 
-There is also an `HttpSession` for keep-alive connections.
+There is also an `HttpSession` for maintaining a session.
 
 ```python
-"""Simple GET"""
-
 import asyncio
 import logging
 
@@ -69,13 +69,13 @@ async def main() -> None:
         (b'connection', b'close')
     ]
     for path in ['/example1', '/example2', '/empty']:
-        async with session.request(path, method='GET', headers=headers) as (response, body):
+        async with session.request(path, method='GET', headers=headers) as response:
             print(response)
             if not response_code.is_successful(response['status_code']):
                 print("failed")
             else:
-                if response['status_code'] == response_code.OK:
-                    async for part in body:
+                if response['status_code'] == response_code.OK and response['more_body']:
+                    async for part in response['body']:
                         print(part)
 
 
@@ -85,19 +85,20 @@ asyncio.run(main())
 Finally there is a single helper function to get json.
 
 ```python
+"""Simple JSON"""
+
 import asyncio
-import ssl
+
 from bareclient import get_json
 
 
-async def main(url, ssl):
-    obj = await get_json(url, ssl=ssl)
+async def main(url: str) -> None:
+    """Get some JSON"""
+    obj = await get_json(url, headers=[(b'accept-encoding', b'gzip')])
     print(obj)
 
 
-url = 'https://jsonplaceholder.typicode.com/todos/1'
-ssl_context = ssl.SSLContext()
+URL = 'https://jsonplaceholder.typicode.com/todos/1'
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(url, ssl_context))
+asyncio.run(main(URL))
 ```

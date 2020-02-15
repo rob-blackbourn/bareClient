@@ -16,6 +16,6 @@ async def main(url: str, headers: Optional[List[Header]]) -> None:
 
 
 URL = 'https://docs.python.org/3/library/cgi.html'
-HEADERS = None  # [(b'host', b'docs.python.org'), (b'connection', b'close')]
+HEADERS = None
 
 asyncio.run(main(URL, HEADERS))
