@@ -95,7 +95,7 @@ class RequestHandlerInstance:
         message: Mapping[str, Any] = {
             'type': 'http.request',
             'url': self.url,
-            'method': 'GET',
+            'method': self.method,
             'headers': self.headers,
             'body': body,
             'more_body': more_body
