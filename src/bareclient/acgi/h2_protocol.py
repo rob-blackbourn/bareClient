@@ -11,7 +11,7 @@ from typing import (
     List,
     Optional
 )
-from urllib.parse import urlparse, ParseResult
+import urllib.parse
 
 import h2.connection
 import h2.events
@@ -29,13 +29,23 @@ class H2Protocol(HttpProtocol):
 
     READ_NUM_BYTES = 4096
 
-    def __init__(self, reader, writer):
+    def __init__(
+            self,
+            reader: asyncio.StreamReader,
+            writer: asyncio.StreamWriter
+    ) -> None:
+        """Initialise an HTTP/2 protocol
+
+        Args:
+            reader (asyncio.StreamReader): The reader
+            writer (asyncio.StreamWriter): The writer
+        """
         super().__init__(reader, writer)
         self.h2_state = h2.connection.H2Connection()
         self.window_update_event: Dict[int, ResetEvent] = {}
         self.initialized = False
         self.responses: asyncio.Queue = asyncio.Queue()
-        self.response_task: asyncio.Task = None
+        self.response_task: Optional[asyncio.Task] = None
         self.pending: List[Task] = []
         self.on_close: Optional[Callable[[], Awaitable[None]]] = None
         self.h2_events: List[h2.events.Event] = []
@@ -130,7 +140,7 @@ class H2Protocol(HttpProtocol):
 
     async def _send_headers(
             self,
-            url: ParseResult,
+            url: urllib.parse.ParseResult,
             method: str,
             headers: List[Header]
     ) -> int:
@@ -256,9 +266,10 @@ class H2Protocol(HttpProtocol):
         del self.window_update_event[stream_id]
 
         # Drain responses to allow the socket to close cleanly.
-        await self.response_task
-        while self.responses.qsize():
-            await self.responses.get()
+        if self.response_task is not None:
+            await self.response_task
+            while self.responses.qsize():
+                await self.responses.get()
 
         for task in self.pending:
             if not task.done():

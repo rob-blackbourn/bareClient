@@ -4,14 +4,12 @@ from asyncio import AbstractEventLoop, open_connection
 import ssl
 from typing import (
     Any,
-    AsyncIterator,
     Awaitable,
     Callable,
     Coroutine,
     Dict,
     List,
-    Optional,
-    Tuple
+    Optional
 )
 import urllib.parse
 from urllib.error import URLError
@@ -29,7 +27,7 @@ SendCallable = Callable[[Dict[str, Any]], Coroutine[Any, Any, None]]
 ReceiveCallable = Callable[[], Awaitable[Dict[str, Any]]]
 Application = Callable[
     [ReceiveCallable, SendCallable],
-    Coroutine[Any, Any, Tuple[Dict[str, Any], AsyncIterator[bytes]]]
+    Coroutine[Any, Any, Dict[str, Any]]
 ]
 
 DEFAULT_PROTOCOLS = ["h2", "http/1.1"]
@@ -46,7 +44,7 @@ async def connect(
         loop: Optional[AbstractEventLoop] = None,
         h11_bufsiz: int = 8192,
         protocols: Optional[List[str]] = None
-) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+) -> Dict[str, Any]:
     """Connect to the web server and run the application
 
     Args:
@@ -66,11 +64,10 @@ async def connect(
             Defaults to None.
 
     Raises:
-        URLError: Raise for an invalid url
+        URLError: Raised for an invalid url
 
     Returns:
-        Tuple[Dict[str, Any], AsyncIterator[bytes]]: The response message and an
-            async iterator to retrieve the body.
+        Dict[str, Any]: The response message.
     """
     if url.scheme == 'http':
         ssl_context: Optional[ssl.SSLContext] = None

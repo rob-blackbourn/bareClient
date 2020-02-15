@@ -91,12 +91,13 @@ async def request(
             cafile=cafile,
             capath=capath,
             cadata=cadata
-    ) as (response, body):
+    ) as response:
         if response['status_code'] < 200 or response['status_code'] >= 400:
             raise RuntimeError('Request failed')
         buf = b''
-        async for part in body:
-            buf += part
+        if response['more_body']:
+            async for part in response['body']:
+                buf += part
         return buf
 
 

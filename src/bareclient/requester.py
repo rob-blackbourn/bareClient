@@ -9,7 +9,6 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Tuple,
     Type
 )
 from baretypes import Header
@@ -69,7 +68,7 @@ class RequestHandlerInstance:
         self.receive = receive
         self.decompressors = decompressors
 
-    async def process(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+    async def process(self) -> Dict[str, Any]:
         """Process the request
 
         Returns:
@@ -124,19 +123,18 @@ class RequestHandlerInstance:
 
         response = await self.receive()
 
-        reader = self._make_body_reader(
-            response.get('more_body', False),
-            header.content_encoding(response['headers'])
-        )
+        response['body'] = self._make_body_reader(
+            response['headers']
+        ) if response['more_body'] else None
 
-        return response, reader
+        return response
 
     def _make_body_reader(
             self,
-            more_body: bool,
-            content_encoding: Optional[List[bytes]]
+            headers: List[Header]
     ) -> AsyncIterator[bytes]:
-        reader = self._body_reader(more_body)
+        reader = self._body_reader()
+        content_encoding = header.content_encoding(headers)
         if content_encoding:
             for encoding in content_encoding:
                 if encoding in self.decompressors:
@@ -144,7 +142,8 @@ class RequestHandlerInstance:
                     return compression_reader_adapter(reader, decompressor())
         return reader
 
-    async def _body_reader(self, more_body: bool) -> AsyncIterator[bytes]:
+    async def _body_reader(self) -> AsyncIterator[bytes]:
+        more_body = True
         while more_body:
             message = await self.receive()
             yield message.get('body', b'')
@@ -188,7 +187,7 @@ class RequestHandler:
             self,
             receive: ReceiveCallable,
             send: SendCallable
-    ) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+    ) -> Dict[str, Any]:
         """Call the request handle instance
 
         Args:
@@ -207,8 +206,8 @@ class RequestHandler:
             receive,
             self.decompressors
         )
-        response, body = await self.instance.process()
-        return response, body
+        response = await self.instance.process()
+        return response
 
     async def close(self):
         """Close the request"""

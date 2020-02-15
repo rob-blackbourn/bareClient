@@ -47,10 +47,10 @@ class HttpSessionInstance:
         self.client = client
         self.update_session = update_session
 
-    async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
-        response, body = await self.client.__aenter__()
+    async def __aenter__(self) -> Dict[str, Any]:
+        response = await self.client.__aenter__()
         self.update_session(response)
-        return response, body
+        return response
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)

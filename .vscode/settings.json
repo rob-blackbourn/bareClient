@@ -10,6 +10,7 @@
   "python.linting.mypyEnabled": true,
   "cSpell.words": [
     "AESGCM",
+    "ASGI",
     "Decompressor",
     "ECDHE",
     "SYSNAME",

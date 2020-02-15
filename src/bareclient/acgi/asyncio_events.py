@@ -5,6 +5,7 @@ from typing import Generic, Optional, TypeVar
 
 T = TypeVar('T')
 
+
 class MessageEvent(asyncio.Event, Generic[T]):
     """An event taking a message when set"""
 
@@ -13,10 +14,10 @@ class MessageEvent(asyncio.Event, Generic[T]):
         self.message: Optional[T] = None
 
     def set_with_message(self, message: Optional[T]) -> None:
-        """Set the event with a message dictionary
+        """Set the event with a value
 
-        :param message: The message dictionary
-        :type message: T
+        Args:
+            message (Optional[T]): The value to set
         """
         self.message = message
         super().set()
@@ -24,8 +25,8 @@ class MessageEvent(asyncio.Event, Generic[T]):
     async def wait_with_message(self) -> Optional[T]:
         """Wait for the event to be set, returning the message dictionary
 
-        :return: The message dictionary the event was set with
-        :rtype: Optional[T]
+        Returns:
+            Optional[T]: value the event was set with
         """
         await super().wait()
         message, self.message = self.message, None
@@ -36,5 +37,6 @@ class ResetEvent(asyncio.Event):
     """An event which automatically clears after being set"""
 
     def set(self) -> None:
+        """Sets then clears the event"""
         super().set()
         super().clear()

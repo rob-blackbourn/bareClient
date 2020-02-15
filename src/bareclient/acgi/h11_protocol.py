@@ -6,7 +6,6 @@ from typing import (
     Dict,
     Optional
 )
-from urllib.parse import urlparse
 
 import h11
 
@@ -18,7 +17,19 @@ from .asyncio_events import MessageEvent
 class H11Protocol(HttpProtocol):
     """An HTTP/1.1 protocol handler"""
 
-    def __init__(self, reader, writer, bufsiz):
+    def __init__(
+            self,
+            reader: asyncio.StreamReader,
+            writer: asyncio.StreamWriter,
+            bufsiz: int
+    ) -> None:
+        """Initialise an HTTP/1.1 protocol handler
+
+        Args:
+            reader (asyncio.StreamReader): The data reader
+            writer (asyncio.StreamWriter): The data writer
+            bufsiz (int): The buffer size used when receiving data.
+        """
         super().__init__(reader, writer)
         self._bufsiz = bufsiz
         self._h11_state = h11.Connection(our_role=h11.CLIENT)

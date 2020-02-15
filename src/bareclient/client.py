@@ -4,12 +4,10 @@ from asyncio import AbstractEventLoop
 import urllib.parse
 from typing import (
     Any,
-    AsyncIterator,
     Dict,
     List,
     Mapping,
     Optional,
-    Tuple,
     Type
 )
 
@@ -52,7 +50,7 @@ class HttpClient:
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
 
-    async def __aenter__(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
+    async def __aenter__(self) -> Dict[str, Any]:
         self.handler = RequestHandler(
             self.url,
             self.method,
@@ -60,7 +58,7 @@ class HttpClient:
             self.content,
             self.decompressors
         )
-        response, body = await connect(
+        response = await connect(
             self.url,
             self.handler,
             cafile=self.cafile,
@@ -70,7 +68,7 @@ class HttpClient:
             h11_bufsiz=self.h11_bufsiz,
             protocols=self.protocols
         )
-        return response, body
+        return response
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
         if self.handler is not None:

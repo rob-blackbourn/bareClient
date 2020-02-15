@@ -47,6 +47,7 @@ Sent from the ACGI to the client.
 * `status_code` (int) - The status code
 * `headers` (Iterable[[byte string, byte string]]) – An iterable of [name, value] two-item iterables, where name is the header name, and value is the header value. 
 * `more_body` (bool) - `True` if there is more body to read, otherwise `False`
+* `body` (AsyncGenerator[bytes]) - The body
 * `stream_id` (Optional[int]) - The stream id for the response for an h2 connection.
 
 ### Response Body

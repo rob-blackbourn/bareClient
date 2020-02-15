@@ -15,10 +15,9 @@ class HttpProtocol(metaclass=ABCMeta):
     ) -> None:
         """Initialise an HTTP protocol
 
-        :param reader: The reader
-        :type reader: StreamReader
-        :param writer: The writer
-        :type writer: StreamWriter
+        Args:
+            reader (StreamReader): The reader
+            writer (StreamWriter): The writer
         """
         self.reader = reader
         self.writer = writer
@@ -27,14 +26,14 @@ class HttpProtocol(metaclass=ABCMeta):
     async def send(self, message: Dict[str, Any]) -> None:
         """Send a message to the web server
 
-        :param message: The message to send
-        :type message: Dict[str, Any]
+        Args:
+            message (Dict[str, Any]): The message to send
         """
 
     @abstractmethod
     async def receive(self) -> Dict[str, Any]:
         """Receive a message from the web server
 
-        :return: The message sent
-        :rtype: Dict[str, Any]
+        Returns:
+            Dict[str, Any]: The message received
         """
