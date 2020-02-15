@@ -63,11 +63,9 @@ class H11Protocol(HttpProtocol):
         self._connect()
         self._is_initialised = True
 
-        url = urlparse(message['url'])
-
         request = h11.Request(
             method=message['method'],
-            target=get_target(url),
+            target=get_target(message['url']),
             headers=message.get('headers', [])
         )
 

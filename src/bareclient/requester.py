@@ -1,5 +1,6 @@
 """Requester"""
 
+import urllib.parse
 from typing import (
     Any,
     AsyncIterable,
@@ -23,10 +24,15 @@ from .constants import USER_AGENT
 from .utils import NullIter
 
 
-def _enrich_headers(headers: Optional[List[Header]]) -> List[Header]:
+def _enrich_headers(
+        url: urllib.parse.ParseResult,
+        headers: Optional[List[Header]]
+) -> List[Header]:
     headers = [] if not headers else list(headers)
     if not header.find(b'user-agent', headers):
         headers.append((b'user-agent', USER_AGENT))
+    if not header.find(b'host', headers):
+        headers.append((b'host', url.netloc.encode('ascii')))
     return headers
 
 
@@ -35,7 +41,7 @@ class RequestHandlerInstance:
 
     def __init__(
             self,
-            url: str,
+            url: urllib.parse.ParseResult,
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
@@ -46,7 +52,7 @@ class RequestHandlerInstance:
         """Initialise the request handler instance
 
         Args:
-            url (str): The url
+            url (urllib.parse.ParseResult): The parsed url
             method (str): The request method
             headers (Optional[List[Header]]): The request headers
             content (Optional[AsyncIterable[bytes]]): The content
@@ -57,7 +63,7 @@ class RequestHandlerInstance:
         """
         self.url = url
         self.method = method
-        self.headers = _enrich_headers(headers)
+        self.headers = _enrich_headers(url, headers)
         self.content = content
         self.send = send
         self.receive = receive
@@ -66,10 +72,10 @@ class RequestHandlerInstance:
     async def process(self) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
         """Process the request
 
-        :return: The response message an an async iterator to read the body
-        :rtype: Tuple[Dict[str, Any], AsyncIterator[bytes]]
+        Returns:
+            Tuple[Dict[str, Any], AsyncIterator[bytes]]: The response message
+                and an async iterator to read the body
         """
-
         content_list: List[bytes] = []
         content_iter: AsyncIterator[bytes] = (
             NullIter() if self.content is None else
@@ -156,7 +162,7 @@ class RequestHandler:
 
     def __init__(
             self,
-            url: str,
+            url: urllib.parse.ParseResult,
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
@@ -164,16 +170,12 @@ class RequestHandler:
     ) -> None:
         """Initialise the request handler
 
-        :param url: The url
-        :type url: str
-        :param method: The request method
-        :type method: str
-        :param headers: The headers
-        :type headers: Optional[List[Header]]
-        :param content: The request content
-        :type content: Optional[AsyncIterable[bytes]]
-        :param decompressors: The available decompressors
-        :type decompressors: Mapping[bytes, Type[Decompressor]]
+        Args:
+            url (urllib.parse.ParseResult): The parsed url
+            method (str): The request method
+            headers (Optional[List[Header]]): The headers
+            content (Optional[AsyncIterable[bytes]]): The request body
+            decompressors (Mapping[bytes, Type[Decompressor]]): The decompressors
         """
         self.url = url
         self.method = method
@@ -189,12 +191,12 @@ class RequestHandler:
     ) -> Tuple[Dict[str, Any], AsyncIterator[bytes]]:
         """Call the request handle instance
 
-        :param receive: The function to receive data
-        :type receive: ReceiveCallable
-        :param send: The function to send data
-        :type send: SendCallable
-        :return: The response message and an async iterator to read the body
-        :rtype: Tuple[Dict[str, Any], AsyncIterator[bytes]]
+        Args:
+            receive (ReceiveCallable): The function to receive data
+            send (SendCallable): The function to send data
+
+        Returns:
+            Tuple[Dict[str, Any], AsyncIterator[bytes]]: [description]
         """
         self.instance = RequestHandlerInstance(
             self.url,

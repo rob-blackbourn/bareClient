@@ -1,6 +1,7 @@
 """The HTTP Client"""
 
 from asyncio import AbstractEventLoop
+import urllib.parse
 from typing import (
     Any,
     AsyncIterator,
@@ -38,7 +39,7 @@ class HttpClient:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Optional[List[str]] = None
     ) -> None:
-        self.url = url
+        self.url = urllib.parse.urlparse(url)
         self.method = method
         self.headers = headers
         self.content = content

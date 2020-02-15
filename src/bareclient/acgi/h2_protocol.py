@@ -67,9 +67,8 @@ class H2Protocol(HttpProtocol):
         if not self.initialized:
             self._initiate_connection()
 
-        url = urlparse(message['url'])
         stream_id = await self._send_headers(
-            url,
+            message['url'],
             message['method'],
             message.get('headers', [])
         )
