@@ -2,6 +2,8 @@
 
 A simple asyncio http client.
 
+The docs are [here](https://rob-blackbourn.github.io/bareClient/).
+
 ## Description
 
 This package provides the asyncio transport for [h11](https://h11.readthedocs.io/en/latest/index.html),
