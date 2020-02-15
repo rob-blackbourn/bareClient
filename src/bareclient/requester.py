@@ -5,7 +5,6 @@ from typing import (
     Any,
     AsyncIterable,
     AsyncIterator,
-    Dict,
     List,
     Mapping,
     Optional,
@@ -68,11 +67,11 @@ class RequestHandlerInstance:
         self.receive = receive
         self.decompressors = decompressors
 
-    async def process(self) -> Dict[str, Any]:
+    async def process(self) -> Mapping[str, Any]:
         """Process the request
 
         Returns:
-            Tuple[Dict[str, Any], AsyncIterator[bytes]]: The response message
+            Mapping[str, Any]: The response message
                 and an async iterator to read the body
         """
         content_list: List[bytes] = []
@@ -90,7 +89,7 @@ class RequestHandlerInstance:
         body = content_list.pop(0) if content_list else b''
         more_body = len(content_list) > 0
 
-        message: Dict[str, Any] = {
+        message: Mapping[str, Any] = {
             'type': 'http.request',
             'url': self.url,
             'method': 'GET',
@@ -121,7 +120,7 @@ class RequestHandlerInstance:
             }
             await self.send(message)
 
-        response = await self.receive()
+        response = dict(await self.receive())
 
         response['body'] = self._make_body_reader(
             response['headers']
@@ -187,7 +186,7 @@ class RequestHandler:
             self,
             receive: ReceiveCallable,
             send: SendCallable
-    ) -> Dict[str, Any]:
+    ) -> Mapping[str, Any]:
         """Call the request handle instance
 
         Args:
@@ -195,7 +194,7 @@ class RequestHandler:
             send (SendCallable): The function to send data
 
         Returns:
-            Tuple[Dict[str, Any], AsyncIterator[bytes]]: [description]
+            Mapping[str, Any]: [description]
         """
         self.instance = RequestHandlerInstance(
             self.url,

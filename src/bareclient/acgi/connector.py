@@ -7,8 +7,8 @@ from typing import (
     Awaitable,
     Callable,
     Coroutine,
-    Dict,
     List,
+    Mapping,
     Optional
 )
 import urllib.parse
@@ -23,11 +23,11 @@ from .http_protocol import HttpProtocol
 from .h11_protocol import H11Protocol
 from .h2_protocol import H2Protocol
 
-SendCallable = Callable[[Dict[str, Any]], Coroutine[Any, Any, None]]
-ReceiveCallable = Callable[[], Awaitable[Dict[str, Any]]]
+SendCallable = Callable[[Mapping[str, Any]], Coroutine[Any, Any, None]]
+ReceiveCallable = Callable[[], Awaitable[Mapping[str, Any]]]
 Application = Callable[
     [ReceiveCallable, SendCallable],
-    Coroutine[Any, Any, Dict[str, Any]]
+    Coroutine[Any, Any, Mapping[str, Any]]
 ]
 
 DEFAULT_PROTOCOLS = ["h2", "http/1.1"]
@@ -44,7 +44,7 @@ async def connect(
         loop: Optional[AbstractEventLoop] = None,
         h11_bufsiz: int = 8192,
         protocols: Optional[List[str]] = None
-) -> Dict[str, Any]:
+) -> Mapping[str, Any]:
     """Connect to the web server and run the application
 
     Args:
@@ -67,7 +67,7 @@ async def connect(
         URLError: Raised for an invalid url
 
     Returns:
-        Dict[str, Any]: The response message.
+        Mapping[str, Any]: The response message.
     """
     if url.scheme == 'http':
         ssl_context: Optional[ssl.SSLContext] = None

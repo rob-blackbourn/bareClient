@@ -7,8 +7,9 @@ from typing import (
     Any,
     Awaitable,
     Callable,
-    Dict,
     List,
+    Mapping,
+    MutableMapping,
     Optional
 )
 import urllib.parse
@@ -42,7 +43,7 @@ class H2Protocol(HttpProtocol):
         """
         super().__init__(reader, writer)
         self.h2_state = h2.connection.H2Connection()
-        self.window_update_event: Dict[int, ResetEvent] = {}
+        self.window_update_event: MutableMapping[int, ResetEvent] = {}
         self.initialized = False
         self.responses: asyncio.Queue = asyncio.Queue()
         self.response_task: Optional[asyncio.Task] = None
@@ -52,8 +53,8 @@ class H2Protocol(HttpProtocol):
 
     async def send(
             self,
-            message: Dict[str, Any]
-    ):
+            message: Mapping[str, Any]
+    ) -> None:
         message_type: str = message['type']
 
         if message_type == 'http.request':
@@ -66,12 +67,12 @@ class H2Protocol(HttpProtocol):
         else:
             raise RuntimeError(f'unknown request type: {message_type}')
 
-    async def receive(self) -> Dict[str, Any]:
+    async def receive(self) -> Mapping[str, Any]:
         return await self.responses.get()
 
     async def _send_request(
             self,
-            message: Dict[str, Any]
+            message: Mapping[str, Any]
     ) -> None:
         # Start sending the request.
         if not self.initialized:
@@ -101,7 +102,7 @@ class H2Protocol(HttpProtocol):
 
     async def _send_request_body(
             self,
-            message: Dict[str, Any]
+            message: Mapping[str, Any]
     ) -> None:
         await self._send_request_data(
             message['stream_id'],

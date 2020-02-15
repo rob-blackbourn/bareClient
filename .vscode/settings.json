@@ -25,6 +25,7 @@
     "cadata",
     "capath",
     "initialised",
+    "pytest",
     "qsize",
     "uname"
   ],

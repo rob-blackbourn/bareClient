@@ -1,6 +1,5 @@
 """Utilities"""
 
-import collections.abc
 from datetime import datetime
 from typing import Any, Dict, Generic, List, Mapping, Tuple, TypeVar
 
@@ -20,20 +19,6 @@ class NullIter(Generic[T]):
         raise StopAsyncIteration
 
 
-def deep_update(source, overrides):
-    """
-    Update a nested dictionary or similar mapping.
-    Modify ``source`` in place.
-    """
-    for key, value in overrides.items():
-        if isinstance(value, collections.abc.Mapping) and value:
-            returned = deep_update(source.get(key, {}), value)
-            source[key] = returned
-        else:
-            source[key] = overrides[key]
-    return source
-
-
 Cookie = Dict[str, Any]
 CookieKey = Tuple[bytes, bytes, bytes]
 CookieCache = Dict[CookieKey, Cookie]
@@ -41,19 +26,18 @@ CookieCache = Dict[CookieKey, Cookie]
 
 def extract_cookies_from_response(
         cookie_cache: CookieCache,
-        response: Dict[str, Any],
+        response: Mapping[str, Any],
         now: datetime
 ) -> CookieCache:
     """Extract cookies from the response
 
-    :param cookie_cache: The cookie cache
-    :type cookie_cache: CookieCache
-    :param response: The response
-    :type response: Dict[str, Any]
-    :param now: The current time
-    :type now: datetime
-    :return: The updated cookie cache
-    :rtype: CookieCache
+    Args:
+        cookie_cache (CookieCache): The cookie cache
+        response (Mapping[str, Any]): The response
+        now (datetime): The current time
+
+    Returns:
+        CookieCache: The updated cookie cache
     """
     header_cookies = header.set_cookie(response['headers'])
     return extract_cookies(cookie_cache, header_cookies, now)
@@ -66,14 +50,13 @@ def extract_cookies(
 ) -> CookieCache:
     """Extract cookies from the headers
 
-    :param cookie_cache: The cookie cache
-    :type cookie_cache: CookieCache
-    :param header_cookies: The headers
-    :type header_cookies: Mapping[bytes, List[Dict[str, Any]]]
-    :param now: The current time
-    :type now: datetime
-    :return: The updated cookie cache
-    :rtype: CookieCache
+    Args:
+        cookie_cache (CookieCache): The cookie cache
+        header_cookies (Mapping[bytes, List[Dict[str, Any]]]): The headers
+        now (datetime): The current time
+
+    Returns:
+        CookieCache: The updated cookie cache
     """
     current_cookies = {
         key: cookie
@@ -106,18 +89,15 @@ def gather_cookies(
 ) -> bytes:
     """Gather the cookies from the cookie cache
 
-    :param cookie_cache: The cookie cache
-    :type cookie_cache: CookieCache
-    :param request_scheme: The request scheme
-    :type request_scheme: bytes
-    :param request_domain: The request domain
-    :type request_domain: bytes
-    :param request_path: The request path
-    :type request_path: bytes
-    :param now: The current time
-    :type now: datetime
-    :return: The cookie header content
-    :rtype: bytes
+    Args:
+        cookie_cache (CookieCache): The cookie cache
+        request_scheme (bytes): The request scheme
+        request_domain (bytes): The request domain
+        request_path (bytes): The request path
+        now (datetime): The current time
+
+    Returns:
+        bytes: The cookie header content
     """
     cookies: Dict[bytes, Cookie] = {}
     for key, cookie in cookie_cache.items():

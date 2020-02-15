@@ -7,13 +7,10 @@ from datetime import datetime
 from typing import (
     Any,
     AsyncContextManager,
-    AsyncIterator,
     Callable,
-    Dict,
     List,
     Mapping,
     Optional,
-    Tuple,
     Type
 )
 from urllib.parse import urlparse
@@ -32,7 +29,7 @@ from .acgi.utils import get_authority
 
 HttpClientFactory = Callable[
     [],
-    AsyncContextManager[Tuple[Dict[str, Any], AsyncIterator[bytes]]]
+    AsyncContextManager[Mapping[str, Any]]
 ]
 
 
@@ -42,12 +39,19 @@ class HttpSessionInstance:
     def __init__(
             self,
             client: HttpClient,
-            update_session: Callable[[Dict[str, Any]], None]
+            update_session: Callable[[Mapping[str, Any]], None]
     ) -> None:
+        """Initialise an HTTP session instance.
+
+        Args:
+            client (HttpClient): The HTTP client
+            update_session (Callable[[Mapping[str, Any]], None]): A function to
+                update the session.
+        """
         self.client = client
         self.update_session = update_session
 
-    async def __aenter__(self) -> Dict[str, Any]:
+    async def __aenter__(self) -> Mapping[str, Any]:
         response = await self.client.__aenter__()
         self.update_session(response)
         return response
@@ -73,6 +77,31 @@ class HttpSession:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Optional[List[str]] = None
     ) -> None:
+        """Initialise an HTTP session
+
+        Args:
+            url (str): The url
+            headers (Optional[List[Header]], optional): The headers. Defaults to
+                None.
+            cookies (Optional[Mapping[bytes, List[Cookie]]], optional): The
+                cookies. Defaults to None.
+            loop (Optional[AbstractEventLoop], optional): The asyncio event
+                loop. Defaults to None.
+            h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to 8096.
+            loop (Optional[AbstractEventLoop], optional): The optional asyncio
+                event loop.. Defaults to None.
+            cafile (Optional[str], optional): The path to a file of concatenated
+                CA certificates in PEM format. Defaults to None.
+            capath (Optional[str], optional): The path to a directory containing
+                several CA certificates in PEM format. Defaults to None.
+            cadata (Optional[str], optional): Either an ASCII string of one or
+                more PEM-encoded certificates or a bytes-like object of
+                DER-encoded certificates. Defaults to None.
+            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+                The decompressors. Defaults to None.
+            protocols (Optional[List[str]], optional): The list of protocols.
+                Defaults to None.
+        """
         self.url = url
         self.headers = headers or []
         self.loop = loop
@@ -97,16 +126,17 @@ class HttpSession:
     ) -> HttpSessionInstance:
         """Make an HTTP request
 
-        :param path: The path excluding the scheme and host part
-        :type path: str
-        :param method: The HTTP method, defaults to 'GET'
-        :type method: str, optional
-        :param headers: Optional headers, defaults to None
-        :type headers: Optional[List[Header]], optional
-        :param content: Optional content, defaults to None
-        :type content: Optional[Content], optional
-        :return: A context instance yielding the response and body.
-        :rtype: HttpSessionInstance
+        Args:
+            path (str): The path excluding the scheme and host part
+            method (str, optional): The HTTP method, defaults to 'GET'. Defaults
+                to 'GET'.
+            headers (Optional[List[Header]], optional): Optional headers.
+                Defaults to None.
+            content (Optional[Content], optional): Optional content, defaults to
+                None. Defaults to None.
+
+        Returns:
+            HttpSessionInstance: A context instance yielding the response and body
         """
         combined_headers = self.headers
         if headers:
@@ -140,7 +170,7 @@ class HttpSession:
 
         return HttpSessionInstance(client, self._extract_cookies)
 
-    def _extract_cookies(self, response: Dict[str, Any]) -> None:
+    def _extract_cookies(self, response: Mapping[str, Any]) -> None:
         now = datetime.utcnow()
         self.cookies = extract_cookies_from_response(
             self.cookies, response, now)

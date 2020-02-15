@@ -2,7 +2,7 @@
 
 from abc import ABCMeta, abstractmethod
 from asyncio import StreamReader, StreamWriter
-from typing import Any, Dict
+from typing import Any, Mapping
 
 
 class HttpProtocol(metaclass=ABCMeta):
@@ -23,17 +23,17 @@ class HttpProtocol(metaclass=ABCMeta):
         self.writer = writer
 
     @abstractmethod
-    async def send(self, message: Dict[str, Any]) -> None:
+    async def send(self, message: Mapping[str, Any]) -> None:
         """Send a message to the web server
 
         Args:
-            message (Dict[str, Any]): The message to send
+            message (Mapping[str, Any]): The message to send
         """
 
     @abstractmethod
-    async def receive(self) -> Dict[str, Any]:
+    async def receive(self) -> Mapping[str, Any]:
         """Receive a message from the web server
 
         Returns:
-            Dict[str, Any]: The message received
+            Mapping[str, Any]: The message received
         """

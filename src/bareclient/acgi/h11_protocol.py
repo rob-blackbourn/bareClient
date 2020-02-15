@@ -3,7 +3,7 @@
 import asyncio
 from typing import (
     Any,
-    Dict,
+    Mapping,
     Optional
 )
 
@@ -12,6 +12,8 @@ import h11
 from .http_protocol import HttpProtocol
 from .utils import get_target
 from .asyncio_events import MessageEvent
+
+MappingMessageEvent = MessageEvent[Mapping[str, Any]]
 
 
 class H11Protocol(HttpProtocol):
@@ -34,8 +36,8 @@ class H11Protocol(HttpProtocol):
         self._bufsiz = bufsiz
         self._h11_state = h11.Connection(our_role=h11.CLIENT)
         self._is_initialised = False
-        self._connection_event: MessageEvent[Dict[str, Any]] = MessageEvent()
-        self._response_event: MessageEvent[Dict[str, Any]] = MessageEvent()
+        self._connection_event: MappingMessageEvent = MessageEvent()
+        self._response_event: MappingMessageEvent = MessageEvent()
         self._is_message_ended = True
 
     def _connect(self) -> None:
@@ -43,7 +45,7 @@ class H11Protocol(HttpProtocol):
             self._h11_state.start_next_cycle()
         self._is_message_ended = False
 
-    async def send(self, message: Dict[str, Any]) -> None:
+    async def send(self, message: Mapping[str, Any]) -> None:
 
         request_type: str = message['type']
 
@@ -56,7 +58,7 @@ class H11Protocol(HttpProtocol):
         else:
             raise Exception(f'unknown request type: {request_type}')
 
-    async def receive(self) -> Dict[str, Any]:
+    async def receive(self) -> Mapping[str, Any]:
 
         message = await self._connection_event.wait_with_message()
         if message is not None:
@@ -69,7 +71,7 @@ class H11Protocol(HttpProtocol):
         message = await self._receive_body_event()
         return message
 
-    async def _send_request(self, message: Dict[str, Any]) -> None:
+    async def _send_request(self, message: Mapping[str, Any]) -> None:
 
         self._connect()
         self._is_initialised = True
@@ -94,7 +96,7 @@ class H11Protocol(HttpProtocol):
         await self._send_request_data(body, more_body)
         asyncio.create_task(self._receive_response())
 
-    async def _send_request_body(self, message: Dict[str, Any]) -> None:
+    async def _send_request_body(self, message: Mapping[str, Any]) -> None:
         await self._send_request_data(
             message.get('body', b''),
             message.get('more_body', False)
@@ -154,7 +156,7 @@ class H11Protocol(HttpProtocol):
         self.writer.close()
         await self.writer.wait_closed()
 
-    async def _receive_body_event(self) -> Dict[str, Any]:
+    async def _receive_body_event(self) -> Mapping[str, Any]:
         while True:
             event = self._h11_state.next_event()
             if event is h11.NEED_DATA:

@@ -4,7 +4,6 @@ from asyncio import AbstractEventLoop
 import urllib.parse
 from typing import (
     Any,
-    Dict,
     List,
     Mapping,
     Optional,
@@ -37,6 +36,31 @@ class HttpClient:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Optional[List[str]] = None
     ) -> None:
+        """Initialise an HTTP client
+
+        Args:
+            url (str): The url
+            method (str, optional): The HTTP method. Defaults to 'GET'.
+            headers (Optional[List[Header]], optional): The headers. Defaults to
+                None.
+            content (Optional[Content], optional): The body content. Defaults to
+                None.
+            loop (Optional[AbstractEventLoop], optional): The optional asyncio
+                event loop. Defaults to None.
+            h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to
+                8096.
+            cafile (Optional[str], optional): The path to a file of concatenated
+                CA certificates in PEM format. Defaults to None.
+            capath (Optional[str], optional): The path to a directory containing
+                several CA certificates in PEM format. Defaults to None.
+            cadata (Optional[str], optional): Either an ASCII string of one or
+                more PEM-encoded certificates or a bytes-like object of
+                DER-encoded certificates. Defaults to None.
+            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+                The decompressors. Defaults to None.
+            protocols (Optional[List[str]], optional): The protocols. Defaults
+                to None.
+        """
         self.url = urllib.parse.urlparse(url)
         self.method = method
         self.headers = headers
@@ -50,7 +74,7 @@ class HttpClient:
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
 
-    async def __aenter__(self) -> Dict[str, Any]:
+    async def __aenter__(self) -> Mapping[str, Any]:
         self.handler = RequestHandler(
             self.url,
             self.method,
