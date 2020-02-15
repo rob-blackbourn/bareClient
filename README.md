@@ -1,6 +1,6 @@
 # bareClient
 
-A simple asyncio http client.
+A simple asyncio http client supporting HTTP versions 1.0, 1.1 and 2.
 
 The docs are [here](https://rob-blackbourn.github.io/bareClient/).
 
