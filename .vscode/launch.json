@@ -9,10 +9,10 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Simple Get H2",
+            "name": "Simple Get",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/demos/simple_get_h2.py",
+            "program": "${workspaceFolder}/demos/simple_get.py",
             "console": "integratedTerminal",
             "justMyCode": false
         },
