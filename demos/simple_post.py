@@ -1,23 +1,27 @@
-""" A simple post example"""
+"""Simple POST"""
 
 import asyncio
-from typing import Optional
+import json
+from bareutils import text_writer
+import bareutils.response_code as response_code
 
-from bareclient import post_json
-
-
-async def main(url: str, cafile: Optional[str] = None) -> None:
-    """POST some data"""
-    obj = await post_json(
-        url,
-        {'title': 'A job'},
-        headers=[(b'accept-encoding', b'gzip')],
-        cafile=cafile
-    )
-    print(obj)
+from bareclient import HttpClient
 
 
-URL = 'https://jsonplaceholder.typicode.com/todos'
+async def main(url: str) -> None:
+    obj = {'name': 'Rob'}
+    body = json.dumps(obj)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(URL))
+    async with HttpClient(
+            url,
+            method='POST',
+            headers=[
+                (b'content-type', b'application/json'),
+                (b'content-length', str(len(body)).encode('ascii'))
+            ],
+            content=text_writer(body)
+    ) as response:
+        if response_code.is_successful(response['status_code']):
+            print("OK")
+
+asyncio.run(main('http://localhost:9009/test/api/info'))

@@ -17,6 +17,14 @@
             "justMyCode": false
         },
         {
+            "name": "Simple POST",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demos/simple_post.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
             "name": "Simple JSON",
             "type": "python",
             "request": "launch",
