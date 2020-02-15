@@ -71,8 +71,7 @@ class RequestHandlerInstance:
         """Process the request
 
         Returns:
-            Mapping[str, Any]: The response message
-                and an async iterator to read the body
+            Mapping[str, Any]: The response message.
         """
         content_list: List[bytes] = []
         content_iter: AsyncIterator[bytes] = (

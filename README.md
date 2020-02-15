@@ -85,8 +85,6 @@ asyncio.run(main())
 Finally there is a single helper function to get json.
 
 ```python
-"""Simple JSON"""
-
 import asyncio
 
 from bareclient import get_json
