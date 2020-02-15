@@ -24,13 +24,19 @@ from .utils import NullIter
 
 def _enrich_headers(
         url: urllib.parse.ParseResult,
-        headers: Optional[List[Header]]
+        headers: Optional[List[Header]],
+        content: Optional[AsyncIterable[bytes]]
 ) -> List[Header]:
     headers = [] if not headers else list(headers)
     if not header.find(b'user-agent', headers):
         headers.append((b'user-agent', USER_AGENT))
     if not header.find(b'host', headers):
         headers.append((b'host', url.netloc.encode('ascii')))
+    if content and not (
+            header.find(b'content-length', headers)
+            or header.find(b'transfer-encoding', headers)
+    ):
+        headers.append((b'transfer-encoding', b'chunked'))
     return headers
 
 
@@ -61,7 +67,7 @@ class RequestHandlerInstance:
         """
         self.url = url
         self.method = method
-        self.headers = _enrich_headers(url, headers)
+        self.headers = _enrich_headers(url, headers, content)
         self.content = content
         self.send = send
         self.receive = receive
