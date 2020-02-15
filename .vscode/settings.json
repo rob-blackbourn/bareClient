@@ -12,6 +12,7 @@
     "AESGCM",
     "Decompressor",
     "ECDHE",
+    "SYSNAME",
     "acgi",
     "aenter",
     "aexit",
@@ -23,7 +24,8 @@
     "cadata",
     "capath",
     "initialised",
-    "qsize"
+    "qsize",
+    "uname"
   ],
   "python.testing.pytestArgs": [
     "tests"

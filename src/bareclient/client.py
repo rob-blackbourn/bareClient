@@ -12,23 +12,16 @@ from typing import (
     Type
 )
 
-from bareutils.compression import (
-    make_gzip_decompressobj,
-    make_deflate_decompressobj,
-    Decompressor
-)
+from bareutils.compression import Decompressor
 from baretypes import Header, Content
+
 from .requester import RequestHandler
 from .acgi import connect
-
-DEFAULT_DECOMPRESSORS = {
-    b'gzip': make_gzip_decompressobj,
-    b'deflate': make_deflate_decompressobj
-}
+from .constants import DEFAULT_DECOMPRESSORS
 
 
 class HttpClient:
-    """An http client"""
+    """An HTTP client"""
 
     def __init__(
             self,

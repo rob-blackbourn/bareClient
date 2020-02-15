@@ -19,7 +19,15 @@ from bareutils.compression import (
 import bareutils.header as header
 
 from .acgi import ReceiveCallable, SendCallable
+from .constants import USER_AGENT
 from .utils import NullIter
+
+
+def _enrich_headers(headers: Optional[List[Header]]) -> List[Header]:
+    headers = [] if not headers else list(headers)
+    if not header.find(b'user-agent', headers):
+        headers.append((b'user-agent', USER_AGENT))
+    return headers
 
 
 class RequestHandlerInstance:
@@ -37,24 +45,19 @@ class RequestHandlerInstance:
     ) -> None:
         """Initialise the request handler instance
 
-        :param url: The url
-        :type url: str
-        :param method: The request method
-        :type method: str
-        :param headers: The headers
-        :type headers: Optional[List[Header]]
-        :param content: The content
-        :type content: Optional[AsyncIterable[bytes]]
-        :param send: The function to send data
-        :type send: SendCallable
-        :param receive: The function to receive data
-        :type receive: ReceiveCallable
-        :param decompressors: The available decompressors
-        :type decompressors: Mapping[bytes, Type[Decompressor]]
+        Args:
+            url (str): The url
+            method (str): The request method
+            headers (Optional[List[Header]]): The request headers
+            content (Optional[AsyncIterable[bytes]]): The content
+            send (SendCallable): The function to sed the data
+            receive (ReceiveCallable): The function to receive the data
+            decompressors (Mapping[bytes, Type[Decompressor]]): The available
+                decompressors
         """
         self.url = url
         self.method = method
-        self.headers = headers or []
+        self.headers = _enrich_headers(headers)
         self.content = content
         self.send = send
         self.receive = receive
@@ -112,7 +115,6 @@ class RequestHandlerInstance:
                 'stream_id': stream_id
             }
             await self.send(message)
-
 
         response = await self.receive()
 
