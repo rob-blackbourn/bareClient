@@ -73,6 +73,10 @@ class RequestHandlerInstance:
         Returns:
             Mapping[str, Any]: The response message.
         """
+        await self._process_request()
+        return await self._process_response()
+
+    async def _process_request(self) -> None:
         content_list: List[bytes] = []
         content_iter: AsyncIterator[bytes] = (
             NullIter() if self.content is None else
@@ -97,6 +101,7 @@ class RequestHandlerInstance:
             'more_body': more_body
         }
         await self.send(message)
+
         connection = await self.receive()
 
         stream_id: Optional[int] = connection['stream_id']
@@ -119,11 +124,12 @@ class RequestHandlerInstance:
             }
             await self.send(message)
 
+    async def _process_response(self) -> Mapping[str, Any]:
         response = dict(await self.receive())
 
         response['body'] = self._make_body_reader(
             response['headers']
-        ) if response['more_body'] else None
+        ) if response.get('more_body', False) else None
 
         return response
 
