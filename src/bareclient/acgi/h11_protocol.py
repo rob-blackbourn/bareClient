@@ -103,7 +103,7 @@ class H11Protocol(HttpProtocol):
 
         await self.writer.drain()
 
-    async def _receive_response(self):
+    async def _receive_response(self) -> None:
         while True:
             event = self._h11_state.next_event()
             if event is h11.NEED_DATA:
@@ -135,7 +135,7 @@ class H11Protocol(HttpProtocol):
             'stream_id': None
         })
 
-    async def _disconnect(self):
+    async def _disconnect(self) -> None:
         if not self._is_message_ended:
             buf = self._h11_state.send(h11.EndOfMessage())
             self.writer.write(buf)
