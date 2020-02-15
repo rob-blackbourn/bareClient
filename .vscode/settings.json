@@ -1,10 +1,46 @@
 {
-    "editor.formatOnSave": true,
-    "python.pythonPath": ".venv/bin/python",
-    "python.linting.pylintUseMinimalCheckers": false,
-    "python.linting.pylintEnabled": true,
-    "python.linting.mypyEnabled": true,
-    "cSpell.words": [
-      "bareclient"
-    ]
+  "editor.rulers": [
+    80,
+    120
+  ],
+  "editor.formatOnSave": true,
+  "python.pythonPath": ".venv/bin/python",
+  "python.linting.pylintUseMinimalCheckers": false,
+  "python.linting.pylintEnabled": true,
+  "python.linting.mypyEnabled": true,
+  "cSpell.words": [
+    "AESGCM",
+    "ASGI",
+    "Decompressor",
+    "ECDHE",
+    "SYSNAME",
+    "acgi",
+    "aenter",
+    "aexit",
+    "aiter",
+    "alpn",
+    "anext",
+    "b'Sat",
+    "b'application",
+    "b'content",
+    "b'last",
+    "b'text",
+    "bareclient",
+    "bareutils",
+    "bufsiz",
+    "cadata",
+    "cafile",
+    "capath",
+    "decompressors",
+    "initialised",
+    "pytest",
+    "qsize",
+    "uname"
+  ],
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true
 }

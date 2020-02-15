@@ -1,15 +1,24 @@
+"""Simple POST"""
+
 import asyncio
-import ssl
-from bareclient import post_json
+import json
+from bareutils import text_writer
+import bareutils.response_code as response_code
+
+from bareclient import HttpClient
 
 
-async def main(url, ssl):
-    obj = await post_json(url, {'title': 'A job'}, ssl=ssl, headers=[(b'accept-encoding', b'gzip')])
-    print(obj)
+async def main(url: str) -> None:
+    obj = {'name': 'Rob'}
+    body = json.dumps(obj)
 
+    async with HttpClient(
+            url,
+            method='POST',
+            headers=[(b'content-type', b'application/json')],
+            content=text_writer(body)
+    ) as response:
+        if response_code.is_successful(response['status_code']):
+            print("OK")
 
-url = 'https://jsonplaceholder.typicode.com/todos'
-ssl_context = ssl.SSLContext()
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(url, ssl_context))
+asyncio.run(main('https://beast.jetblack.net:9009/test/api/info'))

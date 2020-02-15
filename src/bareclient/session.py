@@ -1,103 +1,191 @@
-"""Session"""
+"""An HTTP session"""
 
-from asyncio import AbstractEventLoop, open_connection
+from __future__ import annotations
+
+from asyncio import AbstractEventLoop
+from datetime import datetime
 from typing import (
+    Any,
+    AsyncContextManager,
     Callable,
-    Optional,
+    List,
     Mapping,
+    Optional,
     Type
 )
-import urllib.parse
+from urllib.parse import urlparse
 
+from baretypes import Header, Content
 from bareutils.compression import Decompressor
 
-from .utils import get_port
-from .requester import Requester
+from .client import DEFAULT_DECOMPRESSORS, HttpClient
+from .utils import (
+    Cookie,
+    extract_cookies,
+    extract_cookies_from_response,
+    gather_cookies
+)
+from .acgi.utils import get_authority
+
+HttpClientFactory = Callable[
+    [],
+    AsyncContextManager[Mapping[str, Any]]
+]
+
+
+class HttpSessionInstance:
+    """An HTTP session instance"""
+
+    def __init__(
+            self,
+            client: HttpClient,
+            update_session: Callable[[Mapping[str, Any]], None]
+    ) -> None:
+        """Initialise an HTTP session instance.
+
+        Args:
+            client (HttpClient): The HTTP client
+            update_session (Callable[[Mapping[str, Any]], None]): A function to
+                update the session.
+        """
+        self.client = client
+        self.update_session = update_session
+
+    async def __aenter__(self) -> Mapping[str, Any]:
+        response = await self.client.__aenter__()
+        self.update_session(response)
+        return response
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+        await self.client.__aexit__(exc_type, exc_val, exc_tb)
 
 
 class HttpSession:
-    """Creates an asyncio HTTP session.
-
-    :param url: The url.
-    :param loop: An optional asyncio event loop.
-    :param bufsiz: The block size to read and write.
-    :param decompressors: An optional dictionary of decompressors.
-    :param kwargs: Args passed to asyncio.open_connection.
-    :return: A bareclient.Requester instance for making requests to the connected host.
-
-    .. code-block:: python
-
-        headers = [(b'host', b'docs.python.org'), (b'connection', b'keep-alive')]
-
-        async with HttpSession('https://docs.python.org', ssl=ssl.SSLContext()) as requester:
-
-            response, body = await requester.request(
-                '/3/library/cgi.html',
-                method='GET',
-                headers=headers
-            )
-            print(response)
-            if response.status_code == 200:
-                async for part in body():
-                    print(part)
-
-            response, body = await requester.request(
-                '/3/library/urllib.parse.html',
-                method='GET',
-                headers=headers
-            )
-            print(response)
-            if response.status_code == 200:
-                async for part in body():
-                    print(part)
-    """
+    """An HTTP Session"""
 
     def __init__(
             self,
             url: str,
+            *,
+            headers: Optional[List[Header]] = None,
+            cookies: Optional[Mapping[bytes, List[Cookie]]] = None,
             loop: Optional[AbstractEventLoop] = None,
-            bufsiz: int = 1024,
+            h11_bufsiz: int = 8096,
+            cafile: Optional[str] = None,
+            capath: Optional[str] = None,
+            cadata: Optional[str] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            **kwargs
+            protocols: Optional[List[str]] = None
     ) -> None:
-        """Construct the client.
+        """Initialise an HTTP session
 
-        :param url: The url.
-        :param loop: An optional asyncio event loop.
-        :param bufsiz: The block size to read and write.
-        :param decompressors: An optional dictionary of decompressors.
-        :param kwargs: Args passed to asyncio.open_connection.
+        Args:
+            url (str): The url
+            headers (Optional[List[Header]], optional): The headers. Defaults to
+                None.
+            cookies (Optional[Mapping[bytes, List[Cookie]]], optional): The
+                cookies. Defaults to None.
+            loop (Optional[AbstractEventLoop], optional): The asyncio event
+                loop. Defaults to None.
+            h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to 8096.
+            loop (Optional[AbstractEventLoop], optional): The optional asyncio
+                event loop.. Defaults to None.
+            cafile (Optional[str], optional): The path to a file of concatenated
+                CA certificates in PEM format. Defaults to None.
+            capath (Optional[str], optional): The path to a directory containing
+                several CA certificates in PEM format. Defaults to None.
+            cadata (Optional[str], optional): Either an ASCII string of one or
+                more PEM-encoded certificates or a bytes-like object of
+                DER-encoded certificates. Defaults to None.
+            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+                The decompressors. Defaults to None.
+            protocols (Optional[List[str]], optional): The list of protocols.
+                Defaults to None.
         """
-        self.url = urllib.parse.urlparse(url)
+        self.url = url
+        self.headers = headers or []
         self.loop = loop
-        self.bufsiz = bufsiz
-        self.decompressors = decompressors
-        self.kwargs = kwargs
-        self._close: Optional[Callable[[], None]] = None
+        self.h11_bufsiz = h11_bufsiz
+        self.cafile = cafile
+        self.capath = capath
+        self.cadata = cadata
+        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
+        self.protocols = protocols
+        self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
+        parsed_url = urlparse(url)
+        self.scheme = parsed_url.scheme.encode('ascii')
+        self.domain = get_authority(parsed_url).encode('ascii')
 
-    async def __aenter__(self) -> Requester:
-        """Opens the context.
+    def request(
+            self,
+            path: str,
+            *,
+            method: str = 'GET',
+            headers: Optional[List[Header]] = None,
+            content: Optional[Content] = None
+    ) -> HttpSessionInstance:
+        """Make an HTTP request
 
-        :return: A requester.
+        Args:
+            path (str): The path excluding the scheme and host part
+            method (str, optional): The HTTP method, defaults to 'GET'. Defaults
+                to 'GET'.
+            headers (Optional[List[Header]], optional): Optional headers.
+                Defaults to None.
+            content (Optional[Content], optional): Optional content, defaults to
+                None. Defaults to None.
+
+        Returns:
+            HttpSessionInstance: A context instance yielding the response and body
         """
-        hostname = self.url.hostname
-        port = get_port(self.url)
+        combined_headers = self.headers
+        if headers:
+            combined_headers = combined_headers + headers
 
-        if hostname is None:
-            raise RuntimeError('unspecified hostname')
-        if port is None:
-            raise RuntimeError('unspecified port')
-
-        reader, writer = await open_connection(
-            hostname,
-            port,
-            loop=self.loop,
-            **self.kwargs
+        cookies = self._gather_cookies(
+            self.scheme,
+            self.domain,
+            path.encode('ascii')
         )
-        self._close = writer.close
-        return Requester(reader, writer, self.bufsiz, self.decompressors)
+        if cookies:
+            combined_headers.append(
+                (b'cookie', cookies)
+            )
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        """Closes the context"""
-        if self._close is not None:
-            self._close()
+        url = self.url + path
+
+        client = HttpClient(
+            url,
+            method=method,
+            headers=combined_headers,
+            content=content,
+            loop=self.loop,
+            h11_bufsiz=self.h11_bufsiz,
+            cafile=self.cafile,
+            capath=self.capath,
+            cadata=self.cadata,
+            decompressors=self.decompressors,
+            protocols=self.protocols
+        )
+
+        return HttpSessionInstance(client, self._extract_cookies)
+
+    def _extract_cookies(self, response: Mapping[str, Any]) -> None:
+        now = datetime.utcnow()
+        self.cookies = extract_cookies_from_response(
+            self.cookies, response, now)
+
+    def _gather_cookies(
+            self,
+            scheme: bytes,
+            domain: bytes,
+            path: bytes
+    ) -> bytes:
+        now = datetime.utcnow()
+        return gather_cookies(
+            self.cookies,
+            scheme,
+            domain,
+            path,
+            now
+        )

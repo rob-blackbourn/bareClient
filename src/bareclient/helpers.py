@@ -2,8 +2,7 @@
 
 from asyncio import AbstractEventLoop
 import json
-from ssl import SSLContext
-from typing import Union, List, Mapping, Any, Callable, Optional
+from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
 from baretypes import Headers
@@ -11,10 +10,7 @@ import bareutils.header as header
 from bareutils import bytes_writer
 
 from .client import HttpClient
-
-JsonType = Union[List[Any], Mapping[str, Any]]
-
-USER_AGENT = b'bareClient'
+from .constants import USER_AGENT
 
 
 async def request(
@@ -24,27 +20,45 @@ async def request(
         headers: Headers = None,
         content: Optional[bytes] = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None,
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None,
         chunk_size: int = -1
 ) -> bytes:
     """Gets bytes from a url.
 
-    .. code-block:: python
+    ```python
+    buf = await request(
+        'https://jsonplaceholder.typicode.com/todos/1',
+        'GET',
+        ssl=ssl.SSLContext()
+    )
+    ```
 
-        buf = await request(
-            'https://jsonplaceholder.typicode.com/todos/1',
-            'GET',
-            ssl=ssl.SSLContext()
-        )
+    Args:
+        url (str): The url to get.
+        method (str): The HTTP method (eg. 'GET', 'POST', etc).
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        content (Optional[bytes], optional): The content to send.. Defaults to
+            None.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
 
-    :param url: The url to get.
-    :param method: The HTTP method (eg. 'GET', 'POST', etc).
-    :param headers: Any extra headers required.
-    :param content: The content to send.
-    :param loop: The optional asyncio event loop.
-    :param ssl: An optional ssl.SSLContext.
-    :param chunk_size: The size of each chunk to send or -1 to send as a single chunk.
-    :return: The decoded JSON object.
+    Raises:
+        RuntimeError: Is the status code is not ok
+
+    Returns:
+        bytes: The bytes received
     """
 
     headers = [] if headers is None else list(headers)
@@ -70,17 +84,20 @@ async def request(
 
     async with HttpClient(
             url,
-            method,
-            headers,
+            method=method,
+            headers=headers,
             content=data,
             loop=loop,
-            ssl=ssl
-    ) as (response, body):
-        if response.status_code < 200 or response.status_code >= 400:
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata
+    ) as response:
+        if response['status_code'] < 200 or response['status_code'] >= 400:
             raise RuntimeError('Request failed')
         buf = b''
-        async for part in body:
-            buf += part
+        if response['more_body']:
+            async for part in response['body']:
+                buf += part
         return buf
 
 
@@ -89,21 +106,38 @@ async def get(
         *,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
 ) -> bytes:
-    """Gets bytes from a url.
+    """Issues a GET request
 
-    .. code-block:: python
+    Args:
+        url (str): The url
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
 
-        buf = await get('https://jsonplaceholder.typicode.com/todos/1', ssl=ssl.SSLContext())
-
-    :param url: The url to get.
-    :param headers: Any extra headers required.
-    :param loop: The optional asyncio event loop.
-    :param ssl: An optional ssl.SSLContext.
-    :return: The decoded JSON object.
+    Returns:
+        bytes: [description]
     """
-    return await request(url, 'GET', headers=headers, loop=loop, ssl=ssl)
+    return await request(
+        url,
+        'GET',
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
 
 
 async def get_text(
@@ -112,20 +146,28 @@ async def get_text(
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
         encoding: str = 'utf-8',
-        ssl: Optional[SSLContext] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
 ) -> str:
-    """Gets text from a url.
+    """Issues a GET request returning a string
 
-    .. code-block:: python
+    Args:
+        url (str): The url
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
 
-        buf = await get_text('https://jsonplaceholder.typicode.com/todos/1', ssl=ssl.SSLContext())
-
-    :param url: The url to get.
-    :param headers: Any extra headers required.
-    :param loop: The optional asyncio event loop.
-    :param encoding: The text encoding - defaults to 'utf-8'.
-    :param ssl: An optional ssl.SSLContext.
-    :return: The decoded JSON object.
+    Returns:
+        str: [description]
     """
 
     headers = [] if headers is None else list(headers)
@@ -133,7 +175,14 @@ async def get_text(
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'text/plain'))
 
-    buf = await get(url, headers=headers, loop=loop, ssl=ssl)
+    buf = await get(
+        url,
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return buf.decode(encoding)
 
 
@@ -141,29 +190,47 @@ async def get_json(
         url: str,
         *,
         headers: Headers = None,
-        loads: Callable[[str], JsonType] = json.loads,
+        loads: Callable[[str], Any] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
-) -> JsonType:
-    """Gets a json object from a url.
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
+) -> Any:
+    """Issues a GET request returning a JSON object
 
-    .. code-block:: python
+    Args:
+        url (str): The url
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        loads (Callable[[str], Any], optional): The function to loads the
+            JSON object from the string. Defaults to json.loads.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
 
-        obj = await get_json('https://jsonplaceholder.typicode.com/todos/1', ssl=ssl.SSLContext())
-
-    :param url: The url to get.
-    :param headers: Any extra headers required.
-    :param loads: An optional function to decode the JSON (defaults to json.loads).
-    :param loop: The optional asyncio event loop.
-    :param ssl: An optional ssl.SSLContext.
-    :return: The decoded JSON object.
+    Returns:
+        Any: The decoded JSON object
     """
     headers = [] if headers is None else list(headers)
 
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'application/json'))
 
-    text = await get_text(url, headers=headers, encoding='utf-8', loop=loop, ssl=ssl)
+    text = await get_text(
+        url,
+        headers=headers,
+        encoding='utf-8',
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return loads(text)
 
 
@@ -173,26 +240,40 @@ async def post(
         *,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
 ) -> bytes:
-    """Posts bytes to a url.
+    """Issues a POST request
 
-    .. code-block:: python
+    Args:
+        url (str): The url
+        content (bytes): The body content
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
 
-        buf = await post(
-            'https://jsonplaceholder.typicode.com/todos',
-            b'Big jobs',
-            ssl=ssl.SSLContext()
-        )
-
-    :param url: The url to get.
-    :param content: The content to send.
-    :param headers: Any extra headers required.
-    :param loop: The optional asyncio event loop.
-    :param ssl: An optional ssl.SSLContext.
-    :return: The decoded JSON object.
+    Returns:
+        bytes: The response body
     """
-    return await request(url, method='POST', content=content, headers=headers, loop=loop, ssl=ssl)
+    return await request(
+        url,
+        method='POST',
+        content=content,
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
 
 
 async def post_text(
@@ -202,25 +283,29 @@ async def post_text(
         encoding='utf-8',
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
 ) -> str:
-    """Posts text to a url.
+    """Issues a POST request with a str body
 
-    .. code-block:: python
+    Args:
+        url (str): The url
+        content (bytes): The body content
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
 
-        buf = await post(
-            'https://jsonplaceholder.typicode.com/todos',
-            b'Big jobs',
-            ssl=ssl.SSLContext()
-        )
-
-    :param url: The url to get.
-    :param text: The text to send.
-    :param encoding: The text encoding.
-    :param headers: Any extra headers required.
-    :param loop: The optional asyncio event loop.
-    :param ssl: An optional ssl.SSLContext.
-    :return: The decoded JSON object.
+    Returns:
+        bytes: The response body
     """
 
     headers = [] if headers is None else list(headers)
@@ -232,38 +317,53 @@ async def post_text(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'text/plain'))
 
-    response = await post(url, content=content, headers=headers, loop=loop, ssl=ssl)
+    response = await post(
+        url,
+        content=content,
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return response.decode(encoding=encoding)
 
 
 async def post_json(
         url: str,
-        obj: JsonType,
+        obj: Any,
         *,
-        loads: Callable[[str], JsonType] = json.loads,
-        dumps: Callable[[JsonType], str] = json.dumps,
+        loads: Callable[[str], Any] = json.loads,
+        dumps: Callable[[Any], str] = json.dumps,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
-        ssl: Optional[SSLContext] = None
-) -> Optional[JsonType]:
-    """Posts text to a url.
+        cafile: Optional[str] = None,
+        capath: Optional[str] = None,
+        cadata: Optional[str] = None
+) -> Optional[Any]:
+    """Issues a POST request with a JSON payload
 
-    .. code-block:: python
+    Args:
+        url (str): The url
+        obj (Any): The JSON payload
+        loads (Callable[[str], Any], optional): The function used to decode
+            the response. Defaults to json.loads.
+        dumps (Callable[[Any], str], optional): The function used to encode
+            the request. Defaults to json.dumps.
+        headers (Headers, optional): Any extra headers required. Defaults to
+            None.
+        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
+            loop.. Defaults to None.
+        cafile (Optional[str], optional): The path to a file of concatenated CA
+            certificates in PEM format. Defaults to None.
+        capath (Optional[str], optional): The path to a directory containing
+            several CA certificates in PEM format. Defaults to None.
+        cadata (Optional[str], optional): Either an ASCII string of one or more
+            PEM-encoded certificates or a bytes-like object of DER-encoded
+            certificates. Defaults to None.
 
-        buf = await post(
-            'https://jsonplaceholder.typicode.com/todos',
-            b'Big jobs',
-            ssl=ssl.SSLContext()
-        )
-
-    :param url: The url to get.
-    :param obj: The object to send.
-    :param dumps: The function used to convert the object to JSON text.
-    :param loads: The function used to convert the response from JSON text to an object.
-    :param headers: Any extra headers required.
-    :param loop: The optional asyncio event loop.
-    :param ssl: An optional ssl.SSLContext.
-    :return: The decoded JSON object.
+    Returns:
+        Optional[Any]: The decoded response
     """
 
     headers = [] if headers is None else list(headers)
@@ -275,5 +375,14 @@ async def post_json(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'application/json'))
 
-    text = await post_text(url, text=content, encoding='utf-8', headers=headers, loop=loop, ssl=ssl)
+    text = await post_text(
+        url,
+        text=content,
+        encoding='utf-8',
+        headers=headers,
+        loop=loop,
+        cafile=cafile,
+        capath=capath,
+        cadata=cadata
+    )
     return loads(text)

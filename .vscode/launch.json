@@ -1,0 +1,36 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Simple Get",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demos/simple_get.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Simple POST",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demos/simple_post.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Simple JSON",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/demos/simple_json.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}

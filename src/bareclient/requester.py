@@ -1,144 +1,225 @@
-"""Requesters"""
+"""Requester"""
 
-from asyncio import StreamReader, StreamWriter
+import urllib.parse
 from typing import (
+    Any,
+    AsyncIterable,
+    AsyncIterator,
+    List,
     Mapping,
     Optional,
-    Tuple,
     Type
 )
-
-import h11
-
-from baretypes import Headers, Content
+from baretypes import Header
 from bareutils.compression import (
-    make_gzip_decompressobj,
-    make_deflate_decompressobj,
     compression_reader_adapter,
     Decompressor
 )
 import bareutils.header as header
 
-DEFAULT_DECOMPRESSORS = {
-    b'gzip': make_gzip_decompressobj,
-    b'deflate': make_deflate_decompressobj
-}
+from .acgi import ReceiveCallable, SendCallable
+from .constants import USER_AGENT
+from .utils import NullIter
 
 
-async def body_reader(
-        conn: h11.Connection,
-        reader: StreamReader,
-        bufsiz: int
-) -> Content:
-    """A body reader
-
-    :param conn: The h11 connection
-    :type conn: h11.Connection
-    :param reader: A reader
-    :type reader: StreamReader
-    :param bufsiz: The size of the buffer
-    :type bufsiz: int
-    :raises ConnectionError: Raised if a response was not received
-    :raises ValueError: Raised for an unknown event
-    :return: The content
-    :rtype: Content
-    """
-    while True:
-        event = conn.next_event()
-        if event is h11.NEED_DATA:
-            conn.receive_data(await reader.read(bufsiz))
-        elif isinstance(event, h11.Data):
-            # noinspection PyUnresolvedReferences
-            yield event.data
-        elif isinstance(event, h11.EndOfMessage):
-            return
-        elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
-            raise ConnectionError('Failed to receive response')
-        else:
-            raise ValueError('Unknown event')
+def _enrich_headers(
+        url: urllib.parse.ParseResult,
+        headers: Optional[List[Header]],
+        content: Optional[AsyncIterable[bytes]]
+) -> List[Header]:
+    headers = [] if not headers else list(headers)
+    if not header.find(b'user-agent', headers):
+        headers.append((b'user-agent', USER_AGENT))
+    if not header.find(b'host', headers):
+        headers.append((b'host', url.netloc.encode('ascii')))
+    if content and not (
+            header.find(b'content-length', headers)
+            or header.find(b'transfer-encoding', headers)
+    ):
+        headers.append((b'transfer-encoding', b'chunked'))
+    return headers
 
 
-class Requester:
-    """A requester"""
+class RequestHandlerInstance:
+    """The request handler"""
 
     def __init__(
             self,
-            reader: StreamReader,
-            writer: StreamWriter,
-            bufsiz: int = 1024,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None
-    ) -> None:
-        """Requests HTTP from a session.
-
-        :param reader: An asyncio.StreamReader provider by the context.
-        :param writer: An asyncio.StreamWriter provider by the context.
-        :param bufsiz: The block size to read and write.
-        """
-        self.reader = reader
-        self.writer = writer
-        self.bufsiz = bufsiz
-        self.conn: Optional[h11.Connection] = None
-        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
-
-    async def request(
-            self,
-            path: str,
+            url: urllib.parse.ParseResult,
             method: str,
-            headers: Headers,
-            content: Optional[Content] = None
-    ) -> Tuple[h11.Response, Content]:
-        """Make an HTTP request.
+            headers: Optional[List[Header]],
+            content: Optional[AsyncIterable[bytes]],
+            send: SendCallable,
+            receive: ReceiveCallable,
+            decompressors: Mapping[bytes, Type[Decompressor]]
+    ) -> None:
+        """Initialise the request handler instance
 
-        :param path: The request path.
-        :param method: The request method (e.g. GET, POST, etc.)
-        :param headers: Headers to send.
-        :param content: Optional data to send.
-        :return: An h11.Response object and an async generator function to retrieve the body.
+        Args:
+            url (urllib.parse.ParseResult): The parsed url
+            method (str): The request method
+            headers (Optional[List[Header]]): The request headers
+            content (Optional[AsyncIterable[bytes]]): The content
+            send (SendCallable): The function to sed the data
+            receive (ReceiveCallable): The function to receive the data
+            decompressors (Mapping[bytes, Type[Decompressor]]): The available
+                decompressors
         """
-        if not self.conn:
-            # noinspection PyUnresolvedReferences
-            self.conn = h11.Connection(our_role=h11.CLIENT)
-        else:
-            self.conn.start_next_cycle()
+        self.url = url
+        self.method = method
+        self.headers = _enrich_headers(url, headers, content)
+        self.content = content
+        self.send = send
+        self.receive = receive
+        self.decompressors = decompressors
 
-        request = h11.Request(
-            method=method,
-            target=path,
-            headers=headers
+    async def process(self) -> Mapping[str, Any]:
+        """Process the request
+
+        Returns:
+            Mapping[str, Any]: The response message.
+        """
+        await self._process_request()
+        return await self._process_response()
+
+    async def _process_request(self) -> None:
+        content_list: List[bytes] = []
+        content_iter: AsyncIterator[bytes] = (
+            NullIter() if self.content is None else
+            self.content.__aiter__()
         )
+        try:
+            while len(content_list) < 2:
+                body = await content_iter.__anext__()
+                content_list.append(body)
+        except StopAsyncIteration:
+            pass
 
-        buf = self.conn.send(request)
-        self.writer.write(buf)
-        if content:
-            data = b''
-            async for value in content:
-                data += value
-            buf = self.conn.send(h11.Data(data=data))
-            self.writer.write(buf)
-        buf = self.conn.send(h11.EndOfMessage())
-        self.writer.write(buf)
-        await self.writer.drain()
+        body = content_list.pop(0) if content_list else b''
+        more_body = len(content_list) > 0
 
-        while True:
-            response = self.conn.next_event()
-            if response is h11.NEED_DATA:
-                buf = await self.reader.read(self.bufsiz)
-                self.conn.receive_data(buf)
-            elif isinstance(response, h11.Response):
-                break
-            elif isinstance(response, (h11.ConnectionClosed, h11.EndOfMessage)):
-                raise ConnectionError('Failed to receive response')
-            else:
-                raise ValueError('Unknown event')
+        message: Mapping[str, Any] = {
+            'type': 'http.request',
+            'url': self.url,
+            'method': self.method,
+            'headers': self.headers,
+            'body': body,
+            'more_body': more_body
+        }
+        await self.send(message)
 
-        writer = body_reader(self.conn, self.reader, self.bufsiz)
+        connection = await self.receive()
 
-        content_types = header.find(
-            b'content-encoding', response.headers, b'').split(b', ')
-        for content_type in content_types:
-            if content_type in self.decompressors:
-                decompressor = self.decompressors[content_type]
-                writer = compression_reader_adapter(writer, decompressor())
-                break
+        stream_id: Optional[int] = connection['stream_id']
 
-        return response, writer
+        while more_body:
+            try:
+                body = await content_iter.__anext__()
+                content_list.append(body)
+            except StopAsyncIteration:
+                pass
+
+            body = content_list.pop(0) if content_list else b''
+            more_body = len(content_list) > 0
+
+            message = {
+                'type': 'http.request.body',
+                'body': body,
+                'more_body': more_body,
+                'stream_id': stream_id
+            }
+            await self.send(message)
+
+    async def _process_response(self) -> Mapping[str, Any]:
+        response = dict(await self.receive())
+
+        response['body'] = self._make_body_reader(
+            response['headers']
+        ) if response.get('more_body', False) else None
+
+        return response
+
+    def _make_body_reader(
+            self,
+            headers: List[Header]
+    ) -> AsyncIterator[bytes]:
+        reader = self._body_reader()
+        content_encoding = header.content_encoding(headers)
+        if content_encoding:
+            for encoding in content_encoding:
+                if encoding in self.decompressors:
+                    decompressor = self.decompressors[encoding]
+                    return compression_reader_adapter(reader, decompressor())
+        return reader
+
+    async def _body_reader(self) -> AsyncIterator[bytes]:
+        more_body = True
+        while more_body:
+            message = await self.receive()
+            yield message.get('body', b'')
+            more_body = message.get('more_body', False)
+
+    async def close(self) -> None:
+        """Close the request"""
+        await self.send({
+            'type': 'http.disconnect'
+        })
+
+
+class RequestHandler:
+    """A request handler"""
+
+    def __init__(
+            self,
+            url: urllib.parse.ParseResult,
+            method: str,
+            headers: Optional[List[Header]],
+            content: Optional[AsyncIterable[bytes]],
+            decompressors: Mapping[bytes, Type[Decompressor]]
+    ) -> None:
+        """Initialise the request handler
+
+        Args:
+            url (urllib.parse.ParseResult): The parsed url
+            method (str): The request method
+            headers (Optional[List[Header]]): The headers
+            content (Optional[AsyncIterable[bytes]]): The request body
+            decompressors (Mapping[bytes, Type[Decompressor]]): The decompressors
+        """
+        self.url = url
+        self.method = method
+        self.headers = headers or []
+        self.content = content
+        self.instance: Optional[RequestHandlerInstance] = None
+        self.decompressors = decompressors
+
+    async def __call__(
+            self,
+            receive: ReceiveCallable,
+            send: SendCallable
+    ) -> Mapping[str, Any]:
+        """Call the request handle instance
+
+        Args:
+            receive (ReceiveCallable): The function to receive data
+            send (SendCallable): The function to send data
+
+        Returns:
+            Mapping[str, Any]: [description]
+        """
+        self.instance = RequestHandlerInstance(
+            self.url,
+            self.method,
+            self.headers,
+            self.content,
+            send,
+            receive,
+            self.decompressors
+        )
+        response = await self.instance.process()
+        return response
+
+    async def close(self):
+        """Close the request"""
+        if self.instance is not None:
+            await self.instance.close()
