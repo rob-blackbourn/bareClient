@@ -165,7 +165,7 @@ description = "A markdown extension for python documentation"
 name = "jetblack-markdown"
 optional = false
 python-versions = ">=3.7,<4.0"
-version = "0.4.0"
+version = "0.4.1"
 
 [package.dependencies]
 docstring-parser = ">=0.6,<0.7"
@@ -567,8 +567,8 @@ isort = [
     {file = "isort-4.3.21.tar.gz", hash = "sha256:54da7e92468955c4fceacd0c86bd0ec997b0e1ee80d97f67c35a78b719dccab1"},
 ]
 jetblack-markdown = [
-    {file = "jetblack-markdown-0.4.0.tar.gz", hash = "sha256:f91fcd99b12767b08c059c48958045b43bf79286364a3d87cfeeefcf6a41a8a8"},
-    {file = "jetblack_markdown-0.4.0-py3-none-any.whl", hash = "sha256:3c7169164530e40d31fc123b570d840775d9c24a80328bf1a05628339d7fa336"},
+    {file = "jetblack-markdown-0.4.1.tar.gz", hash = "sha256:1b91ad21ca3ebd2c93a4931fcad645c9cbbc3253b25306e160d3b05766aa4d9d"},
+    {file = "jetblack_markdown-0.4.1-py3-none-any.whl", hash = "sha256:617e5161dc40467263a617dd749fa4647f91dc1437dc5e99c77d14372639f6bb"},
 ]
 jinja2 = [
     {file = "Jinja2-2.11.1-py2.py3-none-any.whl", hash = "sha256:b0eaf100007721b5c16c1fc1eecb87409464edc10469ddc9a22a27a99123be49"},
