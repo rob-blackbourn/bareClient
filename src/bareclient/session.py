@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from asyncio import AbstractEventLoop
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import (
     Any,
     AsyncContextManager,
@@ -14,6 +14,7 @@ from typing import (
     Type
 )
 from urllib.parse import urlparse
+from urllib.error import URLError
 
 from baretypes import Header, Content
 from bareutils.compression import Decompressor
@@ -138,6 +139,9 @@ class HttpSession:
         Returns:
             HttpSessionInstance: A context instance yielding the response and body
         """
+        if not path.startswith('/'):
+            raise URLError("Path must start with '/'")
+
         combined_headers = self.headers
         if headers:
             combined_headers = combined_headers + headers
@@ -171,9 +175,10 @@ class HttpSession:
         return HttpSessionInstance(client, self._extract_cookies)
 
     def _extract_cookies(self, response: Mapping[str, Any]) -> None:
-        now = datetime.utcnow()
+        now = datetime.now().astimezone(timezone.utc)
         self.cookies = extract_cookies_from_response(
-            self.cookies, response, now)
+            self.cookies, response, now
+        )
 
     def _gather_cookies(
             self,
@@ -181,7 +186,7 @@ class HttpSession:
             domain: bytes,
             path: bytes
     ) -> bytes:
-        now = datetime.utcnow()
+        now = datetime.now().astimezone(timezone.utc)
         return gather_cookies(
             self.cookies,
             scheme,
