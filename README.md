@@ -1,17 +1,16 @@
 # bareClient
 
-A simple asyncio http client supporting HTTP versions 1.0, 1.1 and 2.
+A simple asyncio http Pyhton client package supporting HTTP versions 1.0, 1.1
+and 2 (read the [docs](https://rob-blackbourn.github.io/bareClient/)).
 
-The docs are [here](https://rob-blackbourn.github.io/bareClient/).
+This is the client companion to the ASGI server sde web framework
+[bareASGI](https://github.com/rob-blackbourn/bareASGI) and follows the same
+"bare" approach. It makes little attempt to provide any helpful features which
+might do unnecessary work.
 
-## Description
-
-This package provides the asyncio transport for
-[h11](https://h11.readthedocs.io/en/latest/index.html),
-and [h2](https://python-hyper.org/projects/h2/en/stable/).
-
-It makes little attempt to provide any helpful features which might do
-unnecessary work.
+It was written to allow a web server which had negotiated the HTTP/2 protocol
+for make outgoing HTTP/2 calls. This increase performance and simplifies proxy
+configuration in a micro-service architecture.
 
 ## Installation
 
@@ -28,36 +27,23 @@ The basic usage is to create an `HttpClient`.
 ```python
 import asyncio
 from typing import List, Optional
-from baretypes import Header
-
 from bareclient import HttpClient
 
-
-async def main(url: str, headers: Optional[List[Header]]) -> None:
-    async with HttpClient(url, method='GET', headers=headers) as response:
-        print(response)
+async def main(url: str) -> None:
+    async with HttpClient(url, method='GET') as response:
         if response['status_code'] == 200 and response['more_body']:
             async for part in response['body']:
                 print(part)
 
-
-URL = 'https://docs.python.org/3/library/cgi.html'
-HEADERS = None
-
-asyncio.run(main(URL, HEADERS))
+asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
 ```
 
-There is also an `HttpSession` for maintaining a session.
+There is also an `HttpSession` for maintaining session cookies.
 
 ```python
 import asyncio
-import logging
-
 import bareutils.response_code as response_code
 from bareclient import HttpSession
-
-logging.basicConfig(level=logging.DEBUG)
-
 
 async def main() -> None:
     session = HttpSession(
