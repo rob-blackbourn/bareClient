@@ -118,7 +118,6 @@ class H2Protocol(HttpProtocol):
 
     def _reap_task(self, task: Task):
         self.pending.remove(task)
-        print('here')
 
     def _initiate_connection(self) -> None:
         self.h2_state.local_settings = h2.settings.Settings(
