@@ -87,7 +87,7 @@ def gather_cookies(
         request_path: bytes,
         now: datetime
 ) -> bytes:
-    """Gather the cookies from the cookie cache
+    """Gather the cookies from the cookie cache.
 
     Args:
         cookie_cache (CookieCache): The cookie cache

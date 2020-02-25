@@ -28,7 +28,8 @@ async def main() -> None:
             path = f'/posts/{post["id"]}/comments'
             print(f'Requesting comments from "{path}""')
             async with session.request(path, method='GET') as response:
-                # As we are sent the session cookie we do not expect to receive another one.
+                # As we were sent the session cookie we do not expect to receive
+                # another one, until this one has expired.
                 set_cookie = header.find(b'set-cookie', response['headers'])
                 if set_cookie:
                     print('We received a session cookie: ' + set_cookie.decode())
