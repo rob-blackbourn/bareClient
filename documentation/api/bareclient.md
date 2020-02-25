@@ -1,5 +1,3 @@
-# API
-
 @[bareclient:HttpClient]
 
 @[bareclient:HttpSession]

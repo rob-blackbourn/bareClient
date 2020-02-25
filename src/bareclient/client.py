@@ -36,7 +36,40 @@ class HttpClient:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Optional[List[str]] = None
     ) -> None:
-        """Initialise an HTTP client
+        """Make an HTTP client.
+
+        The following example will make a GET request.
+
+        ```python
+        import asyncio
+        from bareclient import HttpClient
+
+
+        async def main(url: str) -> None:
+            async with HttpClient(url, method='GET') as response:
+                print(response)
+                if response['status_code'] == 200 and response['more_body']:
+                    async for part in response['body']:
+                        print(part)
+
+        asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
+        ```
+
+        The `response` is a mapping with the following content:
+
+        - **`type`** (_Unicode string_) - Currently the only response is
+        `"http.response"`.
+        - **`acgi["version"]`** (_Unicode string_) - Version of the ACGI spec.
+        - **`http_version`** (_Unicode string_) - One of `"1.0"`, `"1.1"` or `"2"`.
+        - **`stream_id`** (_int_) - The HTTP/2 stream id, otherwise None.
+        - **`status_code`** (_int_) - The HTTP status code.
+        - **`headers`** (_Iterable[[byte string, byte string]]_) - A iterable of [name,
+        value] two-item iterables, where name is the header name, and value is the
+        header value. Order must be preserved in the HTTP response. Header names
+        must be lowercased. Optional; defaults to an empty list. Pseudo headers
+        (present in HTTP/2 and HTTP/3) must not be present.
+        - **`more_body`** (_bool_) - Signifies if the body has more content.
+        - **`body`** (_AsyncIterable[byte string]_) - The body content.
 
         Args:
             url (str): The url

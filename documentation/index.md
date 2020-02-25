@@ -1,15 +1,16 @@
 # Welcome
 
-A simple asyncio http client support HTTP versions 1.0, 1.1 and 2.
+A simple asyncio http Pyhton client package supporting HTTP versions 1.0, 1.1
+and 2.
 
-## Description
+This is the client companion to the ASGI server side web framework
+[bareASGI](https://github.com/rob-blackbourn/bareASGI) and follows the same
+"bare" approach. It makes little attempt to provide any helpful features which
+might do unnecessary work, providing a foundation for whatever feature set is
+required.
 
-This package provides the asyncio transport for
-[h11](https://h11.readthedocs.io/en/latest/index.html),
-and [h2](https://python-hyper.org/projects/h2/en/stable/).
+It was written to allow a web server which had negotiated the HTTP/2 protocol
+for make outgoing HTTP/2 calls. This increases performance and simplifies proxy
+configuration in a micro-service architecture.
 
-It makes little attempt to provide any helpful features which might do
-unnecessary work.
-
-This client is part of a suite of lightweight HTTP tools around the
-[bareASGI](https://github.com/rob-blackbourn/bareasgi) framework.
+To find out more see [getting started](user-guide/getting-started.md).

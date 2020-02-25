@@ -10,20 +10,20 @@ from bareclient import HttpSession
 
 
 async def main() -> None:
+    """Session example"""
+
     session = HttpSession('https://jsonplaceholder.typicode.com')
     async with session.request('/users/1/posts', method='GET') as response:
         # We expect a session cookie to be sent on the initial request.
         set_cookie = header.find(b'set-cookie', response['headers'])
-        if set_cookie:
-            print('We received a session cookie: ' + set_cookie.decode())
-        else:
-            print("No session cookie")
+        print("Session cookie!" if set_cookie else "No session cookie")
+
         if not response_code.is_successful(response['status_code']):
-            print("failed")
-            return
-        text = await text_reader(response['body'])
-        posts = json.loads(text)
+            raise Exception("Failed to get posts")
+
+        posts = json.loads(await text_reader(response['body']))
         print(f'We received {len(posts)} posts')
+
         for post in posts:
             path = f'/posts/{post["id"]}/comments'
             print(f'Requesting comments from "{path}""')
@@ -31,15 +31,12 @@ async def main() -> None:
                 # As we were sent the session cookie we do not expect to receive
                 # another one, until this one has expired.
                 set_cookie = header.find(b'set-cookie', response['headers'])
-                if set_cookie:
-                    print('We received a session cookie: ' + set_cookie.decode())
-                else:
-                    print("No session cookie")
+                print("Session cookie!" if set_cookie else "No session cookie")
+
                 if not response_code.is_successful(response['status_code']):
-                    print("failed")
-                    return
-                text = await text_reader(response['body'])
-                comments = json.loads(text)
+                    raise Exception("Failed to get comments")
+
+                comments = json.loads(await text_reader(response['body']))
                 print(f'We received {len(comments)} comments')
 
 

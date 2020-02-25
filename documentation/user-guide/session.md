@@ -1,30 +1,54 @@
 # Session
 
-A session utility `HttpSession` is provided.
+A session utility [`HttpSession`](/api/bareclient/#class-httpsession) is provided.
 
-The 
+The session is created with the base url. Each subsequent
+[`request`](/api/bareclient/#method-httpsessionrequest) will maintain
+the session cookies in the same manner as a browser.
+
+The following example demonstrates this:
 
 ```python
 import asyncio
-import logging
+import json
 
+from bareutils import text_reader
+import bareutils.header as header
 import bareutils.response_code as response_code
 from bareclient import HttpSession
 
-logging.basicConfig(level=logging.DEBUG)
-
 
 async def main() -> None:
-    session = HttpSession('http://localhost:9009')
-    for path in ['/example1', '/example2', '/empty']:
-        async with session.request(path, method='GET') as response:
-            print(response)
-            if not response_code.is_successful(response['status_code']):
-                print("failed")
-            else:
-                if response['status_code'] == response_code.OK and response['more_body']:
-                    async for part in response['body']:
-                        print(part)
+    """Session example"""
+
+    # Create the session
+    session = HttpSession('https://jsonplaceholder.typicode.com')
+
+    async with session.request('/users/1/posts', method='GET') as response:
+        # We expect a session cookie to be sent on the initial request.
+        set_cookie = header.find(b'set-cookie', response['headers'])
+        print("Session cookie!" if set_cookie else "No session cookie")
+
+        if not response_code.is_successful(response['status_code']):
+            raise Exception("Failed to get posts")
+
+        posts = json.loads(await text_reader(response['body']))
+        print(f'We received {len(posts)} posts')
+
+        for post in posts:
+            path = f'/posts/{post["id"]}/comments'
+            print(f'Requesting comments from "{path}""')
+            async with session.request(path, method='GET') as response:
+                # As we were sent the session cookie we do not expect to receive
+                # another one, until this one has expired.
+                set_cookie = header.find(b'set-cookie', response['headers'])
+                print("Session cookie!" if set_cookie else "No session cookie")
+
+                if not response_code.is_successful(response['status_code']):
+                    raise Exception("Failed to get comments")
+
+                comments = json.loads(await text_reader(response['body']))
+                print(f'We received {len(comments)} comments')
 
 
 asyncio.run(main())

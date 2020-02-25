@@ -11,6 +11,4 @@ async def main(url: str) -> None:
     print(obj)
 
 
-URL = 'https://jsonplaceholder.typicode.com/todos/1'
-
-asyncio.run(main(URL))
+asyncio.run(main('https://jsonplaceholder.typicode.com/todos/1'))
