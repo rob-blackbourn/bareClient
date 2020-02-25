@@ -1,4 +1,4 @@
-"""Simple GET"""
+"""Simple Session"""
 
 import asyncio
 import json
@@ -12,7 +12,9 @@ from bareclient import HttpSession
 async def main() -> None:
     """Session example"""
 
+    # Create the session
     session = HttpSession('https://jsonplaceholder.typicode.com')
+
     async with session.request('/users/1/posts', method='GET') as response:
         # We expect a session cookie to be sent on the initial request.
         set_cookie = header.find(b'set-cookie', response['headers'])
