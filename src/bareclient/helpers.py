@@ -152,6 +152,19 @@ async def get_text(
 ) -> str:
     """Issues a GET request returning a string
 
+    The following gets some text:
+
+    ```python
+    import asyncio
+    from bareclient import get_text
+
+    async def main(url: str) -> None:
+        text = await get_text(url)
+        print(text)
+
+    asyncio.run(main('https://docs.python.org/3/library/cgi.html'))    
+    ```
+
     Args:
         url (str): The url
         headers (Headers, optional): Any extra headers required. Defaults to
@@ -197,6 +210,19 @@ async def get_json(
         cadata: Optional[str] = None
 ) -> Any:
     """Issues a GET request returning a JSON object
+
+    The following gets some json:
+
+    ```python
+    import asyncio
+    from bareclient import get_json
+
+    async def main(url: str) -> None:
+        obj = await get_json(url)
+        print(obj)
+
+    asyncio.run(main('https://jsonplaceholder.typicode.com/todos/1'))
+    ```
 
     Args:
         url (str): The url
@@ -342,6 +368,21 @@ async def post_json(
         cadata: Optional[str] = None
 ) -> Optional[Any]:
     """Issues a POST request with a JSON payload
+
+    ```python
+    import asyncio
+    from bareclient import post_json
+
+    async def main(url: str) -> None:
+        obj = await post_json(
+            url,
+            {'title': 'A job'},
+            headers=[(b'accept-encoding', b'gzip')]
+        )
+        print(obj)
+
+    asyncio.run(main('https://jsonplaceholder.typicode.com/todos'))
+    ```
 
     Args:
         url (str): The url

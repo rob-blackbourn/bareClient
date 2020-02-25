@@ -80,6 +80,24 @@ class HttpSession:
     ) -> None:
         """Initialise an HTTP session
 
+        The following makes a get request from a session:
+
+        ```python
+        import asyncio
+        from bareclient import HttpClient
+
+
+        async def main(url: str, path: str) -> None:
+            session =  HttpSession(usl)
+            async with session.request(path, method='GET') as response:
+                print(response)
+                if response['status_code'] == 200 and response['more_body']:
+                    async for part in response['body']:
+                        print(part)
+
+        asyncio.run(main('https://docs.python.org', '/3/library/cgi.html'))
+        ```        
+
         Args:
             url (str): The url
             headers (Optional[List[Header]], optional): The headers. Defaults to

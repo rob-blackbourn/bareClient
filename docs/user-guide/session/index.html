@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.3">
+      <meta name="generator" content="mkdocs-1.1, mkdocs-material-4.6.3">
     
     
       
@@ -263,8 +263,32 @@
 
 
   <li class="md-nav__item">
-    <a href="../client/" title="Client" class="md-nav__link">
-      Client
+    <a href="../getting-started/" title="Getting Started" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../requests/" title="Requests" class="md-nav__link">
+      Requests
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../responses/" title="Responses" class="md-nav__link">
+      Responses
     </a>
   </li>
 
@@ -360,28 +384,51 @@
                 
                 
                 <h1 id="session">Session<a class="headerlink" href="#session" title="Permanent link">&para;</a></h1>
-<p>A session utility <code>HttpSession</code> is provided.</p>
-<p>The </p>
+<p>A session utility <a href="/api/bareclient/#class-httpsession"><code>HttpSession</code></a> is provided.</p>
+<p>The session is created with the base url. Each subsequent
+<a href="/api/bareclient/#method-httpsessionrequest"><code>request</code></a> will maintain
+the session cookies in the same manner as a browser.</p>
+<p>The following example demonstrates this:</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
+<span class="kn">from</span> <span class="nn">bareutils</span> <span class="kn">import</span> <span class="n">text_reader</span>
+<span class="kn">import</span> <span class="nn">bareutils.header</span> <span class="k">as</span> <span class="nn">header</span>
 <span class="kn">import</span> <span class="nn">bareutils.response_code</span> <span class="k">as</span> <span class="nn">response_code</span>
 <span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="n">HttpSession</span>
 
-<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">session</span> <span class="o">=</span> <span class="n">HttpSession</span><span class="p">(</span><span class="s1">&#39;http://localhost:9009&#39;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;/example1&#39;</span><span class="p">,</span> <span class="s1">&#39;/example2&#39;</span><span class="p">,</span> <span class="s1">&#39;/empty&#39;</span><span class="p">]:</span>
-        <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">response_code</span><span class="o">.</span><span class="n">OK</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;more_body&#39;</span><span class="p">]:</span>
-                    <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Session example&quot;&quot;&quot;</span>
+
+    <span class="c1"># Create the session</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">HttpSession</span><span class="p">(</span><span class="s1">&#39;https://jsonplaceholder.typicode.com&#39;</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;/users/1/posts&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+        <span class="c1"># We expect a session cookie to be sent on the initial request.</span>
+        <span class="n">set_cookie</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;set-cookie&#39;</span><span class="p">,</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;headers&#39;</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Session cookie!&quot;</span> <span class="k">if</span> <span class="n">set_cookie</span> <span class="k">else</span> <span class="s2">&quot;No session cookie&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to get posts&quot;</span><span class="p">)</span>
+
+        <span class="n">posts</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="k">await</span> <span class="n">text_reader</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;We received {len(posts)} posts&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/posts/</span><span class="si">{post[&quot;id&quot;]}</span><span class="s1">/comments&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Requesting comments from &quot;</span><span class="si">{path}</span><span class="s1">&quot;&quot;&#39;</span><span class="p">)</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+                <span class="c1"># As we were sent the session cookie we do not expect to receive</span>
+                <span class="c1"># another one, until this one has expired.</span>
+                <span class="n">set_cookie</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;set-cookie&#39;</span><span class="p">,</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;headers&#39;</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Session cookie!&quot;</span> <span class="k">if</span> <span class="n">set_cookie</span> <span class="k">else</span> <span class="s2">&quot;No session cookie&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]):</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to get comments&quot;</span><span class="p">)</span>
+
+                <span class="n">comments</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="k">await</span> <span class="n">text_reader</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;We received {len(comments)} comments&#39;</span><span class="p">)</span>
 
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
@@ -410,7 +457,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../client/" title="Client" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../responses/" title="Responses" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -419,7 +466,7 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Client
+                Responses
               </span>
             </div>
           </a>
@@ -461,7 +508,7 @@
     
       <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.1",url:{base:"../.."}})</script>
       
     
   </body>

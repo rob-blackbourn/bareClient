@@ -32,6 +32,17 @@
             "program": "${workspaceFolder}/demos/simple_json.py",
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "mkdocs build",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/mkdocs",
+            "args": [
+                "build"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }

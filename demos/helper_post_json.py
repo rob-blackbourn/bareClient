@@ -1,4 +1,4 @@
-""" A simple post example"""
+"""Post json with a helper function"""
 
 import asyncio
 from typing import Optional
@@ -17,7 +17,4 @@ async def main(url: str, cafile: Optional[str] = None) -> None:
     print(obj)
 
 
-URL = 'https://jsonplaceholder.typicode.com/todos'
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(URL))
+asyncio.run(main('https://jsonplaceholder.typicode.com/todos'))
