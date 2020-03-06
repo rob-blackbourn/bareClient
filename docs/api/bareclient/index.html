@@ -1250,32 +1250,32 @@ must be lowercased. Optional; defaults to an empty list. Pseudo headers
 <div class="autodoc-argument">
         <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">,</span></div>
+        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The HTTP method. Defaults to 'GET'.</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><p>The headers. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The HTTP method. Defaults to 'GET'.</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation"> (optional)</span><p>The headers. Defaults to
 None.</p>
-<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><p>The body content. Defaults to
+<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><span class="autodoc-punctuation"> (optional)</span><p>The body content. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio
 event loop. Defaults to None.</p>
-<var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><p>The HTTP/1 buffer size. Defaults to
+<var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The HTTP/1 buffer size. Defaults to
 8096.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated
 CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or
 more PEM-encoded certificates or a bytes-like object of
 DER-encoded certificates. Defaults to None.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><p>The decompressors. Defaults to None.</p>
-<var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><p>The protocols. Defaults
+<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
+<var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><span class="autodoc-punctuation"> (optional)</span><p>The protocols. Defaults
 to None.</p>
 </div>
 <div class="autodoc-attributes">
@@ -1326,7 +1326,7 @@ to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">cookies</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">,</span></div>
+        <var class="autodoc-varname">cookies</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, List[Cookie]]]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
@@ -1338,30 +1338,30 @@ to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><span class="autodoc-punctuation">,</span></div>
+        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><p>The headers. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation"> (optional)</span><p>The headers. Defaults to
 None.</p>
-<var class="autodoc-varname">cookies</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><p>The
+<var class="autodoc-varname">cookies</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, List[Cookie]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The
 cookies. Defaults to None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The asyncio event
 loop. Defaults to None.</p>
-<var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><p>The HTTP/1 buffer size. Defaults to 8096.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated
+<var class="autodoc-varname">h11_bufsiz</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The HTTP/1 buffer size. Defaults to 8096.</p>
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated
 CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or
 more PEM-encoded certificates or a bytes-like object of
 DER-encoded certificates. Defaults to None.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes</span><p>The decompressors. Defaults to None.</p>
-<var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><p>The list of protocols.
+<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
+<var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><span class="autodoc-punctuation"> (optional)</span><p>The list of protocols.
 Defaults to None.</p>
 </div>
 <div class="autodoc-attributes">
@@ -1396,12 +1396,12 @@ Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">path</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The path excluding the scheme and host part</p>
-<var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The HTTP method, defaults to 'GET'. Defaults
+<var class="autodoc-varname">path</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The path excluding the scheme and host part</p>
+<var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The HTTP method, defaults to 'GET'. Defaults
 to 'GET'.</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><p>Optional headers.
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[Header]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional headers.
 Defaults to None.</p>
-<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><p>Optional content, defaults to
+<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Content]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional content, defaults to
 None. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
@@ -1432,10 +1432,10 @@ None. Defaults to None.</p>
 <div class="autodoc-description">
 
 </div>
-<div class="autodoc-attributes">
+<div class="autodoc-examples">
 
 </div>
-<div class="autodoc-examples">
+<div class="autodoc-attributes">
 
 </div>
 <div class="autodoc-callable">
@@ -1466,16 +1466,16 @@ None. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 </div>
@@ -1521,7 +1521,7 @@ certificates. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><span class="autodoc-punctuation">,</span></div>
+        <var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str], Any]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
@@ -1534,18 +1534,18 @@ certificates. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_4">Parameters<a class="headerlink" href="#parameters_4" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><p>The function to loads the
+<var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str], Any]</span><span class="autodoc-punctuation"> (optional)</span><p>The function to loads the
 JSON object from the string. Defaults to json.loads.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 </div>
@@ -1604,17 +1604,17 @@ certificates. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_5">Parameters<a class="headerlink" href="#parameters_5" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p></p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p></p>
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 </div>
@@ -1661,17 +1661,17 @@ certificates. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_6">Parameters<a class="headerlink" href="#parameters_6" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">bytes</span><span class="autodoc-punctuation"> (optional)</span><p>The body content</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">bytes</span><p>The body content</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 </div>
@@ -1720,9 +1720,9 @@ certificates. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">*</var><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><span class="autodoc-punctuation">,</span></div>
+        <var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str], Any]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">dumps</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[Any]</span><span class="autodoc-punctuation">,</span></div>
+        <var class="autodoc-varname">dumps</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[Any], str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
@@ -1737,21 +1737,21 @@ certificates. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_7">Parameters<a class="headerlink" href="#parameters_7" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">obj</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation"> (optional)</span><p>The JSON payload</p>
-<var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str]</span><p>The function used to decode
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">obj</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><p>The JSON payload</p>
+<var class="autodoc-varname">loads</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[str], Any]</span><span class="autodoc-punctuation"> (optional)</span><p>The function used to decode
 the response. Defaults to json.loads.</p>
-<var class="autodoc-varname">dumps</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[Any]</span><p>The function used to encode
+<var class="autodoc-varname">dumps</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Callable[[Any], str]</span><span class="autodoc-punctuation"> (optional)</span><p>The function used to encode
 the request. Defaults to json.dumps.</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 </div>
@@ -1800,18 +1800,18 @@ certificates. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_8">Parameters<a class="headerlink" href="#parameters_8" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url</p>
-<var class="autodoc-varname">text</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p></p>
-<var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><p></p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url</p>
+<var class="autodoc-varname">text</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p></p>
+<var class="autodoc-varname">encoding</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Any</span><span class="autodoc-punctuation"> (optional)</span><p></p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 </div>
@@ -1870,22 +1870,22 @@ certificates. Defaults to None.</p>
 <br />
 <div class="autodoc-parameters">
 <h4 class="autodoc-title" id="parameters_9">Parameters<a class="headerlink" href="#parameters_9" title="Permanent link">&para;</a></h4>
-<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The url to get.</p>
-<var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><span class="autodoc-punctuation"> (optional)</span><p>The HTTP method (eg. 'GET', 'POST', etc).</p>
-<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><p>Any extra headers required. Defaults to
+<var class="autodoc-varname">url</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The url to get.</p>
+<var class="autodoc-varname">method</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">str</span><p>The HTTP method (eg. 'GET', 'POST', etc).</p>
+<var class="autodoc-varname">headers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Headers</span><span class="autodoc-punctuation"> (optional)</span><p>Any extra headers required. Defaults to
 None.</p>
-<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[bytes]</span><p>The content to send.. Defaults to
+<var class="autodoc-varname">content</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[bytes]</span><span class="autodoc-punctuation"> (optional)</span><p>The content to send.. Defaults to
 None.</p>
-<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><p>The optional asyncio event
+<var class="autodoc-varname">loop</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[AbstractEventLoop]</span><span class="autodoc-punctuation"> (optional)</span><p>The optional asyncio event
 loop.. Defaults to None.</p>
-<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a file of concatenated CA
+<var class="autodoc-varname">cafile</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a file of concatenated CA
 certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>The path to a directory containing
+<var class="autodoc-varname">capath</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The path to a directory containing
 several CA certificates in PEM format. Defaults to None.</p>
-<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><p>Either an ASCII string of one or more
+<var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or more
 PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
-<var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><p>The size of each chunk to send or -1 to send
+<var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The size of each chunk to send or -1 to send
 as a single chunk.. Defaults to -1.</p>
 </div>
 <div class="autodoc-returns">
