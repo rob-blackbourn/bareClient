@@ -11,6 +11,7 @@ from .helpers import (
     post_text,
     post_json
 )
+from .acgi import create_ssl_context_with_cert_chain
 
 __all__ = [
     'HttpClient',
@@ -21,5 +22,6 @@ __all__ = [
     'get_json',
     'post',
     'post_text',
-    'post_json'
+    'post_json',
+    'create_ssl_context_with_cert_chain'
 ]

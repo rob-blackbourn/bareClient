@@ -2,6 +2,7 @@
 
 from asyncio import AbstractEventLoop
 import urllib.parse
+from ssl import SSLContext
 from typing import (
     Any,
     List,
@@ -33,6 +34,7 @@ class HttpClient:
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
+            ssl_context: Optional[SSLContext] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Optional[List[str]] = None
     ) -> None:
@@ -89,6 +91,8 @@ class HttpClient:
             cadata (Optional[str], optional): Either an ASCII string of one or
                 more PEM-encoded certificates or a bytes-like object of
                 DER-encoded certificates. Defaults to None.
+            ssl_context (Optional[SSLContext], optional): An ssl context to be
+                used instead of generating one from the certificates.
             decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
                 The decompressors. Defaults to None.
             protocols (Optional[List[str]], optional): The protocols. Defaults
@@ -103,6 +107,7 @@ class HttpClient:
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
+        self.ssl_context = ssl_context
         self.handler: Optional[RequestHandler] = None
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
@@ -121,6 +126,7 @@ class HttpClient:
             cafile=self.cafile,
             capath=self.capath,
             cadata=self.cadata,
+            ssl_context=self.ssl_context,
             loop=self.loop,
             h11_bufsiz=self.h11_bufsiz,
             protocols=self.protocols

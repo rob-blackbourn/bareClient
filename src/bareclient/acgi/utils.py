@@ -3,8 +3,10 @@
 from asyncio import StreamWriter
 import logging
 import ssl
-from typing import List, Optional
+from typing import AnyStr, Callable, List, Optional
 from urllib.parse import ParseResult
+
+from ..constants import DEFAULT_PROTOCOLS, DEFAULT_CIPHERS
 
 LOGGER = logging.getLogger(__name__)
 
@@ -64,18 +66,16 @@ def create_ssl_context(
 ) -> ssl.SSLContext:
     """Create an ssl context suitable for https
 
-    :param cafile: The path of a file of concatenated CA certificates in PEM
-        format, defaults to None
-    :type cafile: Optional[str], optional
-    :param capath: The path to a directory containing CA certificates in PEM
-        format, defaults to None
-    :type capath: Optional[str], optional
-    :param cadata: The data for a PEM encoded certificate, defaults to None
-    :type cadata: Optional[str], optional
-    :param protocols: The supported protocols
-    :type cadata: List[str]
-    :return: An ssl context
-    :rtype: ssl.SSLContext
+    Args:
+        cafile (Optional[str]): The path of a file of concatenated CA
+            certificates in PEM format.
+        capath (Optional[str]): The path to a directory containing CA
+            certificates in PEM format.
+        cadata (Optional[str]): The data for a PEM encoded certificate.
+        protocols (List[str]): The supported protocols.
+
+    Returns:
+        ssl.SSLContext: An ssl context
     """
     ctx = ssl.create_default_context(
         purpose=ssl.Purpose.SERVER_AUTH,
@@ -87,7 +87,7 @@ def create_ssl_context(
         ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
     )
     ctx.options |= ssl.OP_NO_COMPRESSION
-    ctx.set_ciphers("ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20")
+    ctx.set_ciphers(DEFAULT_CIPHERS)
     ctx.set_alpn_protocols(protocols)
     try:
         ctx.set_npn_protocols(protocols)
@@ -111,3 +111,49 @@ def get_negotiated_protocol(writer: StreamWriter) -> Optional[str]:
     if negotiated_protocol is None:
         negotiated_protocol = ssl_object.selected_npn_protocol()
     return negotiated_protocol
+
+
+def create_ssl_context_with_cert_chain(
+        certfile: str,
+        keyfile: str,
+        password: Optional[Callable[[], AnyStr]] = None,
+        verfify_mode: int = ssl.CERT_REQUIRED,
+        check_hostname: bool = True,
+        protocols: Optional[List[str]] = None
+) -> ssl.SSLContext:
+    """Create an ssl context with load_cert_chain
+
+    Args:
+        certfile (str): The path to a certificate file.
+        keyfile (str): The path to a key file.
+        password (Optional[Callable[[], AnyStr]], optional): A function to get
+            the password. Defaults to None.
+        verify_mode (int, optional): The verify mode. Defaults to
+            ssl.CERT_REQUIRED.
+        check_hostname (bool, optional): Whether the hostname should be checked.
+            Defaults to True.
+        protocols (Optional[List[str]], optional): The list of alpn protocols.
+            Defaults to None.
+
+    Returns:
+        ssl.SSLContext: [description]
+    """
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context.options |= ssl.OP_NO_SSLv2
+    ssl_context.options |= ssl.OP_NO_SSLv3
+    ssl_context.options |= ssl.OP_NO_TLSv1
+    ssl_context.options |= ssl.OP_NO_TLSv1_1
+    ssl_context.options |= ssl.OP_NO_COMPRESSION
+    ssl_context.set_ciphers(DEFAULT_CIPHERS)
+    ssl_context.set_alpn_protocols(protocols or DEFAULT_PROTOCOLS)
+
+    ssl_context.verify_mode = verfify_mode
+    ssl_context.check_hostname = check_hostname
+
+    ssl_context.load_cert_chain(
+        certfile=certfile,
+        keyfile=keyfile,
+        password=password  # type: ignore
+    )
+
+    return ssl_context

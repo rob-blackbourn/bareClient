@@ -1,7 +1,7 @@
 """Connections"""
 
 from asyncio import AbstractEventLoop, open_connection
-import ssl
+from ssl import SSLContext
 from typing import (
     Any,
     Awaitable,
@@ -14,6 +14,7 @@ from typing import (
 import urllib.parse
 from urllib.error import URLError
 
+from ..constants import DEFAULT_PROTOCOLS
 from .utils import (
     get_port,
     create_ssl_context,
@@ -30,9 +31,6 @@ Application = Callable[
     Coroutine[Any, Any, Mapping[str, Any]]
 ]
 
-DEFAULT_PROTOCOLS = ["h2", "http/1.1"]
-# DEFAULT_PROTOCOLS = ["http/1.1"]
-
 
 async def connect(
         url: urllib.parse.ParseResult,
@@ -41,6 +39,7 @@ async def connect(
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
+        ssl_context: Optional[SSLContext] = None,
         loop: Optional[AbstractEventLoop] = None,
         h11_bufsiz: int = 8192,
         protocols: Optional[List[str]] = None
@@ -57,6 +56,8 @@ async def connect(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.
         h11_bufsiz (int, optional): The HTTP/1.1 buffer size. Defaults to 8192.
@@ -69,17 +70,13 @@ async def connect(
     Returns:
         Mapping[str, Any]: The response message.
     """
-    if url.scheme == 'http':
-        ssl_context: Optional[ssl.SSLContext] = None
-    elif url.scheme == 'https':
+    if ssl_context is None and url.scheme == 'https':
         ssl_context = create_ssl_context(
             cafile,
             capath,
             cadata,
             protocols or DEFAULT_PROTOCOLS
         )
-    else:
-        raise URLError(f'Invalid scheme: {url.scheme}')
 
     hostname = url.hostname
     if hostname is None:
