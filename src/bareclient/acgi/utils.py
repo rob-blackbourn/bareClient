@@ -21,13 +21,16 @@ SCHEMES = {
 
 
 def get_port(url: ParseResult) -> Optional[int]:
-    """Gets the port
+    """Gets the port.
 
-    :param url: A parsed url
-    :type url: ParseResult
-    :raises ValueError: Raised for an unknown scheme
-    :return: [description]
-    :rtype: The port
+    Args:
+        url (ParseResult): A parsed url.
+
+    Raises:
+        ValueError: If the scheme is unknown.
+
+    Returns:
+        Optional[int]: The port.
     """
     if url.scheme not in SCHEMES:
         raise ValueError('unknown scheme')
@@ -35,12 +38,13 @@ def get_port(url: ParseResult) -> Optional[int]:
 
 
 def get_target(url: ParseResult) -> str:
-    """Gets the target
+    """Gets the target.
 
-    :param url: A parsed url
-    :type url: ParseResult
-    :return: The target
-    :rtype: str
+    Args:
+        url (ParseResult): A parsed url
+
+    Returns:
+        str: The target.
     """
     path = url.path
     if url.query:
@@ -97,12 +101,13 @@ def create_ssl_context(
 
 
 def get_negotiated_protocol(writer: StreamWriter) -> Optional[str]:
-    """Get the negotiated protocol if any
+    """Get the negotiated protocol, if any.
 
-    :param writer: The writer
-    :type writer: StreamWriter
-    :return: The negotiated protocol if any.
-    :rtype: Optional[str]
+    Args:
+        writer (StreamWriter): The writer.
+
+    Returns:
+        Optional[str]: The negotiated protocol, if any.
     """
     ssl_object: Optional[ssl.SSLSocket] = writer.get_extra_info('ssl_object')
     if ssl_object is None:
@@ -117,7 +122,7 @@ def create_ssl_context_with_cert_chain(
         certfile: str,
         keyfile: str,
         password: Optional[Callable[[], AnyStr]] = None,
-        verfify_mode: int = ssl.CERT_REQUIRED,
+        verify_mode: int = ssl.CERT_REQUIRED,
         check_hostname: bool = True,
         protocols: Optional[List[str]] = None
 ) -> ssl.SSLContext:
@@ -147,7 +152,7 @@ def create_ssl_context_with_cert_chain(
     ssl_context.set_ciphers(DEFAULT_CIPHERS)
     ssl_context.set_alpn_protocols(protocols or DEFAULT_PROTOCOLS)
 
-    ssl_context.verify_mode = verfify_mode
+    ssl_context.verify_mode = verify_mode
     ssl_context.check_hostname = check_hostname
 
     ssl_context.load_cert_chain(
