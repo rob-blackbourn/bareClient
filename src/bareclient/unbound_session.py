@@ -14,19 +14,18 @@ from typing import (
     Type
 )
 from urllib.parse import urlparse
-from urllib.error import URLError
 
 from baretypes import Header, Content
 from bareutils.compression import Decompressor
 
-from .client import DEFAULT_DECOMPRESSORS, HttpClient
-from .utils import (
+from bareclient.client import DEFAULT_DECOMPRESSORS, HttpClient
+from bareclient.utils import (
     Cookie,
     extract_cookies,
     extract_cookies_from_response,
     gather_cookies
 )
-from .acgi.utils import get_authority
+from bareclient.acgi.utils import get_authority
 
 HttpClientFactory = Callable[
     [],
@@ -34,15 +33,15 @@ HttpClientFactory = Callable[
 ]
 
 
-class HttpSessionInstance:
-    """An HTTP session instance"""
+class HttpUnboundSessionInstance:
+    """An HTTP unbound session instance"""
 
     def __init__(
             self,
             client: HttpClient,
             update_session: Callable[[Mapping[str, Any]], None]
     ) -> None:
-        """Initialise an HTTP session instance.
+        """Initialise an HTTP unbound session instance.
 
         Args:
             client (HttpClient): The HTTP client
@@ -61,12 +60,11 @@ class HttpSessionInstance:
         await self.client.__aexit__(exc_type, exc_val, exc_tb)
 
 
-class HttpSession:
-    """An HTTP Session"""
+class HttpUnboundSession:
+    """An HTTP Unbound Session"""
 
     def __init__(
             self,
-            url: str,
             *,
             headers: Optional[List[Header]] = None,
             cookies: Optional[Mapping[bytes, List[Cookie]]] = None,
@@ -87,19 +85,18 @@ class HttpSession:
         from bareclient import HttpClient
 
 
-        async def main(url: str, path: str) -> None:
-            session =  HttpSession(url)
-            async with session.request(path, method='GET') as response:
+        async def main(url: str) -> None:
+            session =  HttpUnboundSession()
+            async with session.request(url, method='GET') as response:
                 print(response)
                 if response['status_code'] == 200 and response['more_body']:
                     async for part in response['body']:
                         print(part)
 
-        asyncio.run(main('https://docs.python.org', '/3/library/cgi.html'))
+        asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
         ```        
 
         Args:
-            url (str): The url
             headers (Optional[List[Header]], optional): The headers. Defaults to
                 None.
             cookies (Optional[Mapping[bytes, List[Cookie]]], optional): The
@@ -121,7 +118,6 @@ class HttpSession:
             protocols (Optional[List[str]], optional): The list of protocols.
                 Defaults to None.
         """
-        self.url = url
         self.headers = headers or []
         self.loop = loop
         self.h11_bufsiz = h11_bufsiz
@@ -131,22 +127,19 @@ class HttpSession:
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
-        parsed_url = urlparse(url)
-        self.scheme = parsed_url.scheme.encode('ascii')
-        self.domain = get_authority(parsed_url).encode('ascii')
 
     def request(
             self,
-            path: str,
+            url: str,
             *,
             method: str = 'GET',
             headers: Optional[List[Header]] = None,
             content: Optional[Content] = None
-    ) -> HttpSessionInstance:
+    ) -> HttpUnboundSessionInstance:
         """Make an HTTP request
 
         Args:
-            path (str): The path excluding the scheme and host part
+            url (str): The url
             method (str, optional): The HTTP method, defaults to 'GET'. Defaults
                 to 'GET'.
             headers (Optional[List[Header]], optional): Optional headers.
@@ -157,24 +150,23 @@ class HttpSession:
         Returns:
             HttpSessionInstance: A context instance yielding the response and body
         """
-        if not path.startswith('/'):
-            raise URLError("Path must start with '/'")
-
         combined_headers = self.headers
         if headers:
             combined_headers = combined_headers + headers
 
+        parsed_url = urlparse(url)
+        scheme = parsed_url.scheme.encode('ascii')
+        domain = get_authority(parsed_url).encode('ascii')
+
         cookies = self._gather_cookies(
-            self.scheme,
-            self.domain,
-            path.encode('ascii')
+            scheme,
+            domain,
+            parsed_url.path.encode('ascii')
         )
         if cookies:
             combined_headers.append(
                 (b'cookie', cookies)
             )
-
-        url = self.url + path
 
         client = HttpClient(
             url,
@@ -190,7 +182,7 @@ class HttpSession:
             protocols=self.protocols
         )
 
-        return HttpSessionInstance(client, self._extract_cookies)
+        return HttpUnboundSessionInstance(client, self._extract_cookies)
 
     def _extract_cookies(self, response: Mapping[str, Any]) -> None:
         now = datetime.now().astimezone(timezone.utc)

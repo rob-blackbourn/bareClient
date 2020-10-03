@@ -2,4 +2,6 @@
 
 @[bareclient:HttpSession]
 
+@[bareclient:HttpUnboundSession]
+
 @[bareclient.helpers]

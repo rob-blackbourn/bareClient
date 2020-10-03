@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1, mkdocs-material-4.6.3">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-4.6.3">
     
     
       
@@ -413,11 +413,11 @@ the session cookies in the same manner as a browser.</p>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to get posts&quot;</span><span class="p">)</span>
 
         <span class="n">posts</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="k">await</span> <span class="n">text_reader</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;We received {len(posts)} posts&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;We received </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">posts</span><span class="p">)</span><span class="si">}</span><span class="s1"> posts&#39;</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">post</span> <span class="ow">in</span> <span class="n">posts</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/posts/</span><span class="si">{post[&quot;id&quot;]}</span><span class="s1">/comments&#39;</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Requesting comments from &quot;</span><span class="si">{path}</span><span class="s1">&quot;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;/posts/</span><span class="si">{</span><span class="n">post</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/comments&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Requesting comments from &quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&quot;&quot;&#39;</span><span class="p">)</span>
             <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
                 <span class="c1"># As we were sent the session cookie we do not expect to receive</span>
                 <span class="c1"># another one, until this one has expired.</span>
@@ -428,7 +428,7 @@ the session cookies in the same manner as a browser.</p>
                     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Failed to get comments&quot;</span><span class="p">)</span>
 
                 <span class="n">comments</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="k">await</span> <span class="n">text_reader</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]))</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;We received {len(comments)} comments&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;We received </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span><span class="si">}</span><span class="s1"> comments&#39;</span><span class="p">)</span>
 
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
@@ -508,7 +508,7 @@ the session cookies in the same manner as a browser.</p>
     
       <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.1",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.1.2",url:{base:"../.."}})</script>
       
     
   </body>
