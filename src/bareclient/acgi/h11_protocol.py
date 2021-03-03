@@ -150,9 +150,16 @@ class H11Protocol(HttpProtocol):
 
     async def _disconnect(self) -> None:
         if not self._is_message_ended and self._h11_state.our_state != h11.DONE:
-            buf = self._h11_state.send(h11.EndOfMessage())
-            self.writer.write(buf)
-            await self.writer.drain()
+
+            if self._h11_state.our_state == h11.MUST_CLOSE:
+                buf = self._h11_state.send(h11.ConnectionClosed())
+            else:
+                buf = self._h11_state.send(h11.EndOfMessage())
+
+            if buf:
+                self.writer.write(buf)
+                await self.writer.drain()
+
         self.writer.close()
         await self.writer.wait_closed()
 
