@@ -1,14 +1,18 @@
 """Tests for async_events.py"""
 
 import asyncio
+from typing import Optional
+
 import pytest
+
 from bareclient.acgi.asyncio_events import MessageEvent, ResetEvent
+
 
 @pytest.mark.asyncio
 async def test_message_event():
     """Test for message event"""
 
-    async def waiter(event: MessageEvent[str]) -> str:
+    async def waiter(event: MessageEvent[str]) -> Optional[str]:
         return await event.wait_with_message()
 
     event: MessageEvent[str] = MessageEvent()
@@ -20,6 +24,7 @@ async def test_message_event():
 
     await waiter_task
     assert waiter_task.result() == message
+
 
 @pytest.mark.asyncio
 async def test_reset_event():
