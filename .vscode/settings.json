@@ -12,6 +12,7 @@
     "AESGCM",
     "ASGI",
     "Decompressor",
+    "ECDH",
     "ECDHE",
     "SYSNAME",
     "acgi",
