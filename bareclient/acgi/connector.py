@@ -7,17 +7,17 @@ from typing import (
     Awaitable,
     Callable,
     Coroutine,
-    List,
+    Iterable,
     Mapping,
     Optional
 )
 import urllib.parse
 from urllib.error import URLError
 
-from ..constants import DEFAULT_PROTOCOLS
+from ..ssl_contexts import create_ssl_context
+
 from .utils import (
     get_port,
-    create_ssl_context,
     get_negotiated_protocol
 )
 from .http_protocol import HttpProtocol
@@ -35,34 +35,37 @@ Application = Callable[
 async def connect(
         url: urllib.parse.ParseResult,
         application: Application,
-        *,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[SSLContext] = None,
-        loop: Optional[AbstractEventLoop] = None,
-        h11_bufsiz: int = 8192,
-        protocols: Optional[List[str]] = None
+        cafile: Optional[str],
+        capath: Optional[str],
+        cadata: Optional[str],
+        ssl_context: Optional[SSLContext],
+        loop: Optional[AbstractEventLoop],
+        h11_bufsiz: int,
+        protocols: Iterable[str],
+        ciphers: Iterable[str],
+        options: Iterable[int]
 ) -> Mapping[str, Any]:
     """Connect to the web server and run the application
 
     Args:
         url (urllib.parse.ParseResult): The url
         application (Application): The application to run
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
+        cafile (Optional[str]): The path to a file of concatenated CA
+            certificates in PEM format.
+        capath (Optional[str]): The path to a directory containing
+            several CA certificates in PEM format.
+        cadata (Optional[str]): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            certificates.
+        ssl_context (Optional[SSLContext]): An ssl context to be
             used instead of generating one from the certificates.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        h11_bufsiz (int, optional): The HTTP/1.1 buffer size. Defaults to 8192.
-        protocols (Optional[List[str]], optional): The HTTP/1.1 buffer size.
-            Defaults to None.
+        loop (Optional[AbstractEventLoop]): The optional asyncio event
+            loop.
+        h11_bufsiz (int): The HTTP/1.1 buffer size.
+        protocols (Iterable[str]): The supported protocols.
+        ciphers (Iterable[str]): The supported ciphers.
+        options (Iterable[int]): The ssl.SSLContext.options.
+
 
     Raises:
         URLError: Raised for an invalid url
@@ -75,7 +78,9 @@ async def connect(
             cafile,
             capath,
             cadata,
-            protocols or DEFAULT_PROTOCOLS
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options
         )
 
     hostname = url.hostname
@@ -93,7 +98,8 @@ async def connect(
     )
 
     negotiated_protocol = get_negotiated_protocol(
-        writer) if ssl_context else None
+        writer
+    ) if ssl_context else None
 
     if negotiated_protocol == 'h2':
         http_protocol: HttpProtocol = H2Protocol(reader, writer)

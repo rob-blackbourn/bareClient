@@ -21,6 +21,8 @@ nav:
           - user-guide/requests.md
           - user-guide/responses.md
           - user-guide/session.md
+          - user-guide/ssl.md
+          - user-guide/http-protocols.md
     - API:
           - bareclient: api/bareclient.md
 

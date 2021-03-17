@@ -2,15 +2,18 @@
 
 from asyncio import AbstractEventLoop
 import json
-from typing import Any, Callable, Optional
+import ssl
+from typing import Any, Callable, Iterable, Mapping, Optional, Type
 from urllib.parse import urlparse
 
 from baretypes import Headers
 import bareutils.header as header
 from bareutils import bytes_writer
+from bareutils.compression import Decompressor
 
 from .client import HttpClient
-from .constants import USER_AGENT
+from .constants import USER_AGENT, DEFAULT_PROTOCOLS
+from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 
 
 async def request(
@@ -23,6 +26,11 @@ async def request(
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1
 ) -> bytes:
     """Gets bytes from a url.
@@ -51,6 +59,16 @@ async def request(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
         chunk_size (int, optional): The size of each chunk to send or -1 to send
             as a single chunk.. Defaults to -1.
 
@@ -90,7 +108,12 @@ async def request(
             loop=loop,
             cafile=cafile,
             capath=capath,
-            cadata=cadata
+            cadata=cadata,
+            ssl_context=ssl_context,
+            decompressors=decompressors,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options
     ) as response:
         if response['status_code'] < 200 or response['status_code'] >= 400:
             raise RuntimeError('Request failed')
@@ -108,7 +131,12 @@ async def get(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS
 ) -> bytes:
     """Issues a GET request
 
@@ -125,6 +153,16 @@ async def get(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
 
     Returns:
         bytes: [description]
@@ -136,7 +174,12 @@ async def get(
         loop=loop,
         cafile=cafile,
         capath=capath,
-        cadata=cadata
+        cadata=cadata,
+        ssl_context=ssl_context,
+        decompressors=decompressors,
+        protocols=protocols,
+        ciphers=ciphers,
+        options=options
     )
 
 
@@ -148,7 +191,12 @@ async def get_text(
         encoding: str = 'utf-8',
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS
 ) -> str:
     """Issues a GET request returning a string
 
@@ -178,6 +226,16 @@ async def get_text(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
 
     Returns:
         str: [description]
@@ -194,7 +252,12 @@ async def get_text(
         loop=loop,
         cafile=cafile,
         capath=capath,
-        cadata=cadata
+        cadata=cadata,
+        ssl_context=ssl_context,
+        decompressors=decompressors,
+        protocols=protocols,
+        ciphers=ciphers,
+        options=options
     )
     return buf.decode(encoding)
 
@@ -207,7 +270,12 @@ async def get_json(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS
 ) -> Any:
     """Issues a GET request returning a JSON object
 
@@ -239,6 +307,16 @@ async def get_json(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
 
     Returns:
         Any: The decoded JSON object
@@ -255,7 +333,12 @@ async def get_json(
         loop=loop,
         cafile=cafile,
         capath=capath,
-        cadata=cadata
+        cadata=cadata,
+        ssl_context=ssl_context,
+        decompressors=decompressors,
+        protocols=protocols,
+        ciphers=ciphers,
+        options=options
     )
     return loads(text)
 
@@ -268,7 +351,13 @@ async def post(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS,
+        chunk_size: int = -1
 ) -> bytes:
     """Issues a POST request
 
@@ -286,6 +375,18 @@ async def post(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
 
     Returns:
         bytes: The response body
@@ -298,7 +399,13 @@ async def post(
         loop=loop,
         cafile=cafile,
         capath=capath,
-        cadata=cadata
+        cadata=cadata,
+        ssl_context=ssl_context,
+        decompressors=decompressors,
+        protocols=protocols,
+        ciphers=ciphers,
+        options=options,
+        chunk_size=chunk_size
     )
 
 
@@ -311,7 +418,13 @@ async def post_text(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS,
+        chunk_size: int = -1
 ) -> str:
     """Issues a POST request with a str body
 
@@ -329,6 +442,18 @@ async def post_text(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
 
     Returns:
         bytes: The response body
@@ -350,7 +475,13 @@ async def post_text(
         loop=loop,
         cafile=cafile,
         capath=capath,
-        cadata=cadata
+        cadata=cadata,
+        ssl_context=ssl_context,
+        decompressors=decompressors,
+        protocols=protocols,
+        ciphers=ciphers,
+        options=options,
+        chunk_size=chunk_size
     )
     return response.decode(encoding=encoding)
 
@@ -365,7 +496,13 @@ async def post_json(
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
-        cadata: Optional[str] = None
+        cadata: Optional[str] = None,
+        ssl_context: Optional[ssl.SSLContext] = None,
+        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        ciphers: Iterable[str] = DEFAULT_CIPHERS,
+        options: Iterable[int] = DEFAULT_OPTIONS,
+        chunk_size: int = -1
 ) -> Optional[Any]:
     """Issues a POST request with a JSON payload
 
@@ -402,6 +539,18 @@ async def post_json(
         cadata (Optional[str], optional): Either an ASCII string of one or more
             PEM-encoded certificates or a bytes-like object of DER-encoded
             certificates. Defaults to None.
+        ssl_context (Optional[SSLContext], optional): An ssl context to be
+            used instead of generating one from the certificates.
+        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
+            The decompressors. Defaults to None.
+        protocols (Iterable[str], optional): The supported protocols. Defaults
+            to DEFAULT_PROTOCOLS.
+        ciphers (Iterable[str], optional): The supported ciphers. Defaults
+            to DEFAULT_CIPHERS.
+        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+            to DEFAULT_OPTIONS.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
 
     Returns:
         Optional[Any]: The decoded response
@@ -424,6 +573,12 @@ async def post_json(
         loop=loop,
         cafile=cafile,
         capath=capath,
-        cadata=cadata
+        cadata=cadata,
+        ssl_context=ssl_context,
+        decompressors=decompressors,
+        protocols=protocols,
+        ciphers=ciphers,
+        options=options,
+        chunk_size=chunk_size
     )
     return loads(text)

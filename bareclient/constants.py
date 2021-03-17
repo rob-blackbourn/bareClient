@@ -23,22 +23,4 @@ USER_AGENT = f'bareClient/{DIST_VERSION} ({SYSNAME}; {RELEASE}; {MACHINE})'.enco
     'ascii'
 )
 
-DEFAULT_PROTOCOLS = ["h2", "http/1.1"]
-DEFAULT_CIPHERS = ":".join(
-    [
-        "ECDHE+AESGCM",
-        "ECDHE+CHACHA20",
-        "DHE+AESGCM",
-        "DHE+CHACHA20",
-        "ECDH+AESGCM",
-        "DH+AESGCM",
-        "ECDH+AES",
-        "DH+AES",
-        "RSA+AESGCM",
-        "RSA+AES",
-        "!aNULL",
-        "!eNULL",
-        "!MD5",
-        "!DSS",
-    ]
-)
+DEFAULT_PROTOCOLS = ("h2", "http/1.1")

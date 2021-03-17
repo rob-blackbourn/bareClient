@@ -8,6 +8,7 @@ from typing import (
     Any,
     AsyncContextManager,
     Callable,
+    Iterable,
     List,
     Mapping,
     Optional,
@@ -26,6 +27,9 @@ from bareclient.utils import (
     gather_cookies
 )
 from bareclient.acgi.utils import get_authority
+
+from .constants import DEFAULT_PROTOCOLS
+from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 
 HttpClientFactory = Callable[
     [],
@@ -74,7 +78,9 @@ class HttpUnboundSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            protocols: Optional[List[str]] = None
+            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+            ciphers: Iterable[str] = DEFAULT_CIPHERS,
+            options: Iterable[int] = DEFAULT_OPTIONS
     ) -> None:
         """Initialise an HTTP session
 
@@ -115,8 +121,12 @@ class HttpUnboundSession:
                 DER-encoded certificates. Defaults to None.
             decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
                 The decompressors. Defaults to None.
-            protocols (Optional[List[str]], optional): The list of protocols.
-                Defaults to None.
+            protocols (Iterable[str], optional): The supported protocols.
+                Defaults to DEFAULT_PROTOCOLS.
+            ciphers (Iterable[str], optional): The supported ciphers.
+                Defaults to DEFAULT_CIPHERS.
+            options (Iterable[int], optional): The SSLContext options.
+                Defaults to DEFAULT_OPTIONS.
         """
         self.headers = headers or []
         self.loop = loop
@@ -126,6 +136,8 @@ class HttpUnboundSession:
         self.cadata = cadata
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
+        self.ciphers = ciphers
+        self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
 
     def request(
@@ -179,7 +191,9 @@ class HttpUnboundSession:
             capath=self.capath,
             cadata=self.cadata,
             decompressors=self.decompressors,
-            protocols=self.protocols
+            protocols=self.protocols,
+            ciphers=self.ciphers,
+            options=self.options
         )
 
         return HttpUnboundSessionInstance(client, self._extract_cookies)

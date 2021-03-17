@@ -460,7 +460,6 @@
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">&#39;https://docs.python.org/3/library/cgi.html&#39;</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>The <code>HttpClient</code> <a href="/user-guide/requests/#httpclient">request</a> provides an async
 context yielding a <a href="/user-guide/responses/">response</a> or type
 <code>Mapping[str, Any]</code> which loosely follows the semantics of ASGI message
@@ -490,7 +489,6 @@ passing.</p>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">&#39;http://localhost:9009/test/api/info&#39;</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>Note that the body content is provided with the <code>test_writer</code> utility which
 turns the payload into an async iterator.</p>

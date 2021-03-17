@@ -8,6 +8,7 @@ from typing import (
     Any,
     AsyncContextManager,
     Callable,
+    Iterable,
     List,
     Mapping,
     Optional,
@@ -19,7 +20,9 @@ from urllib.error import URLError
 from baretypes import Header, Content
 from bareutils.compression import Decompressor
 
-from .client import DEFAULT_DECOMPRESSORS, HttpClient
+from .client import HttpClient
+from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
+from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .utils import (
     Cookie,
     extract_cookies,
@@ -76,7 +79,9 @@ class HttpSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            protocols: Optional[List[str]] = None
+            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+            ciphers: Iterable[str] = DEFAULT_CIPHERS,
+            options: Iterable[int] = DEFAULT_OPTIONS
     ) -> None:
         """Initialise an HTTP session
 
@@ -118,8 +123,12 @@ class HttpSession:
                 DER-encoded certificates. Defaults to None.
             decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
                 The decompressors. Defaults to None.
-            protocols (Optional[List[str]], optional): The list of protocols.
-                Defaults to None.
+            protocols (Iterable[str], optional): The supported protocols. Defaults
+                to DEFAULT_PROTOCOLS.
+            ciphers (Iterable[str], optional): The supported ciphers. Defaults
+                to DEFAULT_CIPHERS.
+            options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
+                to DEFAULT_OPTIONS.
         """
         self.url = url
         self.headers = headers or []
@@ -130,6 +139,8 @@ class HttpSession:
         self.cadata = cadata
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
+        self.ciphers = ciphers
+        self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
         parsed_url = urlparse(url)
         self.scheme = parsed_url.scheme.encode('ascii')
@@ -187,7 +198,9 @@ class HttpSession:
             capath=self.capath,
             cadata=self.cadata,
             decompressors=self.decompressors,
-            protocols=self.protocols
+            protocols=self.protocols,
+            ciphers=self.ciphers,
+            options=self.options
         )
 
         return HttpSessionInstance(client, self._extract_cookies)

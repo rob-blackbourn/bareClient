@@ -1,12 +1,23 @@
 """Utilities"""
 
 from datetime import datetime
-from typing import Any, Dict, Generic, List, Mapping, Tuple, TypeVar
+import logging
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Mapping,
+    Tuple,
+    TypeVar
+)
 
 import bareutils.header as header
 from bareutils.cookies import encode_cookies
 
 T = TypeVar('T')
+
+LOGGER = logging.getLogger(__name__)
 
 
 class NullIter(Generic[T]):
