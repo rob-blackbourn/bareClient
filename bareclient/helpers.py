@@ -3,7 +3,8 @@
 from asyncio import AbstractEventLoop
 import json
 import ssl
-from typing import Any, Callable, Iterable, Mapping, Optional, Type
+from typing import Any, Callable, Iterable, Mapping, Optional, Type, Union
+from urllib.error import HTTPError
 from urllib.parse import urlparse
 
 from baretypes import Headers
@@ -31,7 +32,8 @@ async def request(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        chunk_size: int = -1
+        chunk_size: int = -1,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> bytes:
     """Gets bytes from a url.
 
@@ -70,13 +72,16 @@ async def request(
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
             to DEFAULT_OPTIONS.
         chunk_size (int, optional): The size of each chunk to send or -1 to send
-            as a single chunk.. Defaults to -1.
+            as a single chunk. Defaults to -1.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
 
     Raises:
-        RuntimeError: Is the status code is not ok
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
-        bytes: The bytes received
+        bytes: The bytes received.
     """
 
     headers = [] if headers is None else list(headers)
@@ -113,14 +118,21 @@ async def request(
             decompressors=decompressors,
             protocols=protocols,
             ciphers=ciphers,
-            options=options
+            options=options,
+            connect_timeout=connect_timeout
     ) as response:
-        if response['status_code'] < 200 or response['status_code'] >= 400:
-            raise RuntimeError('Request failed')
         buf = b''
         if response['more_body']:
             async for part in response['body']:
                 buf += part
+        if response['status_code'] < 200 or response['status_code'] >= 400:
+            raise HTTPError(
+                url,
+                response['status_code'],
+                buf,
+                response['headers'],
+                None
+            )
         return buf
 
 
@@ -136,7 +148,8 @@ async def get(
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS
+        options: Iterable[int] = DEFAULT_OPTIONS,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> bytes:
     """Issues a GET request
 
@@ -163,6 +176,12 @@ async def get(
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
             to DEFAULT_OPTIONS.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
+
+    Raises:
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
         bytes: [description]
@@ -179,7 +198,8 @@ async def get(
         decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
-        options=options
+        options=options,
+        connect_timeout=connect_timeout
     )
 
 
@@ -196,7 +216,8 @@ async def get_text(
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS
+        options: Iterable[int] = DEFAULT_OPTIONS,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> str:
     """Issues a GET request returning a string
 
@@ -210,7 +231,7 @@ async def get_text(
         text = await get_text(url)
         print(text)
 
-    asyncio.run(main('https://docs.python.org/3/library/cgi.html'))    
+    asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
     ```
 
     Args:
@@ -236,6 +257,12 @@ async def get_text(
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
             to DEFAULT_OPTIONS.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
+
+    Raises:
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
         str: [description]
@@ -257,7 +284,8 @@ async def get_text(
         decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
-        options=options
+        options=options,
+        connect_timeout=connect_timeout
     )
     return buf.decode(encoding)
 
@@ -275,7 +303,8 @@ async def get_json(
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS
+        options: Iterable[int] = DEFAULT_OPTIONS,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> Any:
     """Issues a GET request returning a JSON object
 
@@ -317,6 +346,12 @@ async def get_json(
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
             to DEFAULT_OPTIONS.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
+
+    Raises:
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
         Any: The decoded JSON object
@@ -338,7 +373,8 @@ async def get_json(
         decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
-        options=options
+        options=options,
+        connect_timeout=connect_timeout
     )
     return loads(text)
 
@@ -357,7 +393,8 @@ async def post(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        chunk_size: int = -1
+        chunk_size: int = -1,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> bytes:
     """Issues a POST request
 
@@ -387,6 +424,12 @@ async def post(
             to DEFAULT_OPTIONS.
         chunk_size (int, optional): The size of each chunk to send or -1 to send
             as a single chunk.. Defaults to -1.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
+
+    Raises:
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
         bytes: The response body
@@ -405,7 +448,8 @@ async def post(
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        chunk_size=chunk_size
+        chunk_size=chunk_size,
+        connect_timeout=connect_timeout
     )
 
 
@@ -424,7 +468,8 @@ async def post_text(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        chunk_size: int = -1
+        chunk_size: int = -1,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> str:
     """Issues a POST request with a str body
 
@@ -454,6 +499,12 @@ async def post_text(
             to DEFAULT_OPTIONS.
         chunk_size (int, optional): The size of each chunk to send or -1 to send
             as a single chunk.. Defaults to -1.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
+
+    Raises:
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
         bytes: The response body
@@ -481,7 +532,8 @@ async def post_text(
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        chunk_size=chunk_size
+        chunk_size=chunk_size,
+        connect_timeout=connect_timeout
     )
     return response.decode(encoding=encoding)
 
@@ -502,7 +554,8 @@ async def post_json(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        chunk_size: int = -1
+        chunk_size: int = -1,
+        connect_timeout: Optional[Union[int, float]] = None
 ) -> Optional[Any]:
     """Issues a POST request with a JSON payload
 
@@ -551,6 +604,12 @@ async def post_json(
             to DEFAULT_OPTIONS.
         chunk_size (int, optional): The size of each chunk to send or -1 to send
             as a single chunk.. Defaults to -1.
+        connect_timeout (Optional[Union[int, float]], optional): The number
+            of seconds to wait for the connection. Defaults to None.
+
+    Raises:
+        HTTPError: Is the status code is not ok.
+        asyncio.TimeoutError: If the connect times out.
 
     Returns:
         Optional[Any]: The decoded response
@@ -579,6 +638,7 @@ async def post_json(
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        chunk_size=chunk_size
+        chunk_size=chunk_size,
+        connect_timeout=connect_timeout
     )
     return loads(text)
