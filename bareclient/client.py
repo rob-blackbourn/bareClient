@@ -9,7 +9,8 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Type
+    Type,
+    Union
 )
 
 from bareutils.compression import Decompressor
@@ -40,7 +41,8 @@ class HttpClient:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS
+            options: Iterable[int] = DEFAULT_OPTIONS,
+            connect_timeout: Optional[Union[int, float]] = None
     ) -> None:
         """Make an HTTP client.
 
@@ -105,6 +107,8 @@ class HttpClient:
                 to DEFAULT_CIPHERS.
             options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
                 to DEFAULT_OPTIONS.
+            connect_timeout (Optional[Union[int, float]], optional): The number
+                of seconds to wait for the connection. Defaults to None.
         """
         self.url = urllib.parse.urlparse(url)
         self.method = method
@@ -121,6 +125,7 @@ class HttpClient:
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
+        self.connect_timeout = connect_timeout
 
     async def __aenter__(self) -> Mapping[str, Any]:
         self.handler = RequestHandler(
@@ -141,7 +146,8 @@ class HttpClient:
             h11_bufsiz=self.h11_bufsiz,
             protocols=self.protocols,
             ciphers=self.ciphers,
-            options=self.options
+            options=self.options,
+            connect_timeout=self.connect_timeout
         )
         return response
 

@@ -1,6 +1,7 @@
 """Connections"""
 
-from asyncio import AbstractEventLoop, open_connection
+import asyncio
+from asyncio import AbstractEventLoop
 from ssl import SSLContext
 from typing import (
     Any,
@@ -9,7 +10,8 @@ from typing import (
     Coroutine,
     Iterable,
     Mapping,
-    Optional
+    Optional,
+    Union
 )
 import urllib.parse
 from urllib.error import URLError
@@ -43,7 +45,8 @@ async def connect(
         h11_bufsiz: int,
         protocols: Iterable[str],
         ciphers: Iterable[str],
-        options: Iterable[int]
+        options: Iterable[int],
+        connect_timeout: Optional[Union[int, float]]
 ) -> Mapping[str, Any]:
     """Connect to the web server and run the application
 
@@ -65,10 +68,11 @@ async def connect(
         protocols (Iterable[str]): The supported protocols.
         ciphers (Iterable[str]): The supported ciphers.
         options (Iterable[int]): The ssl.SSLContext.options.
-
+        connect_timeout (Optional[Union[int, float]]): The connection timeout.
 
     Raises:
         URLError: Raised for an invalid url
+        asyncio.TimeoutError: Raised for a connection timeout.
 
     Returns:
         Mapping[str, Any]: The response message.
@@ -90,12 +94,13 @@ async def connect(
     if port is None:
         raise URLError('unspecified port')
 
-    reader, writer = await open_connection(
+    future = asyncio.open_connection(
         hostname,
         port,
         loop=loop,
         ssl=ssl_context
     )
+    reader, writer = await asyncio.wait_for(future, timeout=connect_timeout)
 
     negotiated_protocol = get_negotiated_protocol(
         writer

@@ -12,7 +12,8 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Type
+    Type,
+    Union
 )
 from urllib.parse import urlparse
 from urllib.error import URLError
@@ -81,7 +82,8 @@ class HttpSession:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS
+            options: Iterable[int] = DEFAULT_OPTIONS,
+            connect_timeout: Optional[Union[int, float]] = None
     ) -> None:
         """Initialise an HTTP session
 
@@ -101,7 +103,7 @@ class HttpSession:
                         print(part)
 
         asyncio.run(main('https://docs.python.org', '/3/library/cgi.html'))
-        ```        
+        ```
 
         Args:
             url (str): The url
@@ -129,6 +131,8 @@ class HttpSession:
                 to DEFAULT_CIPHERS.
             options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
                 to DEFAULT_OPTIONS.
+            connect_timeout (Optional[Union[int, float]], optional): The number
+                of seconds to wait for the connection. Defaults to None.
         """
         self.url = url
         self.headers = headers or []
@@ -145,6 +149,7 @@ class HttpSession:
         parsed_url = urlparse(url)
         self.scheme = parsed_url.scheme.encode('ascii')
         self.domain = get_authority(parsed_url).encode('ascii')
+        self.connect_timeout = connect_timeout
 
     def request(
             self,
@@ -164,6 +169,9 @@ class HttpSession:
                 Defaults to None.
             content (Optional[Content], optional): Optional content, defaults to
                 None. Defaults to None.
+
+        Raises:
+            asyncio.TimeoutError: If the connect times out.
 
         Returns:
             HttpSessionInstance: A context instance yielding the response and body
@@ -200,7 +208,8 @@ class HttpSession:
             decompressors=self.decompressors,
             protocols=self.protocols,
             ciphers=self.ciphers,
-            options=self.options
+            options=self.options,
+            connect_timeout=self.connect_timeout
         )
 
         return HttpSessionInstance(client, self._extract_cookies)
