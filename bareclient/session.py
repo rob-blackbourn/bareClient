@@ -21,7 +21,7 @@ from baretypes import Header, Content
 from bareutils.compression import Decompressor
 
 from .client import HttpClient
-from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
+from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_HTTP_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .utils import (
     Cookie,
@@ -79,7 +79,7 @@ class HttpSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+            http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS
     ) -> None:
@@ -123,8 +123,8 @@ class HttpSession:
                 DER-encoded certificates. Defaults to None.
             decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
                 The decompressors. Defaults to None.
-            protocols (Iterable[str], optional): The supported protocols. Defaults
-                to DEFAULT_PROTOCOLS.
+            http_protocols (Iterable[str], optional): The supported http
+                protocols. Defaults to DEFAULT_HTTP_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers. Defaults
                 to DEFAULT_CIPHERS.
             options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -138,7 +138,7 @@ class HttpSession:
         self.capath = capath
         self.cadata = cadata
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
-        self.protocols = protocols
+        self.http_protocols = http_protocols
         self.ciphers = ciphers
         self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
@@ -198,7 +198,7 @@ class HttpSession:
             capath=self.capath,
             cadata=self.cadata,
             decompressors=self.decompressors,
-            protocols=self.protocols,
+            http_protocols=self.http_protocols,
             ciphers=self.ciphers,
             options=self.options
         )

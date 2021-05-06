@@ -12,7 +12,7 @@ from .helpers import (
     post_text,
     post_json
 )
-from .constants import DEFAULT_PROTOCOLS, DEFAULT_DECOMPRESSORS
+from .constants import DEFAULT_HTTP_PROTOCOLS, DEFAULT_DECOMPRESSORS
 from .ssl_contexts import (
     create_ssl_context,
     create_ssl_context_with_cert_chain,
@@ -33,7 +33,7 @@ __all__ = [
     'post_json',
     'create_ssl_context',
     'create_ssl_context_with_cert_chain',
-    'DEFAULT_PROTOCOLS',
+    'DEFAULT_HTTP_PROTOCOLS',
     'DEFAULT_CIPHERS',
     'DEFAULT_OPTIONS',
     'DEFAULT_DECOMPRESSORS'

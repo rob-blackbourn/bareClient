@@ -28,7 +28,7 @@ from bareclient.utils import (
 )
 from bareclient.acgi.utils import get_authority
 
-from .constants import DEFAULT_PROTOCOLS
+from .constants import DEFAULT_HTTP_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 
 HttpClientFactory = Callable[
@@ -78,7 +78,7 @@ class HttpUnboundSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+            http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS
     ) -> None:
@@ -121,8 +121,8 @@ class HttpUnboundSession:
                 DER-encoded certificates. Defaults to None.
             decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
                 The decompressors. Defaults to None.
-            protocols (Iterable[str], optional): The supported protocols.
-                Defaults to DEFAULT_PROTOCOLS.
+            http_protocols (Iterable[str], optional): The supported http protocols.
+                Defaults to DEFAULT_HTTP_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers.
                 Defaults to DEFAULT_CIPHERS.
             options (Iterable[int], optional): The SSLContext options.
@@ -135,7 +135,7 @@ class HttpUnboundSession:
         self.capath = capath
         self.cadata = cadata
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
-        self.protocols = protocols
+        self.http_protocols = http_protocols
         self.ciphers = ciphers
         self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
@@ -191,7 +191,7 @@ class HttpUnboundSession:
             capath=self.capath,
             cadata=self.cadata,
             decompressors=self.decompressors,
-            protocols=self.protocols,
+            http_protocols=self.http_protocols,
             ciphers=self.ciphers,
             options=self.options
         )

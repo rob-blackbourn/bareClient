@@ -9,7 +9,7 @@ from typing import (
     Optional
 )
 
-from .constants import DEFAULT_PROTOCOLS
+from .constants import DEFAULT_HTTP_PROTOCOLS
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ def create_ssl_context(
         capath: Optional[str],
         cadata: Optional[str],
         *,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> ssl.SSLContext:
@@ -55,8 +55,8 @@ def create_ssl_context(
         capath (Optional[str]): The path to a directory containing CA
             certificates in PEM format.
         cadata (Optional[str]): The data for a PEM encoded certificate.
-        protocols (Iterable[str], optional): The supported protocols.
-            Defaults to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers.
             Defaults to DEFAULT_CIPHERS.
         options (Iterable[str], optional): The SSLContext options.
@@ -74,9 +74,9 @@ def create_ssl_context(
     for option in options:
         ctx.options |= option
     ctx.set_ciphers(':'.join(ciphers))
-    ctx.set_alpn_protocols(list(protocols))
+    ctx.set_alpn_protocols(list(http_protocols))
     try:
-        ctx.set_npn_protocols(list(protocols))
+        ctx.set_npn_protocols(list(http_protocols))
     except NotImplementedError:
         LOGGER.debug("Can't set npn protocols")
     return ctx
@@ -89,7 +89,8 @@ def create_ssl_context_with_cert_chain(
         verify_mode: int = ssl.CERT_REQUIRED,
         check_hostname: bool = True,
         *,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
+        ssl_protocol: int = ssl.PROTOCOL_TLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> ssl.SSLContext:
@@ -104,8 +105,10 @@ def create_ssl_context_with_cert_chain(
             ssl.CERT_REQUIRED.
         check_hostname (bool, optional): Whether the hostname should be checked.
             Defaults to True.
-        protocols (Iterable[str], optional): The alpn protocols.
-            Defaults to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The alpn http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
+        ssl_protocol (int, optional): The SSL protocol. Defaults to
+            ssl.PROTOCOL_TLS.
         ciphers (Iterable[str], optional): The ciphers.
             Defaults to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The SSLContext options.
@@ -114,11 +117,11 @@ def create_ssl_context_with_cert_chain(
     Returns:
         ssl.SSLContext: [description]
     """
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context = ssl.SSLContext(ssl_protocol)
     for option in options:
         ssl_context.options |= option
     ssl_context.set_ciphers(':'.join(ciphers))
-    ssl_context.set_alpn_protocols(list(protocols))
+    ssl_context.set_alpn_protocols(list(http_protocols))
 
     ssl_context.verify_mode = verify_mode
     ssl_context.check_hostname = check_hostname

@@ -12,7 +12,7 @@ from bareutils import bytes_writer
 from bareutils.compression import Decompressor
 
 from .client import HttpClient
-from .constants import USER_AGENT, DEFAULT_PROTOCOLS
+from .constants import USER_AGENT, DEFAULT_HTTP_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 
 
@@ -28,7 +28,7 @@ async def request(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1
@@ -63,8 +63,8 @@ async def request(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -111,7 +111,7 @@ async def request(
             cadata=cadata,
             ssl_context=ssl_context,
             decompressors=decompressors,
-            protocols=protocols,
+            http_protocols=http_protocols,
             ciphers=ciphers,
             options=options
     ) as response:
@@ -134,7 +134,7 @@ async def get(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> bytes:
@@ -157,8 +157,8 @@ async def get(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -177,7 +177,7 @@ async def get(
         cadata=cadata,
         ssl_context=ssl_context,
         decompressors=decompressors,
-        protocols=protocols,
+        http_protocols=http_protocols,
         ciphers=ciphers,
         options=options
     )
@@ -194,7 +194,7 @@ async def get_text(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> str:
@@ -230,8 +230,8 @@ async def get_text(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -255,7 +255,7 @@ async def get_text(
         cadata=cadata,
         ssl_context=ssl_context,
         decompressors=decompressors,
-        protocols=protocols,
+        http_protocols=http_protocols,
         ciphers=ciphers,
         options=options
     )
@@ -273,7 +273,7 @@ async def get_json(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> Any:
@@ -311,8 +311,8 @@ async def get_json(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -336,7 +336,7 @@ async def get_json(
         cadata=cadata,
         ssl_context=ssl_context,
         decompressors=decompressors,
-        protocols=protocols,
+        http_protocols=http_protocols,
         ciphers=ciphers,
         options=options
     )
@@ -354,7 +354,7 @@ async def post(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1
@@ -379,8 +379,8 @@ async def post(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -402,7 +402,7 @@ async def post(
         cadata=cadata,
         ssl_context=ssl_context,
         decompressors=decompressors,
-        protocols=protocols,
+        http_protocols=http_protocols,
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size
@@ -421,7 +421,7 @@ async def post_text(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1
@@ -446,8 +446,8 @@ async def post_text(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -478,7 +478,7 @@ async def post_text(
         cadata=cadata,
         ssl_context=ssl_context,
         decompressors=decompressors,
-        protocols=protocols,
+        http_protocols=http_protocols,
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size
@@ -499,7 +499,7 @@ async def post_json(
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
         decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        http_protocols: Iterable[str] = DEFAULT_HTTP_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1
@@ -543,8 +543,8 @@ async def post_json(
             used instead of generating one from the certificates.
         decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
             The decompressors. Defaults to None.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        http_protocols (Iterable[str], optional): The supported http protocols.
+            Defaults to DEFAULT_HTTP_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -576,7 +576,7 @@ async def post_json(
         cadata=cadata,
         ssl_context=ssl_context,
         decompressors=decompressors,
-        protocols=protocols,
+        http_protocols=http_protocols,
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size

@@ -25,8 +25,8 @@ Keyword arguments:
   DER-encoded certificates. Defaults to None.
 - **`decompressors`** (Optional[Mapping[bytes, Type[Decompressor]]], optional):
   The decompressors. Defaults to None.
-- **`protocols`** (Optional[List[str]], optional): The protocols. Defaults
-  to None.
+- **`http_protocols`** (Optional[List[str]], optional): The http protocols.
+  Defaults to DEFAULT_HTTP_PROTOCOLS.
 
 ## HttpSession
 

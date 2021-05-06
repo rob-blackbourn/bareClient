@@ -41,7 +41,7 @@ async def connect(
         ssl_context: Optional[SSLContext],
         loop: Optional[AbstractEventLoop],
         h11_bufsiz: int,
-        protocols: Iterable[str],
+        http_protocols: Iterable[str],
         ciphers: Iterable[str],
         options: Iterable[int]
 ) -> Mapping[str, Any]:
@@ -62,7 +62,7 @@ async def connect(
         loop (Optional[AbstractEventLoop]): The optional asyncio event
             loop.
         h11_bufsiz (int): The HTTP/1.1 buffer size.
-        protocols (Iterable[str]): The supported protocols.
+        http_protocols (Iterable[str]): The supported http protocols.
         ciphers (Iterable[str]): The supported ciphers.
         options (Iterable[int]): The ssl.SSLContext.options.
 
@@ -78,7 +78,7 @@ async def connect(
             cafile,
             capath,
             cadata,
-            protocols=protocols,
+            http_protocols=http_protocols,
             ciphers=ciphers,
             options=options
         )
