@@ -129,7 +129,7 @@ async def request(
             raise HTTPError(
                 url,
                 response['status_code'],
-                buf,
+                buf.decode(),
                 response['headers'],
                 None
             )

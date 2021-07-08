@@ -9,16 +9,14 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Type,
     Union
 )
 
-from bareutils.compression import Decompressor
 from baretypes import Header, Content
 
 from .requester import RequestHandler
 from .acgi import connect
-from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
+from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS, Decompressors
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 
 
@@ -38,7 +36,7 @@ class HttpClient:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             ssl_context: Optional[SSLContext] = None,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
+            decompressors: Optional[Decompressors] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,

@@ -7,18 +7,14 @@ from typing import (
     AsyncIterator,
     List,
     Mapping,
-    Optional,
-    Type
+    Optional
 )
 from baretypes import Header
-from bareutils.compression import (
-    compression_reader_adapter,
-    Decompressor
-)
+from bareutils.compression import compression_reader_adapter
 import bareutils.header as header
 
 from .acgi import ReceiveCallable, SendCallable
-from .constants import USER_AGENT
+from .constants import USER_AGENT, Decompressors
 from .utils import NullIter
 
 
@@ -51,7 +47,7 @@ class RequestHandlerInstance:
             content: Optional[AsyncIterable[bytes]],
             send: SendCallable,
             receive: ReceiveCallable,
-            decompressors: Mapping[bytes, Type[Decompressor]]
+            decompressors: Decompressors
     ) -> None:
         """Initialise the request handler instance
 
@@ -62,7 +58,7 @@ class RequestHandlerInstance:
             content (Optional[AsyncIterable[bytes]]): The content
             send (SendCallable): The function to sed the data
             receive (ReceiveCallable): The function to receive the data
-            decompressors (Mapping[bytes, Type[Decompressor]]): The available
+            decompressors (Decompressors): The available
                 decompressors
         """
         self.url = url
@@ -142,7 +138,7 @@ class RequestHandlerInstance:
     def _make_body_reader(
             self,
             headers: List[Header]
-    ) -> AsyncIterator[bytes]:
+    ) -> AsyncIterable[bytes]:
         reader = self._body_reader()
         content_encoding = header.content_encoding(headers)
         if content_encoding:
@@ -175,7 +171,7 @@ class RequestHandler:
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
-            decompressors: Mapping[bytes, Type[Decompressor]]
+            decompressors: Decompressors
     ) -> None:
         """Initialise the request handler
 
@@ -184,7 +180,7 @@ class RequestHandler:
             method (str): The request method
             headers (Optional[List[Header]]): The headers
             content (Optional[AsyncIterable[bytes]]): The request body
-            decompressors (Mapping[bytes, Type[Decompressor]]): The decompressors
+            decompressors (Decompressors]): The decompressors
         """
         self.url = url
         self.method = method

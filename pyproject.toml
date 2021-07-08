@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bareclient"
-version = "4.5.0"
+version = "4.6.0"
 description = "A lightweight asyncio HTTP client"
 authors = ["Rob Blackbourn <rob.blackbourn@gmail.com>"]
 license = "Apache-2.0"
@@ -12,8 +12,8 @@ repository = "https://github.com/rob-blackbourn/bareClient"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-baretypes = "^3.1"
-bareutils = "^3.5"
+baretypes = "^3.5"
+bareutils = "^3.7"
 h11 = "^0.12.0"
 h2 = "^4.0"
 
@@ -21,8 +21,8 @@ h2 = "^4.0"
 pytest = "^5.0"
 pytest-asyncio = "^0.10"
 pytest-runner = "^5.1"
-pylint = "^2.4"
-mypy = "^0.740.0"
+pylint = "^2.8"
+mypy = "^0.812"
 autopep8 = "^1.4"
 mkdocs = "^1.0.4"
 mkdocs-material = "^4.6.0"
