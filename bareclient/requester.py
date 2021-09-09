@@ -1,6 +1,5 @@
 """Requester"""
 
-import urllib.parse
 from typing import (
     Any,
     AsyncIterable,
@@ -16,10 +15,11 @@ import bareutils.header as header
 from .acgi import ReceiveCallable, SendCallable
 from .constants import USER_AGENT, Decompressors
 from .utils import NullIter
+from .types import HttpRequest, HttpRequestBody, HttpDisconnect
 
 
 def _enrich_headers(
-        url: urllib.parse.ParseResult,
+        host: str,
         headers: Optional[List[Header]],
         content: Optional[AsyncIterable[bytes]]
 ) -> List[Header]:
@@ -27,7 +27,7 @@ def _enrich_headers(
     if not header.find(b'user-agent', headers):
         headers.append((b'user-agent', USER_AGENT))
     if not header.find(b'host', headers):
-        headers.append((b'host', url.netloc.encode('ascii')))
+        headers.append((b'host', host.encode('ascii')))
     if content and not (
             header.find(b'content-length', headers)
             or header.find(b'transfer-encoding', headers)
@@ -41,7 +41,9 @@ class RequestHandlerInstance:
 
     def __init__(
             self,
-            url: urllib.parse.ParseResult,
+            host: str,
+            scheme: str,
+            path: str,
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
@@ -52,7 +54,9 @@ class RequestHandlerInstance:
         """Initialise the request handler instance
 
         Args:
-            url (urllib.parse.ParseResult): The parsed url
+            host (str): The host
+            scheme (str): The scheme
+            path (str): The path
             method (str): The request method
             headers (Optional[List[Header]]): The request headers
             content (Optional[AsyncIterable[bytes]]): The content
@@ -61,9 +65,11 @@ class RequestHandlerInstance:
             decompressors (Decompressors): The available
                 decompressors
         """
-        self.url = url
+        self.host = host
+        self.scheme = scheme
+        self.path = path
         self.method = method
-        self.headers = _enrich_headers(url, headers, content)
+        self.headers = _enrich_headers(host, headers, content)
         self.content = content
         self.send = send
         self.receive = receive
@@ -94,15 +100,17 @@ class RequestHandlerInstance:
         body = content_list.pop(0) if content_list else b''
         more_body = len(content_list) > 0
 
-        message: Mapping[str, Any] = {
+        http_request: HttpRequest = {
             'type': 'http.request',
-            'url': self.url,
+            'host': self.host,
+            'scheme': self.scheme,
+            'path': self.path,
             'method': self.method,
             'headers': self.headers,
             'body': body,
             'more_body': more_body
         }
-        await self.send(message)
+        await self.send(http_request)
 
         connection = await self.receive()
 
@@ -118,13 +126,13 @@ class RequestHandlerInstance:
             body = content_list.pop(0) if content_list else b''
             more_body = len(content_list) > 0
 
-            message = {
+            http_request_body: HttpRequestBody = {
                 'type': 'http.request.body',
                 'body': body,
                 'more_body': more_body,
                 'stream_id': stream_id
             }
-            await self.send(message)
+            await self.send(http_request_body)
 
     async def _process_response(self) -> Mapping[str, Any]:
         response = dict(await self.receive())
@@ -157,9 +165,11 @@ class RequestHandlerInstance:
 
     async def close(self) -> None:
         """Close the request"""
-        await self.send({
-            'type': 'http.disconnect'
-        })
+        http_disconnect: HttpDisconnect = {
+            'type': 'http.disconnect',
+            'stream_id': None
+        }
+        await self.send(http_disconnect)
 
 
 class RequestHandler:
@@ -167,7 +177,9 @@ class RequestHandler:
 
     def __init__(
             self,
-            url: urllib.parse.ParseResult,
+            host: str,
+            scheme: str,
+            path: str,
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
@@ -176,13 +188,17 @@ class RequestHandler:
         """Initialise the request handler
 
         Args:
-            url (urllib.parse.ParseResult): The parsed url
+            host (str): The host
+            scheme (str): The scheme
+            path (str): The path
             method (str): The request method
             headers (Optional[List[Header]]): The headers
             content (Optional[AsyncIterable[bytes]]): The request body
             decompressors (Decompressors]): The decompressors
         """
-        self.url = url
+        self.host = host
+        self.scheme = scheme
+        self.path = path
         self.method = method
         self.headers = headers or []
         self.content = content
@@ -204,7 +220,9 @@ class RequestHandler:
             Mapping[str, Any]: [description]
         """
         self.instance = RequestHandlerInstance(
-            self.url,
+            self.host,
+            self.scheme,
+            self.path,
             self.method,
             self.headers,
             self.content,

@@ -4,14 +4,21 @@ import asyncio
 from typing import (
     Any,
     Mapping,
-    Optional
+    Optional,
+    cast
 )
 
 import h11
 
-from .http_protocol import HttpProtocol
-from .utils import get_target
 from .asyncio_events import MessageEvent
+from .http_protocol import HttpProtocol
+from ..types import (
+    HttpRequest,
+    HttpRequestBody,
+    HttpResponseConnection,
+    HttpResponseBody,
+    HttpDisconnect
+)
 
 MappingMessageEvent = MessageEvent[Mapping[str, Any]]
 
@@ -50,9 +57,9 @@ class H11Protocol(HttpProtocol):
         request_type: str = message['type']
 
         if request_type == 'http.request':
-            await self._send_request(message)
+            await self._send_request(cast(HttpRequest, message))
         elif request_type == 'http.request.body':
-            await self._send_request_body(message)
+            await self._send_request_body(cast(HttpRequestBody, message))
         elif request_type == 'http.disconnect':
             await self._disconnect()
         else:
@@ -71,32 +78,33 @@ class H11Protocol(HttpProtocol):
         message = await self._receive_body_event()
         return message
 
-    async def _send_request(self, message: Mapping[str, Any]) -> None:
+    async def _send_request(self, message: HttpRequest) -> None:
 
         self._connect()
         self._is_initialised = True
 
         request = h11.Request(
             method=message['method'],
-            target=get_target(message['url']),
+            target=message['host'],
             headers=message.get('headers', [])
         )
 
         buf = self._h11_state.send(request)
         self.writer.write(buf)
         await self.writer.drain()
-        self._connection_event.set_with_message({
+        http_response_connection: HttpResponseConnection = {
             'type': 'http.response.connection',
             'http_version': 'h11',
             'stream_id': None
-        })
+        }
+        self._connection_event.set_with_message(http_response_connection)
 
         body = message.get('body', b'')
         more_body = message.get('more_body', False)
         await self._send_request_data(body, more_body)
         asyncio.create_task(self._receive_response())
 
-    async def _send_request_body(self, message: Mapping[str, Any]) -> None:
+    async def _send_request_body(self, message: HttpRequestBody) -> None:
         await self._send_request_data(
             message.get('body', b''),
             message.get('more_body', False)
@@ -169,24 +177,27 @@ class H11Protocol(HttpProtocol):
             if event is h11.NEED_DATA:
                 self._h11_state.receive_data(await self.reader.read(self._bufsiz))
             elif isinstance(event, h11.Data):
-                return {
+                http_response_body: HttpResponseBody = {
                     'type': 'http.response.body',
                     'body': event.data,
                     'more_body': True,
                     'stream_id': None
                 }
+                return http_response_body
             elif isinstance(event, h11.EndOfMessage):
                 self._is_message_ended = True
-                return {
+                http_response_body = {
                     'type': 'http.response.body',
                     'body': b'',
                     'more_body': False,
                     'stream_id': None
                 }
+                return http_response_body
             elif isinstance(event, h11.ConnectionClosed):
-                return {
-                    'type': 'http.stream.disconnect',
+                http_disconnect: HttpDisconnect = {
+                    'type': 'http.disconnect',
                     'stream_id': None
                 }
+                return http_disconnect
             else:
                 raise ValueError('Unknown event')

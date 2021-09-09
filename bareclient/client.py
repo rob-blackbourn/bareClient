@@ -118,23 +118,31 @@ class HttpClient:
         self.capath = capath
         self.cadata = cadata
         self.ssl_context = ssl_context
-        self.handler: Optional[RequestHandler] = None
         self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
         self.connect_timeout = connect_timeout
 
+        if self.url.hostname is None:
+            raise ValueError('Unknown hostname')
+
+        self.handler: Optional[RequestHandler] = None
+
     async def __aenter__(self) -> Mapping[str, Any]:
         self.handler = RequestHandler(
-            self.url,
+            self.url.netloc,
+            self.url.scheme,
+            self.url.path,
             self.method,
             self.headers,
             self.content,
             self.decompressors
         )
         response = await connect(
-            self.url,
+            self.url.scheme,
+            self.url.hostname,  # type: ignore
+            self.url.port,
             self.handler,
             cafile=self.cafile,
             capath=self.capath,

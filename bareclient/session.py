@@ -30,7 +30,6 @@ from .utils import (
     extract_cookies_from_response,
     gather_cookies
 )
-from .acgi.utils import get_authority
 
 HttpClientFactory = Callable[
     [],
@@ -148,7 +147,7 @@ class HttpSession:
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
         parsed_url = urlparse(url)
         self.scheme = parsed_url.scheme.encode('ascii')
-        self.domain = get_authority(parsed_url).encode('ascii')
+        self.domain = parsed_url.netloc.encode('ascii')
         self.connect_timeout = connect_timeout
 
     def request(

@@ -10,9 +10,9 @@ from typing import (
     List,
     Mapping,
     MutableMapping,
-    Optional
+    Optional,
+    cast
 )
-import urllib.parse
 
 import h2.connection
 import h2.events
@@ -20,8 +20,15 @@ import h2.settings
 
 from baretypes import Header
 
+from ..types import (
+    HttpRequest,
+    HttpRequestBody,
+    HttpResponseConnection,
+    HttpResponseBody,
+    HttpDisconnect
+)
+
 from .http_protocol import HttpProtocol
-from .utils import get_target, get_authority
 from .asyncio_events import ResetEvent
 
 
@@ -58,9 +65,9 @@ class H2Protocol(HttpProtocol):
         message_type: str = message['type']
 
         if message_type == 'http.request':
-            await self._send_request(message)
+            await self._send_request(cast(HttpRequest, message))
         elif message_type == 'http.request.body':
-            await self._send_request_body(message)
+            await self._send_request_body(cast(HttpRequestBody, message))
         elif message_type == 'http.disconnect':
             if self.on_close:
                 await self.on_close()
@@ -72,23 +79,26 @@ class H2Protocol(HttpProtocol):
 
     async def _send_request(
             self,
-            message: Mapping[str, Any]
+            message: HttpRequest
     ) -> None:
         # Start sending the request.
         if not self.initialized:
             self._initiate_connection()
 
         stream_id = await self._send_headers(
-            message['url'],
+            message['scheme'],
+            message['host'],
+            message['path'],
             message['method'],
             message.get('headers', [])
         )
         self.window_update_event[stream_id] = ResetEvent()
-        await self.responses.put({
+        http_response_connection: HttpResponseConnection = {
             'type': 'http.response.connection',
             'http_version': 'h2',
             'stream_id': stream_id
-        })
+        }
+        await self.responses.put(http_response_connection)
 
         body = message.get('body', b'')
         more_body = message.get('more_body', False)
@@ -102,8 +112,9 @@ class H2Protocol(HttpProtocol):
 
     async def _send_request_body(
             self,
-            message: Mapping[str, Any]
+            message: HttpRequestBody
     ) -> None:
+        assert message['stream_id'] is not None, "stream_id required for http/2"
         await self._send_request_data(
             message['stream_id'],
             message['body'],
@@ -140,16 +151,18 @@ class H2Protocol(HttpProtocol):
 
     async def _send_headers(
             self,
-            url: urllib.parse.ParseResult,
+            scheme: str,
+            host: str,
+            path: str,
             method: str,
             headers: List[Header]
     ) -> int:
         stream_id = self.h2_state.get_next_available_stream_id()
         headers = [
             (b":method", method.encode("ascii")),
-            (b":authority", get_authority(url).encode("ascii")),
-            (b":scheme", url.scheme.encode("ascii")),
-            (b":path", get_target(url).encode("ascii")),
+            (b":authority", host.encode("ascii")),
+            (b":scheme", scheme.encode("ascii")),
+            (b":path", path.encode("ascii")),
         ] + headers
 
         self.h2_state.send_headers(stream_id, headers)
@@ -229,17 +242,19 @@ class H2Protocol(HttpProtocol):
                 self.h2_state.acknowledge_received_data(
                     event.flow_controlled_length, event.stream_id
                 )
-                await self.responses.put({
+                http_response_body: HttpResponseBody = {
                     'type': 'http.response.body',
                     'body': event.data,
                     'more_body': event.stream_ended is None,
                     'stream_id': event.stream_id
-                })
+                }
+                await self.responses.put(http_response_body)
             elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
-                await self.responses.put({
-                    'type': 'http.stream.disconnect',
+                http_disconnect: HttpDisconnect = {
+                    'type': 'http.disconnect',
                     'stream_id': event.stream_id
-                })
+                }
+                await self.responses.put(http_disconnect)
                 is_connected = False
 
     async def _receive_event(self) -> h2.events.Event:

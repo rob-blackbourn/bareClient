@@ -9,7 +9,8 @@ from typing import (
     List,
     Mapping,
     Tuple,
-    TypeVar
+    TypeVar,
+    cast
 )
 
 import bareutils.header as header
@@ -50,7 +51,10 @@ def extract_cookies_from_response(
     Returns:
         CookieCache: The updated cookie cache
     """
-    header_cookies = header.set_cookie(response['headers'])
+    header_cookies = cast(
+        Mapping[bytes, List[Dict[str, Any]]],
+        header.set_cookie(response['headers'])
+    )
     return extract_cookies(cookie_cache, header_cookies, now)
 
 

@@ -26,7 +26,6 @@ from bareclient.utils import (
     extract_cookies_from_response,
     gather_cookies
 )
-from bareclient.acgi.utils import get_authority
 
 from .constants import DEFAULT_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
@@ -168,7 +167,7 @@ class HttpUnboundSession:
 
         parsed_url = urlparse(url)
         scheme = parsed_url.scheme.encode('ascii')
-        domain = get_authority(parsed_url).encode('ascii')
+        domain = parsed_url.netloc.encode('ascii')
 
         cookies = self._gather_cookies(
             scheme,
