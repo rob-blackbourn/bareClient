@@ -50,6 +50,14 @@
       "justMyCode": false
     },
     {
+      "name": "Simple Middleware",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_middleware.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "mkdocs build",
       "type": "python",
       "request": "launch",

@@ -15,6 +15,7 @@ from baretypes import Header, Content
 from .requester import RequestHandler
 from .acgi import connect
 from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS, Decompressors
+from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .types import Response
 
@@ -39,7 +40,8 @@ class HttpClient:
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
-            connect_timeout: Optional[Union[int, float]] = None
+            connect_timeout: Optional[Union[int, float]] = None,
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
     ) -> None:
         """Make an HTTP client.
 
@@ -114,6 +116,7 @@ class HttpClient:
         self.ciphers = ciphers
         self.options = options
         self.connect_timeout = connect_timeout
+        self.middleware = middleware or []
 
         self.handler: Optional[RequestHandler] = None
 
@@ -125,7 +128,8 @@ class HttpClient:
             self.method,
             self.headers,
             self.content,
-            self.decompressors
+            self.decompressors,
+            self.middleware
         )
         response = await connect(
             self.scheme,

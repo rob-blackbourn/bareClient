@@ -107,7 +107,7 @@ class H2Protocol(HttpProtocol):
         if body is not None:
             await self._send_request_data(stream_id, body, more_body)
         else:
-            self._end_stream(stream_id)
+            await self._end_stream(stream_id)
 
         self.response_task = asyncio.create_task(self._receive_response())
         self.on_close = functools.partial(

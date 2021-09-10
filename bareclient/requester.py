@@ -14,10 +14,12 @@ import bareutils.header as header
 
 from .acgi import ReceiveCallable, SendCallable
 from .constants import USER_AGENT, Decompressors
+from .middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from .types import (
     HttpRequest,
     HttpRequestBody,
     HttpDisconnect,
+    HttpResponseConnection,
     HttpResponse,
     HttpResponseBody,
     Response
@@ -79,7 +81,8 @@ class RequestHandlerInstance:
             content: Optional[AsyncIterable[bytes]],
             send: SendCallable,
             receive: ReceiveCallable,
-            decompressors: Decompressors
+            decompressors: Decompressors,
+            middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler instance
 
@@ -104,6 +107,7 @@ class RequestHandlerInstance:
         self.send = send
         self.receive = receive
         self.decompressors = decompressors
+        self.middleware = middleware
 
     async def process(self) -> Response:
         """Process the request
@@ -111,26 +115,66 @@ class RequestHandlerInstance:
         Returns:
             Response: The response message.
         """
-        await self._process_request()
+        chain = make_middleware_chain(
+            *self.middleware,
+            handler=self._process
+        )
+        return await chain(
+            self.host,
+            self.scheme,
+            self.path,
+            self.method,
+            self.headers,
+            self.content
+        )
+
+    async def _process(
+            self,
+            host: str,
+            scheme: str,
+            path: str,
+            method: str,
+            headers: List[Tuple[bytes, bytes]],
+            content: Optional[AsyncIterable[bytes]]
+    ) -> Response:
+        await self._process_request(
+            host,
+            scheme,
+            path,
+            method,
+            headers,
+            content
+        )
         return await self._process_response()
 
-    async def _process_request(self) -> None:
-        body_writer = _make_body_writer(self.content).__aiter__()
+    async def _process_request(
+            self,
+            host: str,
+            scheme: str,
+            path: str,
+            method: str,
+            headers: List[Tuple[bytes, bytes]],
+            content: Optional[AsyncIterable[bytes]]
+    ) -> None:
+        body_writer = _make_body_writer(content).__aiter__()
         body, more_body = await body_writer.__anext__()
 
         http_request: HttpRequest = {
             'type': 'http.request',
-            'host': self.host,
-            'scheme': self.scheme,
-            'path': self.path,
-            'method': self.method,
-            'headers': self.headers,
+            'host': host,
+            'scheme': scheme,
+            'path': path,
+            'method': method,
+            'headers': headers,
             'body': body,
             'more_body': more_body
         }
         await self.send(http_request)
 
-        connection = await self.receive()
+        connection = cast(
+            HttpResponseConnection,
+            await self.receive()
+        )
 
         stream_id: Optional[int] = connection['stream_id']
 
@@ -210,7 +254,8 @@ class RequestHandler:
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
-            decompressors: Decompressors
+            decompressors: Decompressors,
+            middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler
 
@@ -231,6 +276,7 @@ class RequestHandler:
         self.content = content
         self.instance: Optional[RequestHandlerInstance] = None
         self.decompressors = decompressors
+        self.middleware = middleware
 
     async def __call__(
             self,
@@ -255,7 +301,8 @@ class RequestHandler:
             self.content,
             send,
             receive,
-            self.decompressors
+            self.decompressors,
+            self.middleware
         )
         response = await self.instance.process()
         return response
