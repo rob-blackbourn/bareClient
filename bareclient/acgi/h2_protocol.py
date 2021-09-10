@@ -3,7 +3,6 @@
 import asyncio
 from asyncio import Task
 import functools
-import logging
 from typing import (
     Awaitable,
     Callable,
