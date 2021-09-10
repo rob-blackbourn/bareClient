@@ -3,8 +3,6 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-import pytest
-
 from bareutils.cookies import encode_set_cookie
 
 from bareclient.utils import (
