@@ -1,9 +1,12 @@
 """Simple JSON"""
 
 import asyncio
+import logging
 from urllib.error import HTTPError
 
 from bareclient import get_json
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 async def main(url: str) -> None:
@@ -20,4 +23,4 @@ async def main(url: str) -> None:
     except HTTPError as error:
         print(error)
 
-asyncio.run(main('https://jsonplaceholder.typicode.com/todos/123456'))
+asyncio.run(main('https://jsonplaceholder.typicode.com/todos/1'))

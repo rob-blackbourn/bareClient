@@ -124,9 +124,6 @@ class HttpClient:
         self.options = options
         self.connect_timeout = connect_timeout
 
-        if self.url.hostname is None:
-            raise ValueError('Unknown hostname')
-
         self.handler: Optional[RequestHandler] = None
 
     async def __aenter__(self) -> Mapping[str, Any]:
@@ -141,7 +138,7 @@ class HttpClient:
         )
         response = await connect(
             self.url.scheme,
-            self.url.hostname,  # type: ignore
+            self.url.netloc,
             self.url.port,
             self.handler,
             cafile=self.cafile,
