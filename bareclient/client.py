@@ -14,7 +14,7 @@ from baretypes import Header, Content
 
 from .requester import RequestHandler
 from .acgi import connect
-from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS, Decompressors
+from .constants import DEFAULT_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .types import Response
@@ -36,7 +36,6 @@ class HttpClient:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             ssl_context: Optional[SSLContext] = None,
-            decompressors: Optional[Decompressors] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
@@ -82,8 +81,6 @@ class HttpClient:
                 DER-encoded certificates. Defaults to None.
             ssl_context (Optional[SSLContext], optional): An ssl context to be
                 used instead of generating one from the certificates.
-            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-                The decompressors. Defaults to None.
             protocols (Iterable[str], optional): The supported protocols. Defaults
                 to DEFAULT_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -113,7 +110,6 @@ class HttpClient:
         self.capath = capath
         self.cadata = cadata
         self.ssl_context = ssl_context
-        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
@@ -130,7 +126,6 @@ class HttpClient:
             self.method,
             self.headers,
             self.content,
-            self.decompressors,
             self.middleware
         )
         response = await connect(

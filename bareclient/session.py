@@ -11,17 +11,15 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Type,
     Union
 )
 from urllib.parse import urlparse
 from urllib.error import URLError
 
 from baretypes import Header, Content
-from bareutils.compression import Decompressor
 
 from .client import HttpClient
-from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
+from .constants import DEFAULT_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .types import Response
@@ -79,7 +77,6 @@ class HttpSession:
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
@@ -124,8 +121,6 @@ class HttpSession:
             cadata (Optional[str], optional): Either an ASCII string of one or
                 more PEM-encoded certificates or a bytes-like object of
                 DER-encoded certificates. Defaults to None.
-            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-                The decompressors. Defaults to None.
             protocols (Iterable[str], optional): The supported protocols. Defaults
                 to DEFAULT_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -144,7 +139,6 @@ class HttpSession:
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
-        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
@@ -209,7 +203,6 @@ class HttpSession:
             cafile=self.cafile,
             capath=self.capath,
             cadata=self.cadata,
-            decompressors=self.decompressors,
             protocols=self.protocols,
             ciphers=self.ciphers,
             options=self.options,

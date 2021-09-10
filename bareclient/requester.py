@@ -12,7 +12,7 @@ from baretypes import Header
 import bareutils.header as header
 
 from .acgi import ReceiveCallable, SendCallable
-from .constants import USER_AGENT, Decompressors
+from .constants import USER_AGENT
 from .middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from .types import (
     HttpRequest,
@@ -80,7 +80,6 @@ class RequestHandlerInstance:
             content: Optional[AsyncIterable[bytes]],
             send: SendCallable,
             receive: ReceiveCallable,
-            decompressors: Decompressors,
             middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler instance
@@ -94,8 +93,6 @@ class RequestHandlerInstance:
             content (Optional[AsyncIterable[bytes]]): The content
             send (SendCallable): The function to sed the data
             receive (ReceiveCallable): The function to receive the data
-            decompressors (Decompressors): The available
-                decompressors
         """
         self.host = host
         self.scheme = scheme
@@ -105,7 +102,6 @@ class RequestHandlerInstance:
         self.content = content
         self.send = send
         self.receive = receive
-        self.decompressors = decompressors
         self.middleware = middleware
 
     async def process(self) -> Response:
@@ -242,7 +238,6 @@ class RequestHandler:
             method: str,
             headers: Optional[List[Header]],
             content: Optional[AsyncIterable[bytes]],
-            decompressors: Decompressors,
             middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler
@@ -254,7 +249,6 @@ class RequestHandler:
             method (str): The request method
             headers (Optional[List[Header]]): The headers
             content (Optional[AsyncIterable[bytes]]): The request body
-            decompressors (Decompressors]): The decompressors
         """
         self.host = host
         self.scheme = scheme
@@ -263,7 +257,6 @@ class RequestHandler:
         self.headers = headers or []
         self.content = content
         self.instance: Optional[RequestHandlerInstance] = None
-        self.decompressors = decompressors
         self.middleware = middleware
 
     async def __call__(
@@ -289,7 +282,6 @@ class RequestHandler:
             self.content,
             send,
             receive,
-            self.decompressors,
             self.middleware
         )
         response = await self.instance.process()

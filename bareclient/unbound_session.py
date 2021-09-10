@@ -11,14 +11,12 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Type
 )
 from urllib.parse import urlparse
 
 from baretypes import Header, Content
-from bareutils.compression import Decompressor
 
-from bareclient.client import DEFAULT_DECOMPRESSORS, HttpClient
+from bareclient.client import HttpClient
 from bareclient.utils import (
     Cookie,
     extract_cookies,
@@ -77,7 +75,6 @@ class HttpUnboundSession:
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
@@ -120,8 +117,6 @@ class HttpUnboundSession:
             cadata (Optional[str], optional): Either an ASCII string of one or
                 more PEM-encoded certificates or a bytes-like object of
                 DER-encoded certificates. Defaults to None.
-            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-                The decompressors. Defaults to None.
             protocols (Iterable[str], optional): The supported protocols.
                 Defaults to DEFAULT_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers.
@@ -137,7 +132,6 @@ class HttpUnboundSession:
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
-        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
@@ -194,7 +188,6 @@ class HttpUnboundSession:
             cafile=self.cafile,
             capath=self.capath,
             cadata=self.cadata,
-            decompressors=self.decompressors,
             protocols=self.protocols,
             ciphers=self.ciphers,
             options=self.options,
