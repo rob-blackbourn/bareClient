@@ -3,7 +3,7 @@
 from asyncio import AbstractEventLoop
 import json
 import ssl
-from typing import Any, Callable, Iterable, Mapping, Optional, Type, Union
+from typing import Any, Callable, Iterable, List, Mapping, Optional, Type, Union
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 
@@ -15,6 +15,7 @@ from bareutils.compression import Decompressor
 from .client import HttpClient
 from .constants import USER_AGENT, DEFAULT_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .middleware import HttpClientMiddlewareCallback
 
 
 async def request(
@@ -33,7 +34,8 @@ async def request(
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> bytes:
     """Gets bytes from a url.
 
@@ -75,6 +77,8 @@ async def request(
             as a single chunk. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -119,7 +123,8 @@ async def request(
             protocols=protocols,
             ciphers=ciphers,
             options=options,
-            connect_timeout=connect_timeout
+            connect_timeout=connect_timeout,
+            middleware=middleware
     ) as response:
         buf = b''
         if response.body is not None:
@@ -152,7 +157,8 @@ async def get(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> bytes:
     """Issues a GET request
 
@@ -181,6 +187,8 @@ async def get(
             to DEFAULT_OPTIONS.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -202,7 +210,8 @@ async def get(
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
 
 
@@ -220,7 +229,8 @@ async def get_text(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> str:
     """Issues a GET request returning a string
 
@@ -262,6 +272,8 @@ async def get_text(
             to DEFAULT_OPTIONS.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -288,7 +300,8 @@ async def get_text(
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return buf.decode(encoding)
 
@@ -307,7 +320,8 @@ async def get_json(
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> Any:
     """Issues a GET request returning a JSON object
 
@@ -351,6 +365,8 @@ async def get_json(
             to DEFAULT_OPTIONS.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -377,7 +393,8 @@ async def get_json(
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return loads(text)
 
@@ -397,7 +414,8 @@ async def post(
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> bytes:
     """Issues a POST request
 
@@ -429,6 +447,8 @@ async def post(
             as a single chunk.. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -452,7 +472,8 @@ async def post(
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
 
 
@@ -472,7 +493,8 @@ async def post_text(
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> str:
     """Issues a POST request with a str body
 
@@ -504,6 +526,8 @@ async def post_text(
             as a single chunk.. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -536,7 +560,8 @@ async def post_text(
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return response.decode(encoding=encoding)
 
@@ -558,7 +583,8 @@ async def post_json(
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> Optional[Any]:
     """Issues a POST request with a JSON payload
 
@@ -609,6 +635,8 @@ async def post_json(
             as a single chunk.. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -642,6 +670,7 @@ async def post_json(
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return loads(text)
