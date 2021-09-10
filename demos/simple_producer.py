@@ -1,13 +1,10 @@
 """Simple POST"""
 
 import asyncio
-import logging
 
 import bareutils.response_code as response_code
 
 from bareclient import HttpClient
-
-# logging.basicConfig(level=logging.DEBUG)
 
 
 async def main(url: str) -> None:

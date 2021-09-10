@@ -91,9 +91,15 @@ class HttpClient:
             connect_timeout (Optional[Union[int, float]], optional): The number
                 of seconds to wait for the connection. Defaults to None.
         """
-        self.url = urllib.parse.urlparse(url)
-        if self.url.hostname is None:
+        parsed_url = urllib.parse.urlparse(url)
+        if parsed_url.hostname is None:
             raise ValueError('no hostname in url: ' + url)
+        self.scheme = parsed_url.scheme
+        self.netloc = parsed_url.netloc
+        self.hostname = parsed_url.hostname
+        self.path = parsed_url.path
+        self.port = parsed_url.port
+
         self.method = method
         self.headers = headers
         self.content = content
@@ -113,18 +119,18 @@ class HttpClient:
 
     async def __aenter__(self) -> Response:
         self.handler = RequestHandler(
-            self.url.netloc,
-            self.url.scheme,
-            self.url.path,
+            self.netloc,
+            self.scheme,
+            self.path,
             self.method,
             self.headers,
             self.content,
             self.decompressors
         )
         response = await connect(
-            self.url.scheme,
-            self.url.hostname,  # type: ignore
-            self.url.port,
+            self.scheme,
+            self.hostname,
+            self.port,
             self.handler,
             cafile=self.cafile,
             capath=self.capath,
