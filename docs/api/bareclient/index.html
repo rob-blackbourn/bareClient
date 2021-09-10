@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-4.6.3">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-4.6.3">
     
     
       
@@ -299,6 +299,30 @@
   <li class="md-nav__item">
     <a href="../../user-guide/session/" title="Session" class="md-nav__link">
       Session
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../user-guide/ssl/" title="SSL" class="md-nav__link">
+      SSL
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../user-guide/http-protocols/" title="HTTP Protocols" class="md-nav__link">
+      HTTP Protocols
     </a>
   </li>
 
@@ -1340,29 +1364,13 @@
 <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'GET'</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">'status_code'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">'more_body'</span><span class="p">]:</span>
-            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">'body'</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">'https://docs.python.org/3/library/cgi.html'</span><span class="p">))</span>
 </code></pre>
 </div>
-<p>The <code>response</code> is a mapping with the following content:</p>
-<ul>
-<li><strong><code>type</code></strong> (<em>Unicode string</em>) - Currently the only response is
-<code>"http.response"</code>.</li>
-<li><strong><code>acgi["version"]</code></strong> (<em>Unicode string</em>) - Version of the ACGI spec.</li>
-<li><strong><code>http_version</code></strong> (<em>Unicode string</em>) - One of <code>"1.0"</code>, <code>"1.1"</code> or <code>"2"</code>.</li>
-<li><strong><code>stream_id</code></strong> (<em>int</em>) - The HTTP/2 stream id, otherwise None.</li>
-<li><strong><code>status_code</code></strong> (<em>int</em>) - The HTTP status code.</li>
-<li><strong><code>headers</code></strong> (<em>Iterable[[byte string, byte string]]</em>) - A iterable of [name,
-value] two-item iterables, where name is the header name, and value is the
-header value. Order must be preserved in the HTTP response. Header names
-must be lowercased. Optional; defaults to an empty list. Pseudo headers
-(present in HTTP/2 and HTTP/3) must not be present.</li>
-<li><strong><code>more_body</code></strong> (<em>bool</em>) - Signifies if the body has more content.</li>
-<li><strong><code>body</code></strong> (<em>AsyncIterable[byte string]</em>) - The body content.</li>
-</ul>
 </div>
 <div class="autodoc-signature"><span class="autodoc-qualifier">bareclient</span><span class="autodoc-punctuation">.</span><var class="autodoc-varname">HttpClient</var><span class="autodoc-punctuation">(</span><br />
 <div class="autodoc-argument">
@@ -1394,7 +1402,9 @@ must be lowercased. Optional; defaults to an empty list. Pseudo headers
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1425,6 +1435,8 @@ to DEFAULT_PROTOCOLS.</p>
 to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The ssl.SSLContext.options. Defaults
 to DEFAULT_OPTIONS.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-attributes">
 
@@ -1458,8 +1470,8 @@ to DEFAULT_OPTIONS.</p>
     <span class="n">session</span> <span class="o">=</span>  <span class="n">HttpSession</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'GET'</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">'status_code'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">'more_body'</span><span class="p">]:</span>
-            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">'body'</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">'https://docs.python.org'</span><span class="p">,</span> <span class="s1">'/3/library/cgi.html'</span><span class="p">))</span>
@@ -1492,7 +1504,9 @@ to DEFAULT_OPTIONS.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1519,6 +1533,8 @@ to DEFAULT_PROTOCOLS.</p>
 to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The ssl.SSLContext.options. Defaults
 to DEFAULT_OPTIONS.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-attributes">
 
@@ -1597,8 +1613,8 @@ None. Defaults to None.</p>
     <span class="n">session</span> <span class="o">=</span>  <span class="n">HttpUnboundSession</span><span class="p">()</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'GET'</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">'status_code'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">'more_body'</span><span class="p">]:</span>
-            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">'body'</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">'https://docs.python.org/3/library/cgi.html'</span><span class="p">))</span>
@@ -1625,7 +1641,11 @@ None. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span></div>
+        <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1645,8 +1665,12 @@ several CA certificates in PEM format. Defaults to None.</p>
 more PEM-encoded certificates or a bytes-like object of
 DER-encoded certificates. Defaults to None.</p>
 <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
-<var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[str]]</span><span class="autodoc-punctuation"> (optional)</span><p>The list of protocols.
-Defaults to None.</p>
+<var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols.
+Defaults to DEFAULT_PROTOCOLS.</p>
+<var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers.
+Defaults to DEFAULT_CIPHERS.</p>
+<var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The SSLContext options.
+Defaults to DEFAULT_OPTIONS.</p>
 </div>
 <div class="autodoc-attributes">
 
@@ -1755,7 +1779,9 @@ None. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1781,6 +1807,8 @@ to DEFAULT_PROTOCOLS.</p>
 to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The ssl.SSLContext.options. Defaults
 to DEFAULT_OPTIONS.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_2">Returns<a class="headerlink" href="#returns_2" title="Permanent link">&para;</a></h4>
@@ -1842,7 +1870,9 @@ to DEFAULT_OPTIONS.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">Any</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1870,6 +1900,8 @@ to DEFAULT_PROTOCOLS.</p>
 to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The ssl.SSLContext.options. Defaults
 to DEFAULT_OPTIONS.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_3">Returns<a class="headerlink" href="#returns_3" title="Permanent link">&para;</a></h4>
@@ -1901,7 +1933,7 @@ to DEFAULT_OPTIONS.</p>
     <span class="n">text</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_text</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
-<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">'https://docs.python.org/3/library/cgi.html'</span><span class="p">))</span>  <br />
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">'https://docs.python.org/3/library/cgi.html'</span><span class="p">))</span>
 </code></pre>
 </div>
 </div>
@@ -1931,7 +1963,9 @@ to DEFAULT_OPTIONS.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">str</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1958,6 +1992,8 @@ to DEFAULT_PROTOCOLS.</p>
 to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The ssl.SSLContext.options. Defaults
 to DEFAULT_OPTIONS.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_4">Returns<a class="headerlink" href="#returns_4" title="Permanent link">&para;</a></h4>
@@ -2009,7 +2045,9 @@ to DEFAULT_OPTIONS.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span></div>
+        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2038,6 +2076,8 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The size of each chunk to send or -1 to send
 as a single chunk.. Defaults to -1.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_5">Returns<a class="headerlink" href="#returns_5" title="Permanent link">&para;</a></h4>
@@ -2108,7 +2148,9 @@ as a single chunk.. Defaults to -1.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span></div>
+        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">Optional[Any]</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2141,6 +2183,8 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The size of each chunk to send or -1 to send
 as a single chunk.. Defaults to -1.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_6">Returns<a class="headerlink" href="#returns_6" title="Permanent link">&para;</a></h4>
@@ -2194,7 +2238,9 @@ as a single chunk.. Defaults to -1.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span></div>
+        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2224,6 +2270,8 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The size of each chunk to send or -1 to send
 as a single chunk.. Defaults to -1.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_7">Returns<a class="headerlink" href="#returns_7" title="Permanent link">&para;</a></h4>
@@ -2285,7 +2333,9 @@ as a single chunk.. Defaults to -1.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span></div>
+        <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2315,12 +2365,14 @@ to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The ssl.SSLContext.options. Defaults
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation"> (optional)</span><p>The size of each chunk to send or -1 to send
-as a single chunk.. Defaults to -1.</p>
+as a single chunk. Defaults to -1.</p>
+<var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
+of seconds to wait for the connection. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_8">Returns<a class="headerlink" href="#returns_8" title="Permanent link">&para;</a></h4>
 <span class="autodoc-vartype">bytes</span><span class="autodoc-punctuation">: </span>
-<span class="autodoc-summary">The bytes received</span>
+<span class="autodoc-summary">The bytes received.</span>
 </div>
 <div class="autodoc-raises">
 
@@ -2353,7 +2405,7 @@ as a single chunk.. Defaults to -1.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../../user-guide/session/" title="Session" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../../user-guide/http-protocols/" title="HTTP Protocols" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -2362,7 +2414,7 @@ as a single chunk.. Defaults to -1.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Session
+                HTTP Protocols
               </span>
             </div>
           </a>
@@ -2390,7 +2442,7 @@ as a single chunk.. Defaults to -1.</p>
     
       <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.1.2",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.2.2",url:{base:"../.."}})</script>
       
     
   </body>

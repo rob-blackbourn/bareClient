@@ -86,7 +86,7 @@ class RequestHandlerInstance:
         """Process the request
 
         Returns:
-            HttpResponses: The response message.
+            Response: The response message.
         """
         await self._process_request()
         return await self._process_response()
@@ -242,7 +242,7 @@ class RequestHandler:
             send (SendCallable): The function to send data
 
         Returns:
-            Response: [description]
+            Response: The response.
         """
         self.instance = RequestHandlerInstance(
             self.host,

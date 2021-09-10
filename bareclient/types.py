@@ -88,3 +88,9 @@ class Response:
         self.status_code = status_code
         self.headers = headers
         self.body = body
+
+    def __repr__(self) -> str:
+        return f"Response(status_code={self.status_code}, ...)"
+
+    def __str__(self) -> str:
+        return repr(self)

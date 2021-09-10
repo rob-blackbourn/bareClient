@@ -97,8 +97,8 @@ class HttpSession:
             session =  HttpSession(url)
             async with session.request(path, method='GET') as response:
                 print(response)
-                if response['status_code'] == 200 and response['more_body']:
-                    async for part in response['body']:
+                if response.status_code == 200 and response.body is not None:
+                    async for part in response.body:
                         print(part)
 
         asyncio.run(main('https://docs.python.org', '/3/library/cgi.html'))
