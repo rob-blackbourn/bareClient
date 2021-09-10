@@ -23,16 +23,6 @@ T = TypeVar('T')
 LOGGER = logging.getLogger(__name__)
 
 
-class NullIter(Generic[T]):
-    """An iterator containing no items"""
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self) -> T:
-        raise StopAsyncIteration
-
-
 Cookie = Dict[str, Any]
 CookieKey = Tuple[bytes, bytes, bytes]
 CookieCache = Dict[CookieKey, Cookie]

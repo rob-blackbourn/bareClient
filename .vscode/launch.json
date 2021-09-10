@@ -42,6 +42,14 @@
       "justMyCode": false
     },
     {
+      "name": "Simple Producer",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_producer.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "mkdocs build",
       "type": "python",
       "request": "launch",

@@ -92,6 +92,8 @@ class HttpClient:
                 of seconds to wait for the connection. Defaults to None.
         """
         self.url = urllib.parse.urlparse(url)
+        if self.url.hostname is None:
+            raise ValueError('no hostname in url: ' + url)
         self.method = method
         self.headers = headers
         self.content = content
@@ -121,7 +123,7 @@ class HttpClient:
         )
         response = await connect(
             self.url.scheme,
-            self.url.netloc,
+            self.url.hostname,  # type: ignore
             self.url.port,
             self.handler,
             cafile=self.cafile,

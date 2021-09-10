@@ -20,7 +20,7 @@ class HttpRequest(TypedDict):
     path: str
     method: str
     headers: List[Tuple[bytes, bytes]]
-    body: bytes
+    body: Optional[bytes]
     more_body: bool
 
 

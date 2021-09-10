@@ -86,7 +86,7 @@ class H11Protocol(HttpProtocol):
 
         request = h11.Request(
             method=message['method'],
-            target=message['host'],
+            target=message['path'],
             headers=message.get('headers', [])
         )
 
@@ -100,8 +100,8 @@ class H11Protocol(HttpProtocol):
         }
         self._connection_event.set_with_message(http_response_connection)
 
-        body = message.get('body', b'')
-        more_body = message.get('more_body', False)
+        body = message['body']
+        more_body = message['more_body']
         await self._send_request_data(body, more_body)
         asyncio.create_task(self._receive_response())
 
@@ -113,11 +113,12 @@ class H11Protocol(HttpProtocol):
 
     async def _send_request_data(
             self,
-            body: bytes,
+            body: Optional[bytes],
             more_body: Optional[bool]
     ) -> None:
-        buf = self._h11_state.send(h11.Data(data=body))
-        self.writer.write(buf)
+        if body is not None:
+            buf = self._h11_state.send(h11.Data(data=body))
+            self.writer.write(buf)
 
         if not more_body:
             buf = self._h11_state.send(h11.EndOfMessage())

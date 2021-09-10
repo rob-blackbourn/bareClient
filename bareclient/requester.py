@@ -14,7 +14,6 @@ import bareutils.header as header
 
 from .acgi import ReceiveCallable, SendCallable
 from .constants import USER_AGENT, Decompressors
-from .utils import NullIter
 from .types import (
     HttpRequest,
     HttpRequestBody,
@@ -41,6 +40,30 @@ def _enrich_headers(
     ):
         headers.append((b'transfer-encoding', b'chunked'))
     return headers
+
+
+async def _make_body_writer(
+        content: Optional[AsyncIterable[bytes]]
+) -> AsyncIterator[Tuple[Optional[bytes], bool]]:
+    if content is None:
+        yield None, False
+    else:
+        more_body = True
+        content_iter = content.__aiter__()
+        try:
+            first = await content_iter.__anext__()
+        except StopAsyncIteration:
+            more_body = False
+            yield None, more_body
+
+        while more_body:
+            try:
+                second = await content_iter.__anext__()
+            except StopAsyncIteration:
+                more_body = False
+
+            yield first, more_body
+            first = second
 
 
 class RequestHandlerInstance:
@@ -92,20 +115,8 @@ class RequestHandlerInstance:
         return await self._process_response()
 
     async def _process_request(self) -> None:
-        content_list: List[bytes] = []
-        content_iter: AsyncIterator[bytes] = (
-            NullIter() if self.content is None else
-            self.content.__aiter__()
-        )
-        try:
-            while len(content_list) < 2:
-                body = await content_iter.__anext__()
-                content_list.append(body)
-        except StopAsyncIteration:
-            pass
-
-        body = content_list.pop(0) if content_list else b''
-        more_body = len(content_list) > 0
+        body_writer = _make_body_writer(self.content).__aiter__()
+        body, more_body = await body_writer.__anext__()
 
         http_request: HttpRequest = {
             'type': 'http.request',
@@ -123,19 +134,10 @@ class RequestHandlerInstance:
 
         stream_id: Optional[int] = connection['stream_id']
 
-        while more_body:
-            try:
-                body = await content_iter.__anext__()
-                content_list.append(body)
-            except StopAsyncIteration:
-                pass
-
-            body = content_list.pop(0) if content_list else b''
-            more_body = len(content_list) > 0
-
+        async for body, more_body in body_writer:
             http_request_body: HttpRequestBody = {
                 'type': 'http.request.body',
-                'body': body,
+                'body': body or b'',
                 'more_body': more_body,
                 'stream_id': stream_id
             }

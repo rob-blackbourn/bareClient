@@ -3,6 +3,7 @@
 import asyncio
 from asyncio import Task
 import functools
+import logging
 from typing import (
     Awaitable,
     Callable,
@@ -101,15 +102,18 @@ class H2Protocol(HttpProtocol):
         }
         await self.responses.put(http_response_connection)
 
-        body = message.get('body', b'')
-        more_body = message.get('more_body', False)
+        body = message['body']
+        more_body = message['more_body']
 
-        self._create_task(
-            self._send_request_data(stream_id, body, more_body)
-        )
+        if body is not None:
+            await self._send_request_data(stream_id, body, more_body)
+        else:
+            self._end_stream(stream_id)
+
         self.response_task = asyncio.create_task(self._receive_response())
         self.on_close = functools.partial(
-            self._response_closed, stream_id=stream_id)
+            self._response_closed, stream_id=stream_id
+        )
 
     async def _send_request_body(
             self,
@@ -179,14 +183,13 @@ class H2Protocol(HttpProtocol):
             body: bytes,
             more_body: bool
     ) -> None:
-        await self._send_data(stream_id, body)
-        if not more_body:
-            await self._end_stream(stream_id)
+        await self._send_data(stream_id, body, more_body)
 
     async def _send_data(
             self,
             stream_id: int,
-            data: bytes
+            data: bytes,
+            more_body: bool
     ) -> None:
         while data:
             window_size = self.h2_state.local_flow_control_window(stream_id)
@@ -199,7 +202,11 @@ class H2Protocol(HttpProtocol):
                 await self.window_update_event[stream_id].wait()
             else:
                 chunk, data = data[:chunk_size], data[chunk_size:]
-                self.h2_state.send_data(stream_id, chunk)
+                self.h2_state.send_data(
+                    stream_id,
+                    chunk,
+                    end_stream=not more_body
+                )
                 data_to_send = self.h2_state.data_to_send()
                 self.writer.write(data_to_send)
                 await self.writer.drain()
