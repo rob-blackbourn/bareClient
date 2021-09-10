@@ -58,6 +58,14 @@
       "justMyCode": false
     },
     {
+      "name": "Simple Compressed",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_compressed.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "mkdocs build",
       "type": "python",
       "request": "launch",

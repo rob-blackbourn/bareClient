@@ -9,7 +9,6 @@ from typing import (
     cast
 )
 from baretypes import Header
-from bareutils.compression import compression_reader_adapter
 import bareutils.header as header
 
 from .acgi import ReceiveCallable, SendCallable
@@ -195,9 +194,11 @@ class RequestHandlerInstance:
 
         if response['type'] == 'http.response':
             http_response = cast(HttpResponse, response)
-            body_reader = self._make_body_reader(
-                http_response['headers']
-            ) if http_response.get('more_body', False) else None
+            body_reader = (
+                self._body_reader()
+                if http_response.get('more_body', False)
+                else None
+            )
             return Response(
                 http_response['status_code'],
                 http_response['headers'],
@@ -205,19 +206,6 @@ class RequestHandlerInstance:
             )
 
         raise ValueError(f'Invalid type "{response["type"]}"')
-
-    def _make_body_reader(
-            self,
-            headers: List[Tuple[bytes, bytes]]
-    ) -> AsyncIterable[bytes]:
-        reader = self._body_reader()
-        content_encoding = header.content_encoding(headers)
-        if content_encoding:
-            for encoding in content_encoding:
-                if encoding in self.decompressors:
-                    decompressor = self.decompressors[encoding]
-                    return compression_reader_adapter(reader, decompressor())
-        return reader
 
     async def _body_reader(self) -> AsyncIterator[bytes]:
         more_body = True
