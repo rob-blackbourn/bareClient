@@ -16,6 +16,8 @@ from typing import (
 import bareutils.header as header
 from bareutils.cookies import encode_cookies
 
+from .types import Response
+
 T = TypeVar('T')
 
 LOGGER = logging.getLogger(__name__)
@@ -38,14 +40,14 @@ CookieCache = Dict[CookieKey, Cookie]
 
 def extract_cookies_from_response(
         cookie_cache: CookieCache,
-        response: Mapping[str, Any],
+        response: Response,
         now: datetime
 ) -> CookieCache:
     """Extract cookies from the response
 
     Args:
         cookie_cache (CookieCache): The cookie cache
-        response (Mapping[str, Any]): The response
+        response (Response): The response
         now (datetime): The current time
 
     Returns:
@@ -53,7 +55,7 @@ def extract_cookies_from_response(
     """
     header_cookies = cast(
         Mapping[bytes, List[Dict[str, Any]]],
-        header.set_cookie(response['headers'])
+        header.set_cookie(response.headers)
     )
     return extract_cookies(cookie_cache, header_cookies, now)
 

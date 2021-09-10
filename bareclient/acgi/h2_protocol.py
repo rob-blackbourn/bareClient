@@ -4,11 +4,9 @@ import asyncio
 from asyncio import Task
 import functools
 from typing import (
-    Any,
     Awaitable,
     Callable,
     List,
-    Mapping,
     MutableMapping,
     Optional,
     cast
@@ -23,9 +21,12 @@ from baretypes import Header
 from ..types import (
     HttpRequest,
     HttpRequestBody,
+    HttpResponse,
     HttpResponseConnection,
     HttpResponseBody,
-    HttpDisconnect
+    HttpDisconnect,
+    HttpRequests,
+    HttpResponses
 )
 
 from .http_protocol import HttpProtocol
@@ -60,7 +61,7 @@ class H2Protocol(HttpProtocol):
 
     async def send(
             self,
-            message: Mapping[str, Any]
+            message: HttpRequests
     ) -> None:
         message_type: str = message['type']
 
@@ -74,7 +75,7 @@ class H2Protocol(HttpProtocol):
         else:
             raise RuntimeError(f'unknown request type: {message_type}')
 
-    async def receive(self) -> Mapping[str, Any]:
+    async def receive(self) -> HttpResponses:
         return await self.responses.get()
 
     async def _send_request(
@@ -223,7 +224,7 @@ class H2Protocol(HttpProtocol):
             elif not name.startswith(b":"):
                 headers.append((name, value))
 
-        await self.responses.put({
+        http_response: HttpResponse = {
             'type': 'http.response',
             'acgi': {
                 'version': "1.0"
@@ -233,7 +234,9 @@ class H2Protocol(HttpProtocol):
             'headers': headers,
             'more_body': event.stream_ended is None,
             'stream_id': event.stream_id
-        })
+
+        }
+        await self.responses.put(http_response)
 
         is_connected = True
         while is_connected:

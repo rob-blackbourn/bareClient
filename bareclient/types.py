@@ -1,6 +1,15 @@
 """Types"""
 
-from typing import List, Literal, Optional, Tuple, TypedDict
+from typing import (
+    AsyncIterable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypedDict,
+    Union
+)
 
 
 class HttpRequest(TypedDict):
@@ -30,6 +39,17 @@ class HttpResponseConnection(TypedDict):
     stream_id: Optional[int]
 
 
+class HttpResponse(TypedDict):
+
+    type: Literal['http.response']
+    acgi: Dict[str, str]
+    http_version: str
+    status_code: int
+    headers: List[Tuple[bytes, bytes]]
+    more_body: bool
+    stream_id: Optional[int]
+
+
 class HttpResponseBody(TypedDict):
 
     type: Literal['http.response.body']
@@ -42,3 +62,29 @@ class HttpDisconnect(TypedDict):
 
     type: Literal['http.disconnect']
     stream_id: Optional[int]
+
+
+HttpRequests = Union[
+    HttpRequest,
+    HttpRequestBody,
+    HttpDisconnect
+]
+HttpResponses = Union[
+    HttpResponseConnection,
+    HttpResponse,
+    HttpResponseBody,
+    HttpDisconnect
+]
+
+
+class Response:
+
+    def __init__(
+        self,
+        status_code: int,
+        headers: List[Tuple[bytes, bytes]],
+        body: Optional[AsyncIterable[bytes]]
+    ) -> None:
+        self.status_code = status_code
+        self.headers = headers
+        self.body = body

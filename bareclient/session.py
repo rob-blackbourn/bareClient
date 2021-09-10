@@ -5,7 +5,6 @@ from __future__ import annotations
 from asyncio import AbstractEventLoop
 from datetime import datetime, timezone
 from typing import (
-    Any,
     AsyncContextManager,
     Callable,
     Iterable,
@@ -24,6 +23,7 @@ from bareutils.compression import Decompressor
 from .client import HttpClient
 from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .types import Response
 from .utils import (
     Cookie,
     extract_cookies,
@@ -33,7 +33,7 @@ from .utils import (
 
 HttpClientFactory = Callable[
     [],
-    AsyncContextManager[Mapping[str, Any]]
+    AsyncContextManager[Response]
 ]
 
 
@@ -43,7 +43,7 @@ class HttpSessionInstance:
     def __init__(
             self,
             client: HttpClient,
-            update_session: Callable[[Mapping[str, Any]], None]
+            update_session: Callable[[Response], None]
     ) -> None:
         """Initialise an HTTP session instance.
 
@@ -55,7 +55,7 @@ class HttpSessionInstance:
         self.client = client
         self.update_session = update_session
 
-    async def __aenter__(self) -> Mapping[str, Any]:
+    async def __aenter__(self) -> Response:
         response = await self.client.__aenter__()
         self.update_session(response)
         return response
@@ -213,7 +213,7 @@ class HttpSession:
 
         return HttpSessionInstance(client, self._extract_cookies)
 
-    def _extract_cookies(self, response: Mapping[str, Any]) -> None:
+    def _extract_cookies(self, response: Response) -> None:
         now = datetime.now().astimezone(timezone.utc)
         self.cookies = extract_cookies_from_response(
             self.cookies, response, now

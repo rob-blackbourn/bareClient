@@ -4,10 +4,8 @@ from asyncio import AbstractEventLoop
 import urllib.parse
 from ssl import SSLContext
 from typing import (
-    Any,
     Iterable,
     List,
-    Mapping,
     Optional,
     Union
 )
@@ -18,6 +16,7 @@ from .requester import RequestHandler
 from .acgi import connect
 from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS, Decompressors
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .types import Response
 
 
 class HttpClient:
@@ -69,8 +68,8 @@ class HttpClient:
         - **`http_version`** (_Unicode string_) - One of `"1.0"`, `"1.1"` or `"2"`.
         - **`stream_id`** (_int_) - The HTTP/2 stream id, otherwise None.
         - **`status_code`** (_int_) - The HTTP status code.
-        - **`headers`** (_Iterable[[byte string, byte string]]_) - A iterable of [name,
-        value] two-item iterables, where name is the header name, and value is the
+        - **`headers`** (_Sequence[[byte string, byte string]]_) - A sequence of [name,
+        value] two-item sequences, where name is the header name, and value is the
         header value. Order must be preserved in the HTTP response. Header names
         must be lowercased. Optional; defaults to an empty list. Pseudo headers
         (present in HTTP/2 and HTTP/3) must not be present.
@@ -126,7 +125,7 @@ class HttpClient:
 
         self.handler: Optional[RequestHandler] = None
 
-    async def __aenter__(self) -> Mapping[str, Any]:
+    async def __aenter__(self) -> Response:
         self.handler = RequestHandler(
             self.url.netloc,
             self.url.scheme,

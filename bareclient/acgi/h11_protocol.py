@@ -2,8 +2,6 @@
 
 import asyncio
 from typing import (
-    Any,
-    Mapping,
     Optional,
     cast
 )
@@ -15,12 +13,15 @@ from .http_protocol import HttpProtocol
 from ..types import (
     HttpRequest,
     HttpRequestBody,
+    HttpResponse,
     HttpResponseConnection,
     HttpResponseBody,
-    HttpDisconnect
+    HttpDisconnect,
+    HttpRequests,
+    HttpResponses
 )
 
-MappingMessageEvent = MessageEvent[Mapping[str, Any]]
+MappingMessageEvent = MessageEvent[HttpResponses]
 
 
 class H11Protocol(HttpProtocol):
@@ -52,7 +53,7 @@ class H11Protocol(HttpProtocol):
             self._h11_state.start_next_cycle()
         self._is_message_ended = False
 
-    async def send(self, message: Mapping[str, Any]) -> None:
+    async def send(self, message: HttpRequests) -> None:
 
         request_type: str = message['type']
 
@@ -65,7 +66,7 @@ class H11Protocol(HttpProtocol):
         else:
             raise Exception(f'unknown request type: {request_type}')
 
-    async def receive(self) -> Mapping[str, Any]:
+    async def receive(self) -> HttpResponses:
 
         message = await self._connection_event.wait_with_message()
         if message is not None:
@@ -144,7 +145,7 @@ class H11Protocol(HttpProtocol):
             elif name == b'transfer-encoding' and value == b'chunked':
                 more_body = True
 
-        self._response_event.set_with_message({
+        http_response: HttpResponse = {
             'type': 'http.response',
             'acgi': {
                 'version': "1.0"
@@ -154,7 +155,8 @@ class H11Protocol(HttpProtocol):
             'headers': event.headers,
             'more_body': more_body,
             'stream_id': None
-        })
+        }
+        self._response_event.set_with_message(http_response)
 
     async def _disconnect(self) -> None:
         if not self._is_message_ended and self._h11_state.our_state != h11.DONE:
@@ -171,7 +173,7 @@ class H11Protocol(HttpProtocol):
         self.writer.close()
         await self.writer.wait_closed()
 
-    async def _receive_body_event(self) -> Mapping[str, Any]:
+    async def _receive_body_event(self) -> HttpResponses:
         while True:
             event = self._h11_state.next_event()
             if event is h11.NEED_DATA:

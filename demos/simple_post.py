@@ -18,7 +18,7 @@ async def main(url: str) -> None:
             headers=[(b'content-type', b'application/json')],
             content=text_writer(body)
     ) as response:
-        if response_code.is_successful(response['status_code']):
+        if response_code.is_successful(response.status_code):
             print("OK")
 
 asyncio.run(main('https://beast.jetblack.net:9009/test/api/info'))

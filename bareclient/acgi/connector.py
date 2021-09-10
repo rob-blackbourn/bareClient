@@ -9,13 +9,13 @@ from typing import (
     Callable,
     Coroutine,
     Iterable,
-    Mapping,
     Optional,
     Union
 )
 from urllib.error import URLError
 
 from ..ssl_contexts import create_ssl_context
+from ..types import HttpRequests, HttpResponses, Response
 
 from .utils import (
     get_negotiated_protocol
@@ -24,11 +24,11 @@ from .http_protocol import HttpProtocol
 from .h11_protocol import H11Protocol
 from .h2_protocol import H2Protocol
 
-SendCallable = Callable[[Mapping[str, Any]], Coroutine[Any, Any, None]]
-ReceiveCallable = Callable[[], Awaitable[Mapping[str, Any]]]
+SendCallable = Callable[[HttpRequests], Coroutine[Any, Any, None]]
+ReceiveCallable = Callable[[], Awaitable[HttpResponses]]
 Application = Callable[
     [ReceiveCallable, SendCallable],
-    Coroutine[Any, Any, Mapping[str, Any]]
+    Coroutine[Any, Any, Response]
 ]
 
 
@@ -47,7 +47,7 @@ async def connect(
         ciphers: Iterable[str],
         options: Iterable[int],
         connect_timeout: Optional[Union[int, float]]
-) -> Mapping[str, Any]:
+) -> Response:
     """Connect to the web server and run the application
 
     Args:
@@ -77,7 +77,7 @@ async def connect(
         asyncio.TimeoutError: Raised for a connection timeout.
 
     Returns:
-        Mapping[str, Any]: The response message.
+        Response: The response message.
     """
     if ssl_context is None and scheme == 'https':
         ssl_context = create_ssl_context(

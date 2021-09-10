@@ -122,15 +122,18 @@ async def request(
             connect_timeout=connect_timeout
     ) as response:
         buf = b''
-        if response['more_body']:
-            async for part in response['body']:
+        if response.body is not None:
+            async for part in response.body:
                 buf += part
-        if response['status_code'] < 200 or response['status_code'] >= 400:
+        if response.status_code < 200 or response.status_code >= 400:
             raise HTTPError(
                 url,
-                response['status_code'],
+                response.status_code,
                 buf.decode(),
-                response['headers'],
+                {
+                    name.decode(): value.decode()
+                    for name, value in response.headers
+                },
                 None
             )
         return buf

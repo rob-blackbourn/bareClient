@@ -5,7 +5,6 @@ from __future__ import annotations
 from asyncio import AbstractEventLoop
 from datetime import datetime, timezone
 from typing import (
-    Any,
     AsyncContextManager,
     Callable,
     Iterable,
@@ -29,10 +28,11 @@ from bareclient.utils import (
 
 from .constants import DEFAULT_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .types import Response
 
 HttpClientFactory = Callable[
     [],
-    AsyncContextManager[Mapping[str, Any]]
+    AsyncContextManager[Response]
 ]
 
 
@@ -42,19 +42,19 @@ class HttpUnboundSessionInstance:
     def __init__(
             self,
             client: HttpClient,
-            update_session: Callable[[Mapping[str, Any]], None]
+            update_session: Callable[[Response], None]
     ) -> None:
         """Initialise an HTTP unbound session instance.
 
         Args:
             client (HttpClient): The HTTP client
-            update_session (Callable[[Mapping[str, Any]], None]): A function to
+            update_session (Callable[[Response], None]): A function to
                 update the session.
         """
         self.client = client
         self.update_session = update_session
 
-    async def __aenter__(self) -> Mapping[str, Any]:
+    async def __aenter__(self) -> Response:
         response = await self.client.__aenter__()
         self.update_session(response)
         return response
@@ -197,7 +197,7 @@ class HttpUnboundSession:
 
         return HttpUnboundSessionInstance(client, self._extract_cookies)
 
-    def _extract_cookies(self, response: Mapping[str, Any]) -> None:
+    def _extract_cookies(self, response: Response) -> None:
         now = datetime.now().astimezone(timezone.utc)
         self.cookies = extract_cookies_from_response(
             self.cookies, response, now

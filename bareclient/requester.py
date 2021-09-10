@@ -1,12 +1,12 @@
 """Requester"""
 
 from typing import (
-    Any,
     AsyncIterable,
     AsyncIterator,
     List,
-    Mapping,
-    Optional
+    Optional,
+    Tuple,
+    cast
 )
 from baretypes import Header
 from bareutils.compression import compression_reader_adapter
@@ -15,7 +15,14 @@ import bareutils.header as header
 from .acgi import ReceiveCallable, SendCallable
 from .constants import USER_AGENT, Decompressors
 from .utils import NullIter
-from .types import HttpRequest, HttpRequestBody, HttpDisconnect
+from .types import (
+    HttpRequest,
+    HttpRequestBody,
+    HttpDisconnect,
+    HttpResponse,
+    HttpResponseBody,
+    Response
+)
 
 
 def _enrich_headers(
@@ -75,11 +82,11 @@ class RequestHandlerInstance:
         self.receive = receive
         self.decompressors = decompressors
 
-    async def process(self) -> Mapping[str, Any]:
+    async def process(self) -> Response:
         """Process the request
 
         Returns:
-            Mapping[str, Any]: The response message.
+            HttpResponses: The response message.
         """
         await self._process_request()
         return await self._process_response()
@@ -134,18 +141,28 @@ class RequestHandlerInstance:
             }
             await self.send(http_request_body)
 
-    async def _process_response(self) -> Mapping[str, Any]:
-        response = dict(await self.receive())
+    async def _process_response(self) -> Response:
+        response = await self.receive()
 
-        response['body'] = self._make_body_reader(
-            response['headers']
-        ) if response.get('more_body', False) else None
+        if response['type'] == 'http.disconnect':
+            raise IOError('server disconnected')
 
-        return response
+        if response['type'] == 'http.response':
+            http_response = cast(HttpResponse, response)
+            body_reader = self._make_body_reader(
+                http_response['headers']
+            ) if http_response.get('more_body', False) else None
+            return Response(
+                http_response['status_code'],
+                http_response['headers'],
+                body_reader
+            )
+
+        raise ValueError(f'Invalid type "{response["type"]}"')
 
     def _make_body_reader(
             self,
-            headers: List[Header]
+            headers: List[Tuple[bytes, bytes]]
     ) -> AsyncIterable[bytes]:
         reader = self._body_reader()
         content_encoding = header.content_encoding(headers)
@@ -159,9 +176,17 @@ class RequestHandlerInstance:
     async def _body_reader(self) -> AsyncIterator[bytes]:
         more_body = True
         while more_body:
-            message = await self.receive()
-            yield message.get('body', b'')
-            more_body = message.get('more_body', False)
+            response = await self.receive()
+            if response['type'] == 'http.disconnect':
+                raise IOError('server disconnected')
+            elif response['type'] == 'http.response.body':
+                http_response_body = cast(HttpResponseBody, response)
+                yield http_response_body['body']
+                more_body = response['more_body']
+            else:
+                raise ValueError(
+                    f'received invalid message type "{response["type"]}"'
+                )
 
     async def close(self) -> None:
         """Close the request"""
@@ -209,7 +234,7 @@ class RequestHandler:
             self,
             receive: ReceiveCallable,
             send: SendCallable
-    ) -> Mapping[str, Any]:
+    ) -> Response:
         """Call the request handle instance
 
         Args:
@@ -217,7 +242,7 @@ class RequestHandler:
             send (SendCallable): The function to send data
 
         Returns:
-            Mapping[str, Any]: [description]
+            Response: [description]
         """
         self.instance = RequestHandlerInstance(
             self.host,
