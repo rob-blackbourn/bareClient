@@ -9,10 +9,12 @@ This is very much work in progress.
 
 ### Request
 
-Sent from the client to ACGI.
+Sent from the client to ACGI to request an http connection.
 
 - `type` (Unicode String) - `"http.request"`
-- `url` (Unicode String) - The requested url
+- `host` (Unicode String) - The host
+- `scheme` (Unicode String) - The scheme
+- `path` (Unicode String) - The path
 - `method` (Unicode string) - The HTTP request method
 - `headers` (Iterable[[byte string, byte string]]) – An iterable of [name, value] two-item iterables, where name is the header name, and value is the header value.
 - `body` (byte string) - The body of the request.
@@ -20,7 +22,7 @@ Sent from the client to ACGI.
 
 ### Request Connection
 
-Sent from the client to ACGI.
+Sent from the ACGI to the client to indicate a connection has been established.
 
 - `type` (Unicode string) - `"http.response.connection"`
 - `http_version` (Unicode string) - Either `"h11"` or `"h2"`.
@@ -30,7 +32,7 @@ The `stream_id` is used for subsequent communication.
 
 ### Request Body
 
-Sent from the client to ACGI.
+Sent from the client to ACGI to transfer the request body.
 
 - `type` (Unicode string) - `"http.request.body"`
 - `body` (byte string) - The body of the request
@@ -39,7 +41,7 @@ Sent from the client to ACGI.
 
 ### Response
 
-Sent from the ACGI to the client.
+Sent from the ACGI to the client to pass the response.
 
 - `type` (Unicode string) - `"http.response"`
 - `acgi` (Dict[str, str]) `{ "version": "1.0" }`
@@ -52,7 +54,7 @@ Sent from the ACGI to the client.
 
 ### Response Body
 
-Sent from the ACGI to the client.
+Sent from the ACGI to the client where there is more body available..
 
 - `type` (Unicode string) - `"http.response.body"`
 - `body` (bytes) - The body
@@ -61,7 +63,7 @@ Sent from the ACGI to the client.
 
 ### Disconnect
 
-Sent from either the client or ACGI.
+Sent from either the client or ACGI for disconnect.
 
 - `type` (Unicode string) - `"http.disconnect"`
 - `stream_id` (Optional[int]) - The stream id for the response for an h2 connection.
