@@ -22,6 +22,7 @@ from bareutils.compression import Decompressor
 
 from .client import HttpClient
 from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
+from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .types import Response
 from .utils import (
@@ -82,7 +83,8 @@ class HttpSession:
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
-            connect_timeout: Optional[Union[int, float]] = None
+            connect_timeout: Optional[Union[int, float]] = None,
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
     ) -> None:
         """Initialise an HTTP session
 
@@ -132,6 +134,8 @@ class HttpSession:
                 to DEFAULT_OPTIONS.
             connect_timeout (Optional[Union[int, float]], optional): The number
                 of seconds to wait for the connection. Defaults to None.
+            middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+                Optional middleware. Defaults to None.
         """
         self.url = url
         self.headers = headers or []
@@ -149,6 +153,7 @@ class HttpSession:
         self.scheme = parsed_url.scheme.encode('ascii')
         self.domain = parsed_url.netloc.encode('ascii')
         self.connect_timeout = connect_timeout
+        self.middleware = middleware
 
     def request(
             self,
@@ -208,7 +213,8 @@ class HttpSession:
             protocols=self.protocols,
             ciphers=self.ciphers,
             options=self.options,
-            connect_timeout=self.connect_timeout
+            connect_timeout=self.connect_timeout,
+            middleware=self.middleware
         )
 
         return HttpSessionInstance(client, self._extract_cookies)

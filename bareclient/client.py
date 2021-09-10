@@ -92,6 +92,8 @@ class HttpClient:
                 to DEFAULT_OPTIONS.
             connect_timeout (Optional[Union[int, float]], optional): The number
                 of seconds to wait for the connection. Defaults to None.
+            middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+                Optional middleware. Defaults to None.
         """
         parsed_url = urllib.parse.urlparse(url)
         if parsed_url.hostname is None:

@@ -27,6 +27,7 @@ from bareclient.utils import (
 )
 
 from .constants import DEFAULT_PROTOCOLS
+from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .types import Response
 
@@ -79,7 +80,8 @@ class HttpUnboundSession:
             decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS
+            options: Iterable[int] = DEFAULT_OPTIONS,
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
     ) -> None:
         """Initialise an HTTP session
 
@@ -126,6 +128,8 @@ class HttpUnboundSession:
                 Defaults to DEFAULT_CIPHERS.
             options (Iterable[int], optional): The SSLContext options.
                 Defaults to DEFAULT_OPTIONS.
+            middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+                Optional middleware. Defaults to None.
         """
         self.headers = headers or []
         self.loop = loop
@@ -138,6 +142,7 @@ class HttpUnboundSession:
         self.ciphers = ciphers
         self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
+        self.middleware = middleware
 
     def request(
             self,
@@ -192,7 +197,8 @@ class HttpUnboundSession:
             decompressors=self.decompressors,
             protocols=self.protocols,
             ciphers=self.ciphers,
-            options=self.options
+            options=self.options,
+            middleware=self.middleware
         )
 
         return HttpUnboundSessionInstance(client, self._extract_cookies)
