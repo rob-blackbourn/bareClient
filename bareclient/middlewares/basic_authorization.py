@@ -8,8 +8,6 @@ from typing import (
     Tuple
 )
 
-from bareutils import header
-
 from ..types import Response
 from ..middleware import (
     HttpClientCallback,
@@ -21,6 +19,15 @@ def create_basic_auth_middleware(
     username: str,
     password: str
 ) -> HttpClientMiddlewareCallback:
+    """Middleware for basic authorization
+
+    Args:
+        username (str): The username
+        password (str): The password
+
+    Returns:
+        HttpClientMiddlewareCallback: The middleware.
+    """
 
     authorization = b64encode(f"{username}:{password}".encode('ascii'))
     authorization_headers = [
