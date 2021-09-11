@@ -12,7 +12,7 @@ from .helpers import (
     post_text,
     post_json
 )
-from .constants import DEFAULT_PROTOCOLS, DEFAULT_DECOMPRESSORS, DEFAULT_COMPRESSORS
+from .constants import DEFAULT_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback, HttpClientCallback
 from .ssl_contexts import (
     create_ssl_context,
@@ -38,8 +38,6 @@ __all__ = [
     'DEFAULT_PROTOCOLS',
     'DEFAULT_CIPHERS',
     'DEFAULT_OPTIONS',
-    'DEFAULT_DECOMPRESSORS',
-    'DEFAULT_COMPRESSORS',
     'Response',
     'HttpClientMiddlewareCallback',
     'HttpClientCallback'

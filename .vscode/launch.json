@@ -58,10 +58,10 @@
       "justMyCode": false
     },
     {
-      "name": "Simple Compressed",
+      "name": "Simple Compression",
       "type": "python",
       "request": "launch",
-      "program": "${workspaceFolder}/demos/simple_compressed.py",
+      "program": "${workspaceFolder}/demos/simple_compression.py",
       "console": "integratedTerminal",
       "justMyCode": false
     },
@@ -70,7 +70,9 @@
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/.venv/bin/mkdocs",
-      "args": ["build"],
+      "args": [
+        "build"
+      ],
       "console": "integratedTerminal",
       "justMyCode": false
     }
