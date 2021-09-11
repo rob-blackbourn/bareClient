@@ -9,33 +9,33 @@ from typing import (
     Callable,
     Coroutine,
     Iterable,
-    Mapping,
     Optional,
     Union
 )
-import urllib.parse
 from urllib.error import URLError
 
 from ..ssl_contexts import create_ssl_context
+from ..types import HttpRequests, HttpResponses, Response
 
 from .utils import (
-    get_port,
     get_negotiated_protocol
 )
 from .http_protocol import HttpProtocol
 from .h11_protocol import H11Protocol
 from .h2_protocol import H2Protocol
 
-SendCallable = Callable[[Mapping[str, Any]], Coroutine[Any, Any, None]]
-ReceiveCallable = Callable[[], Awaitable[Mapping[str, Any]]]
+SendCallable = Callable[[HttpRequests], Coroutine[Any, Any, None]]
+ReceiveCallable = Callable[[], Awaitable[HttpResponses]]
 Application = Callable[
     [ReceiveCallable, SendCallable],
-    Coroutine[Any, Any, Mapping[str, Any]]
+    Coroutine[Any, Any, Response]
 ]
 
 
 async def connect(
-        url: urllib.parse.ParseResult,
+        scheme: str,
+        hostname: str,
+        port: Optional[int],
         application: Application,
         cafile: Optional[str],
         capath: Optional[str],
@@ -47,11 +47,13 @@ async def connect(
         ciphers: Iterable[str],
         options: Iterable[int],
         connect_timeout: Optional[Union[int, float]]
-) -> Mapping[str, Any]:
+) -> Response:
     """Connect to the web server and run the application
 
     Args:
-        url (urllib.parse.ParseResult): The url
+        scheme (str): The scheme
+        hostname (str): The hostname
+        port (Optional[int]): The port (if specified).
         application (Application): The application to run
         cafile (Optional[str]): The path to a file of concatenated CA
             certificates in PEM format.
@@ -75,9 +77,9 @@ async def connect(
         asyncio.TimeoutError: Raised for a connection timeout.
 
     Returns:
-        Mapping[str, Any]: The response message.
+        Response: The response message.
     """
-    if ssl_context is None and url.scheme == 'https':
+    if ssl_context is None and scheme == 'https':
         ssl_context = create_ssl_context(
             cafile,
             capath,
@@ -87,12 +89,15 @@ async def connect(
             options=options
         )
 
-    hostname = url.hostname
     if hostname is None:
         raise URLError('unspecified hostname')
-    port = get_port(url)
     if port is None:
-        raise URLError('unspecified port')
+        if scheme == 'http':
+            port = 80
+        elif scheme == 'https':
+            port = 443
+        else:
+            raise URLError('unspecified port')
 
     future = asyncio.open_connection(
         hostname,

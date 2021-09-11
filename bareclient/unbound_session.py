@@ -5,35 +5,33 @@ from __future__ import annotations
 from asyncio import AbstractEventLoop
 from datetime import datetime, timezone
 from typing import (
-    Any,
     AsyncContextManager,
     Callable,
     Iterable,
     List,
     Mapping,
     Optional,
-    Type
 )
 from urllib.parse import urlparse
 
 from baretypes import Header, Content
-from bareutils.compression import Decompressor
 
-from bareclient.client import DEFAULT_DECOMPRESSORS, HttpClient
+from bareclient.client import HttpClient
 from bareclient.utils import (
     Cookie,
     extract_cookies,
     extract_cookies_from_response,
     gather_cookies
 )
-from bareclient.acgi.utils import get_authority
 
 from .constants import DEFAULT_PROTOCOLS
+from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .types import Response
 
 HttpClientFactory = Callable[
     [],
-    AsyncContextManager[Mapping[str, Any]]
+    AsyncContextManager[Response]
 ]
 
 
@@ -43,19 +41,19 @@ class HttpUnboundSessionInstance:
     def __init__(
             self,
             client: HttpClient,
-            update_session: Callable[[Mapping[str, Any]], None]
+            update_session: Callable[[Response], None]
     ) -> None:
         """Initialise an HTTP unbound session instance.
 
         Args:
             client (HttpClient): The HTTP client
-            update_session (Callable[[Mapping[str, Any]], None]): A function to
+            update_session (Callable[[Response], None]): A function to
                 update the session.
         """
         self.client = client
         self.update_session = update_session
 
-    async def __aenter__(self) -> Mapping[str, Any]:
+    async def __aenter__(self) -> Response:
         response = await self.client.__aenter__()
         self.update_session(response)
         return response
@@ -77,10 +75,10 @@ class HttpUnboundSession:
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS
+            options: Iterable[int] = DEFAULT_OPTIONS,
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
     ) -> None:
         """Initialise an HTTP session
 
@@ -95,8 +93,8 @@ class HttpUnboundSession:
             session =  HttpUnboundSession()
             async with session.request(url, method='GET') as response:
                 print(response)
-                if response['status_code'] == 200 and response['more_body']:
-                    async for part in response['body']:
+                if response.status_code == 200 and response.body is not None:
+                    async for part in response.body:
                         print(part)
 
         asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
@@ -119,14 +117,14 @@ class HttpUnboundSession:
             cadata (Optional[str], optional): Either an ASCII string of one or
                 more PEM-encoded certificates or a bytes-like object of
                 DER-encoded certificates. Defaults to None.
-            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-                The decompressors. Defaults to None.
             protocols (Iterable[str], optional): The supported protocols.
                 Defaults to DEFAULT_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers.
                 Defaults to DEFAULT_CIPHERS.
             options (Iterable[int], optional): The SSLContext options.
                 Defaults to DEFAULT_OPTIONS.
+            middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+                Optional middleware. Defaults to None.
         """
         self.headers = headers or []
         self.loop = loop
@@ -134,11 +132,11 @@ class HttpUnboundSession:
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
-        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
+        self.middleware = middleware
 
     def request(
             self,
@@ -168,7 +166,7 @@ class HttpUnboundSession:
 
         parsed_url = urlparse(url)
         scheme = parsed_url.scheme.encode('ascii')
-        domain = get_authority(parsed_url).encode('ascii')
+        domain = parsed_url.netloc.encode('ascii')
 
         cookies = self._gather_cookies(
             scheme,
@@ -190,15 +188,15 @@ class HttpUnboundSession:
             cafile=self.cafile,
             capath=self.capath,
             cadata=self.cadata,
-            decompressors=self.decompressors,
             protocols=self.protocols,
             ciphers=self.ciphers,
-            options=self.options
+            options=self.options,
+            middleware=self.middleware
         )
 
         return HttpUnboundSessionInstance(client, self._extract_cookies)
 
-    def _extract_cookies(self, response: Mapping[str, Any]) -> None:
+    def _extract_cookies(self, response: Response) -> None:
         now = datetime.now().astimezone(timezone.utc)
         self.cookies = extract_cookies_from_response(
             self.cookies, response, now

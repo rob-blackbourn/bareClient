@@ -17,13 +17,13 @@ async def main() -> None:
 
     async with session.request('/users/1/posts', method='GET') as response:
         # We expect a session cookie to be sent on the initial request.
-        set_cookie = header.find(b'set-cookie', response['headers'])
+        set_cookie = header.find(b'set-cookie', response.headers)
         print("Session cookie!" if set_cookie else "No session cookie")
 
-        if not response_code.is_successful(response['status_code']):
+        if not response_code.is_successful(response.status_code):
             raise Exception("Failed to get posts")
 
-        posts = json.loads(await text_reader(response['body']))
+        posts = json.loads(await text_reader(response.body)) if response.body else []
         print(f'We received {len(posts)} posts')
 
         for post in posts:
@@ -32,13 +32,15 @@ async def main() -> None:
             async with session.request(path, method='GET') as response:
                 # As we were sent the session cookie we do not expect to receive
                 # another one, until this one has expired.
-                set_cookie = header.find(b'set-cookie', response['headers'])
+                set_cookie = header.find(b'set-cookie', response.headers)
                 print("Session cookie!" if set_cookie else "No session cookie")
 
-                if not response_code.is_successful(response['status_code']):
+                if not response_code.is_successful(response.status_code):
                     raise Exception("Failed to get comments")
 
-                comments = json.loads(await text_reader(response['body']))
+                comments = json.loads(
+                    await text_reader(response.body)
+                ) if response.body else []
                 print(f'We received {len(comments)} comments')
 
 

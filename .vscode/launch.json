@@ -1,48 +1,88 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Simple Get",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/demos/simple_get.py",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Simple POST",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/demos/simple_post.py",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "Simple JSON",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/demos/simple_json.py",
-            "console": "integratedTerminal",
-            "justMyCode": false
-        },
-        {
-            "name": "mkdocs build",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/.venv/bin/mkdocs",
-            "args": [
-                "build"
-            ],
-            "console": "integratedTerminal",
-            "justMyCode": false
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple Get",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_get.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple POST",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_post.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple JSON",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_json.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple Session",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_session.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple Producer",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_producer.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple Middleware",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_middleware.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Simple Compression",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_compression.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Basic auth",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/basic_auth.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "mkdocs build",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/.venv/bin/mkdocs",
+      "args": [
+        "build"
+      ],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
 }

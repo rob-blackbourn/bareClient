@@ -3,24 +3,12 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-import pytest
-
 from bareutils.cookies import encode_set_cookie
 
 from bareclient.utils import (
-    NullIter,
     extract_cookies_from_response,
     gather_cookies
 )
-
-
-@pytest.mark.asyncio
-async def test_null_iter() -> None:
-    """Test for NullIter"""
-    count = 0
-    async for _ in NullIter():
-        count += 1
-    assert count == 0
 
 
 def test_extract_cookies():

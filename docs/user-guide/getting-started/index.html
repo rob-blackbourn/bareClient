@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-4.6.3">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-4.6.3">
     
     
       
@@ -350,6 +350,54 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../ssl/" title="SSL" class="md-nav__link">
+      SSL
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../http-protocols/" title="HTTP Protocols" class="md-nav__link">
+      HTTP Protocols
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../middleware/" title="Middleware" class="md-nav__link">
+      Middleware
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../compression/" title="Compression" class="md-nav__link">
+      Compression
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -452,8 +500,8 @@
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;more_body&#39;</span><span class="p">]:</span>
-            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 
 
@@ -461,9 +509,7 @@
 </code></pre></div>
 
 <p>The <code>HttpClient</code> <a href="/user-guide/requests/#httpclient">request</a> provides an async
-context yielding a <a href="/user-guide/responses/">response</a> or type
-<code>Mapping[str, Any]</code> which loosely follows the semantics of ASGI message
-passing.</p>
+context yielding a <a href="/user-guide/responses/">response</a>.</p>
 <h2 id="post">POST<a class="headerlink" href="#post" title="Permanent link">&para;</a></h2>
 <p>The following code demonstrates a simple <code>POST</code> request.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
@@ -484,7 +530,7 @@ passing.</p>
             <span class="n">headers</span><span class="o">=</span><span class="p">[(</span><span class="sa">b</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;application/json&#39;</span><span class="p">)],</span>
             <span class="n">content</span><span class="o">=</span><span class="n">text_writer</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">response_code</span><span class="o">.</span><span class="n">is_successful</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK&quot;</span><span class="p">)</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">&#39;http://localhost:9009/test/api/info&#39;</span><span class="p">))</span>
@@ -564,7 +610,7 @@ turns the payload into an async iterator.</p>
     
       <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.1.2",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.2.2",url:{base:"../.."}})</script>
       
     
   </body>

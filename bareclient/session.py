@@ -5,36 +5,34 @@ from __future__ import annotations
 from asyncio import AbstractEventLoop
 from datetime import datetime, timezone
 from typing import (
-    Any,
     AsyncContextManager,
     Callable,
     Iterable,
     List,
     Mapping,
     Optional,
-    Type,
     Union
 )
 from urllib.parse import urlparse
 from urllib.error import URLError
 
 from baretypes import Header, Content
-from bareutils.compression import Decompressor
 
 from .client import HttpClient
-from .constants import DEFAULT_DECOMPRESSORS, DEFAULT_PROTOCOLS
+from .constants import DEFAULT_PROTOCOLS
+from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .types import Response
 from .utils import (
     Cookie,
     extract_cookies,
     extract_cookies_from_response,
     gather_cookies
 )
-from .acgi.utils import get_authority
 
 HttpClientFactory = Callable[
     [],
-    AsyncContextManager[Mapping[str, Any]]
+    AsyncContextManager[Response]
 ]
 
 
@@ -44,7 +42,7 @@ class HttpSessionInstance:
     def __init__(
             self,
             client: HttpClient,
-            update_session: Callable[[Mapping[str, Any]], None]
+            update_session: Callable[[Response], None]
     ) -> None:
         """Initialise an HTTP session instance.
 
@@ -56,7 +54,7 @@ class HttpSessionInstance:
         self.client = client
         self.update_session = update_session
 
-    async def __aenter__(self) -> Mapping[str, Any]:
+    async def __aenter__(self) -> Response:
         response = await self.client.__aenter__()
         self.update_session(response)
         return response
@@ -79,11 +77,11 @@ class HttpSession:
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
-            decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
             protocols: Iterable[str] = DEFAULT_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
-            connect_timeout: Optional[Union[int, float]] = None
+            connect_timeout: Optional[Union[int, float]] = None,
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
     ) -> None:
         """Initialise an HTTP session
 
@@ -98,8 +96,8 @@ class HttpSession:
             session =  HttpSession(url)
             async with session.request(path, method='GET') as response:
                 print(response)
-                if response['status_code'] == 200 and response['more_body']:
-                    async for part in response['body']:
+                if response.status_code == 200 and response.body is not None:
+                    async for part in response.body:
                         print(part)
 
         asyncio.run(main('https://docs.python.org', '/3/library/cgi.html'))
@@ -123,8 +121,6 @@ class HttpSession:
             cadata (Optional[str], optional): Either an ASCII string of one or
                 more PEM-encoded certificates or a bytes-like object of
                 DER-encoded certificates. Defaults to None.
-            decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-                The decompressors. Defaults to None.
             protocols (Iterable[str], optional): The supported protocols. Defaults
                 to DEFAULT_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -133,6 +129,8 @@ class HttpSession:
                 to DEFAULT_OPTIONS.
             connect_timeout (Optional[Union[int, float]], optional): The number
                 of seconds to wait for the connection. Defaults to None.
+            middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+                Optional middleware. Defaults to None.
         """
         self.url = url
         self.headers = headers or []
@@ -141,15 +139,15 @@ class HttpSession:
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
-        self.decompressors = decompressors or DEFAULT_DECOMPRESSORS
         self.protocols = protocols
         self.ciphers = ciphers
         self.options = options
         self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
         parsed_url = urlparse(url)
         self.scheme = parsed_url.scheme.encode('ascii')
-        self.domain = get_authority(parsed_url).encode('ascii')
+        self.domain = parsed_url.netloc.encode('ascii')
         self.connect_timeout = connect_timeout
+        self.middleware = middleware
 
     def request(
             self,
@@ -205,16 +203,16 @@ class HttpSession:
             cafile=self.cafile,
             capath=self.capath,
             cadata=self.cadata,
-            decompressors=self.decompressors,
             protocols=self.protocols,
             ciphers=self.ciphers,
             options=self.options,
-            connect_timeout=self.connect_timeout
+            connect_timeout=self.connect_timeout,
+            middleware=self.middleware
         )
 
         return HttpSessionInstance(client, self._extract_cookies)
 
-    def _extract_cookies(self, response: Mapping[str, Any]) -> None:
+    def _extract_cookies(self, response: Response) -> None:
         now = datetime.now().astimezone(timezone.utc)
         self.cookies = extract_cookies_from_response(
             self.cookies, response, now

@@ -3,18 +3,18 @@
 from asyncio import AbstractEventLoop
 import json
 import ssl
-from typing import Any, Callable, Iterable, Mapping, Optional, Type, Union
+from typing import Any, Callable, Iterable, List, Optional, Union
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 
 from baretypes import Headers
 import bareutils.header as header
 from bareutils import bytes_writer
-from bareutils.compression import Decompressor
 
 from .client import HttpClient
 from .constants import USER_AGENT, DEFAULT_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .middleware import HttpClientMiddlewareCallback
 
 
 async def request(
@@ -28,12 +28,12 @@ async def request(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> bytes:
     """Gets bytes from a url.
 
@@ -63,8 +63,6 @@ async def request(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -75,6 +73,8 @@ async def request(
             as a single chunk. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -115,22 +115,25 @@ async def request(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            decompressors=decompressors,
             protocols=protocols,
             ciphers=ciphers,
             options=options,
-            connect_timeout=connect_timeout
+            connect_timeout=connect_timeout,
+            middleware=middleware
     ) as response:
         buf = b''
-        if response['more_body']:
-            async for part in response['body']:
+        if response.body is not None:
+            async for part in response.body:
                 buf += part
-        if response['status_code'] < 200 or response['status_code'] >= 400:
+        if response.status_code < 200 or response.status_code >= 400:
             raise HTTPError(
                 url,
-                response['status_code'],
+                response.status_code,
                 buf.decode(),
-                response['headers'],
+                {
+                    name.decode(): value.decode()
+                    for name, value in response.headers
+                },
                 None
             )
         return buf
@@ -145,11 +148,11 @@ async def get(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> bytes:
     """Issues a GET request
 
@@ -168,8 +171,6 @@ async def get(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -178,6 +179,8 @@ async def get(
             to DEFAULT_OPTIONS.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -195,11 +198,11 @@ async def get(
         capath=capath,
         cadata=cadata,
         ssl_context=ssl_context,
-        decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
 
 
@@ -213,11 +216,11 @@ async def get_text(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> str:
     """Issues a GET request returning a string
 
@@ -249,8 +252,6 @@ async def get_text(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -259,6 +260,8 @@ async def get_text(
             to DEFAULT_OPTIONS.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -281,11 +284,11 @@ async def get_text(
         capath=capath,
         cadata=cadata,
         ssl_context=ssl_context,
-        decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return buf.decode(encoding)
 
@@ -300,11 +303,11 @@ async def get_json(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> Any:
     """Issues a GET request returning a JSON object
 
@@ -338,8 +341,6 @@ async def get_json(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -348,6 +349,8 @@ async def get_json(
             to DEFAULT_OPTIONS.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -370,11 +373,11 @@ async def get_json(
         capath=capath,
         cadata=cadata,
         ssl_context=ssl_context,
-        decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
         options=options,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return loads(text)
 
@@ -389,12 +392,12 @@ async def post(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> bytes:
     """Issues a POST request
 
@@ -414,8 +417,6 @@ async def post(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -426,6 +427,8 @@ async def post(
             as a single chunk.. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -444,12 +447,12 @@ async def post(
         capath=capath,
         cadata=cadata,
         ssl_context=ssl_context,
-        decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
 
 
@@ -464,12 +467,12 @@ async def post_text(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> str:
     """Issues a POST request with a str body
 
@@ -489,8 +492,6 @@ async def post_text(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -501,6 +502,8 @@ async def post_text(
             as a single chunk.. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -528,12 +531,12 @@ async def post_text(
         capath=capath,
         cadata=cadata,
         ssl_context=ssl_context,
-        decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return response.decode(encoding=encoding)
 
@@ -550,12 +553,12 @@ async def post_json(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        decompressors: Optional[Mapping[bytes, Type[Decompressor]]] = None,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None
+        connect_timeout: Optional[Union[int, float]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
 ) -> Optional[Any]:
     """Issues a POST request with a JSON payload
 
@@ -594,8 +597,6 @@ async def post_json(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        decompressors (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-            The decompressors. Defaults to None.
         protocols (Iterable[str], optional): The supported protocols. Defaults
             to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
@@ -606,6 +607,8 @@ async def post_json(
             as a single chunk.. Defaults to -1.
         connect_timeout (Optional[Union[int, float]], optional): The number
             of seconds to wait for the connection. Defaults to None.
+        middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
+            Optional middleware. Defaults to None.
 
     Raises:
         HTTPError: Is the status code is not ok.
@@ -634,11 +637,11 @@ async def post_json(
         capath=capath,
         cadata=cadata,
         ssl_context=ssl_context,
-        decompressors=decompressors,
         protocols=protocols,
         ciphers=ciphers,
         options=options,
         chunk_size=chunk_size,
-        connect_timeout=connect_timeout
+        connect_timeout=connect_timeout,
+        middleware=middleware
     )
     return loads(text)

@@ -23,6 +23,8 @@ nav:
           - user-guide/session.md
           - user-guide/ssl.md
           - user-guide/http-protocols.md
+          - user-guide/middleware.md
+          - user-guide/compression.md
     - API:
           - bareclient: api/bareclient.md
 

@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-4.6.3">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-4.6.3">
     
     
       
@@ -343,6 +343,54 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../ssl/" title="SSL" class="md-nav__link">
+      SSL
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../http-protocols/" title="HTTP Protocols" class="md-nav__link">
+      HTTP Protocols
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../middleware/" title="Middleware" class="md-nav__link">
+      Middleware
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../compression/" title="Compression" class="md-nav__link">
+      Compression
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -430,43 +478,21 @@
                 
                 <h1 id="responses">Responses<a class="headerlink" href="#responses" title="Permanent link">&para;</a></h1>
 <p>The response is yielded in the <code>HttpClient</code> async context.</p>
-<p>Keys:</p>
+<p>The response object has the following fields:</p>
+<p>Fields:</p>
 <ul>
-<li><strong><code>type</code></strong> (<em>Unicode string</em>) - Currently the only response is
-  <code>"http.response"</code>.</li>
-<li><strong><code>acgi["version"]</code></strong> (<em>Unicode string</em>) - Version of the ACGI spec.</li>
-<li><strong><code>http_version</code></strong> (<em>Unicode string</em>) - One of <code>"1.0"</code>, <code>"1.1"</code> or <code>"2"</code>.</li>
-<li><strong><code>stream_id</code></strong> (<em>int</em>) - The HTTP/2 stream id, otherwise None.</li>
 <li><strong><code>status_code</code></strong> (<em>int</em>) - The HTTP status code.</li>
-<li><strong><code>headers</code></strong> (<em>Iterable[[byte string, byte string]]</em>) - A iterable of [name,
+<li><strong><code>headers</code></strong> (<em>List[[byte string, byte string]]</em>) - A list of [name,
   value] two-item iterables, where name is the header name, and value is the
   header value. Order must be preserved in the HTTP response. Header names
   must be lowercased. Optional; defaults to an empty list. Pseudo headers
   (present in HTTP/2 and HTTP/3) must not be present.</li>
-<li><strong><code>more_body</code></strong> (<em>bool</em>) - Signifies if the body has more content.</li>
-<li><strong><code>body</code></strong> (<em>AsyncIterable[byte string]</em>) - The body content.</li>
+<li><strong><code>body</code></strong> (<em>Optional[AsyncIterable[byte string]]</em>) - The body content if any.</li>
 </ul>
-<p>For the above request the response might look as follows:</p>
-<div class="codehilite"><pre><span></span><code><span class="p">{</span>
-    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;http.response&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;acgi&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="s1">&#39;1.0&#39;</span><span class="p">},</span>
-    <span class="s1">&#39;http_version&#39;</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;stream_id&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="s1">&#39;status_code&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-    <span class="s1">&#39;headers&#39;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;text/html&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;content-length&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;53727&#39;</span><span class="p">),</span>
-        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;last-modified&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;Sat, 15 Feb 2020 0...26:32 GMT&#39;</span><span class="p">),</span>
-        <span class="o">...</span>
-    <span class="p">],</span>
-    <span class="s1">&#39;more_body&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">async_generator</span> <span class="n">obj</span><span class="o">...</span><span class="mi">5</span><span class="n">ede8f320</span><span class="o">&gt;</span><span class="p">,</span>
-<span class="p">}</span>
-</code></pre></div>
-
 <h2 id="response-body">Response Body<a class="headerlink" href="#response-body" title="Permanent link">&para;</a></h2>
-<p>The response body (<code>response["body"]</code>) can be iterated over asynchronusly.</p>
-<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
+<p>The response body (<code>response.body</code>) may be <code>None</code> or an async iterator. It can be
+iterated over asynchronusly as follows.</p>
+<div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 </code></pre></div>
                 
@@ -541,7 +567,7 @@
     
       <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.1.2",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.2.2",url:{base:"../.."}})</script>
       
     
   </body>
