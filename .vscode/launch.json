@@ -66,6 +66,14 @@
       "justMyCode": false
     },
     {
+      "name": "Basic auth",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/basic_auth.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "mkdocs build",
       "type": "python",
       "request": "launch",
