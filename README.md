@@ -13,6 +13,15 @@ It was written to allow a web server which had negotiated the HTTP/2 protocol
 for make outgoing HTTP/2 calls. This increases performance and simplifies proxy
 configuration in a micro-service architecture.
 
+## Features
+
+The client has the following notable features:
+
+* Lightweight
+* Uses asyncio
+* Supports HTTP versions 1.0, 1.1, 2
+* Supports middleware
+
 ## Installation
 
 The package can be installed with pip.

@@ -1,5 +1,7 @@
 # Welcome
 
+## Overview
+
 A simple asyncio http Pyhton client package supporting HTTP versions 1.0, 1.1
 and 2.
 
@@ -14,3 +16,12 @@ for make outgoing HTTP/2 calls. This increases performance and simplifies proxy
 configuration in a micro-service architecture.
 
 To find out more see [getting started](user-guide/getting-started.md).
+
+## Features
+
+The client has the following notable features:
+
+* Lightweight
+* Uses asyncio
+* Supports HTTP versions 1.0, 1.1, 2
+* Has middleware

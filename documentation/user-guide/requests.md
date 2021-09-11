@@ -23,10 +23,10 @@ Keyword arguments:
 - **`cadata`** (Optional[str], optional): Either an ASCII string of one or
   more PEM-encoded certificates or a bytes-like object of
   DER-encoded certificates. Defaults to None.
-- **`decompressors`** (Optional[Mapping[bytes, Type[Decompressor]]], optional):
-  The decompressors. Defaults to None.
 - **`protocols`** (Optional[List[str]], optional): The protocols. Defaults
   to None.
+- **`middleware`** (Optional[List[HttpClientMiddlewareCallback]], optional): The
+  middleware. Defaults to None.
 
 ## HttpSession
 

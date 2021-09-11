@@ -327,6 +327,30 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../user-guide/middleware/" title="Middleware" class="md-nav__link">
+      Middleware
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../user-guide/compression/" title="Compression" class="md-nav__link">
+      Compression
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -1396,15 +1420,15 @@
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1428,7 +1452,6 @@ more PEM-encoded certificates or a bytes-like object of
 DER-encoded certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -1437,6 +1460,7 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-attributes">
 
@@ -1498,15 +1522,15 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1526,7 +1550,6 @@ several CA certificates in PEM format. Defaults to None.</p>
 <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or
 more PEM-encoded certificates or a bytes-like object of
 DER-encoded certificates. Defaults to None.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -1535,6 +1558,7 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-attributes">
 
@@ -1639,13 +1663,13 @@ None. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span></div>
+        <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">None</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1664,13 +1688,13 @@ several CA certificates in PEM format. Defaults to None.</p>
 <var class="autodoc-varname">cadata</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[str]</span><span class="autodoc-punctuation"> (optional)</span><p>Either an ASCII string of one or
 more PEM-encoded certificates or a bytes-like object of
 DER-encoded certificates. Defaults to None.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols.
 Defaults to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers.
 Defaults to DEFAULT_CIPHERS.</p>
 <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation"> (optional)</span><p>The SSLContext options.
 Defaults to DEFAULT_OPTIONS.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-attributes">
 
@@ -1773,15 +1797,15 @@ None. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1800,7 +1824,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -1809,6 +1832,7 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_2">Returns<a class="headerlink" href="#returns_2" title="Permanent link">&para;</a></h4>
@@ -1864,15 +1888,15 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">Any</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1893,7 +1917,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -1902,6 +1925,7 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_3">Returns<a class="headerlink" href="#returns_3" title="Permanent link">&para;</a></h4>
@@ -1957,15 +1981,15 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">options</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[int]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">str</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -1985,7 +2009,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -1994,6 +2017,7 @@ to DEFAULT_CIPHERS.</p>
 to DEFAULT_OPTIONS.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_4">Returns<a class="headerlink" href="#returns_4" title="Permanent link">&para;</a></h4>
@@ -2037,8 +2061,6 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
@@ -2047,7 +2069,9 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2067,7 +2091,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -2078,6 +2101,7 @@ to DEFAULT_OPTIONS.</p>
 as a single chunk.. Defaults to -1.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_5">Returns<a class="headerlink" href="#returns_5" title="Permanent link">&para;</a></h4>
@@ -2140,8 +2164,6 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
@@ -2150,7 +2172,9 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">Optional[Any]</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2174,7 +2198,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -2185,6 +2208,7 @@ to DEFAULT_OPTIONS.</p>
 as a single chunk.. Defaults to -1.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_6">Returns<a class="headerlink" href="#returns_6" title="Permanent link">&para;</a></h4>
@@ -2230,8 +2254,6 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
@@ -2240,7 +2262,9 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2261,7 +2285,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -2272,6 +2295,7 @@ to DEFAULT_OPTIONS.</p>
 as a single chunk.. Defaults to -1.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_7">Returns<a class="headerlink" href="#returns_7" title="Permanent link">&para;</a></h4>
@@ -2325,8 +2349,6 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation">,</span></div>
-<div class="autodoc-argument">
         <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
         <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation">,</span></div>
@@ -2335,7 +2357,9 @@ of seconds to wait for the connection. Defaults to None.</p>
 <div class="autodoc-argument">
         <var class="autodoc-varname">chunk_size</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">int</span><span class="autodoc-punctuation">,</span></div>
 <div class="autodoc-argument">
-        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span></div>
+        <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation">,</span></div>
+<div class="autodoc-argument">
+        <var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span></div>
 <span class="autodoc-punctuation">)</span><span class="autodoc-punctuation"> -&gt; </span><span class="autodoc-vartype">bytes</span></div>
 <br />
 <div class="autodoc-parameters">
@@ -2357,7 +2381,6 @@ PEM-encoded certificates or a bytes-like object of DER-encoded
 certificates. Defaults to None.</p>
 <var class="autodoc-varname">ssl_context</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[SSLContext]</span><span class="autodoc-punctuation"> (optional)</span><p>An ssl context to be
 used instead of generating one from the certificates.</p>
-<var class="autodoc-varname">decompressors</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Mapping[bytes, Type[Decompressor]]]</span><span class="autodoc-punctuation"> (optional)</span><p>The decompressors. Defaults to None.</p>
 <var class="autodoc-varname">protocols</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported protocols. Defaults
 to DEFAULT_PROTOCOLS.</p>
 <var class="autodoc-varname">ciphers</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Iterable[str]</span><span class="autodoc-punctuation"> (optional)</span><p>The supported ciphers. Defaults
@@ -2368,6 +2391,7 @@ to DEFAULT_OPTIONS.</p>
 as a single chunk. Defaults to -1.</p>
 <var class="autodoc-varname">connect_timeout</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[Union[int, float]]</span><span class="autodoc-punctuation"> (optional)</span><p>The number
 of seconds to wait for the connection. Defaults to None.</p>
+<var class="autodoc-varname">middleware</var><span class="autodoc-punctuation">: </span><span class="autodoc-vartype">Optional[List[HttpClientMiddlewareCallback]]</span><span class="autodoc-punctuation"> (optional)</span><p>Optional middleware. Defaults to None.</p>
 </div>
 <div class="autodoc-returns">
 <h4 class="autodoc-title" id="returns_8">Returns<a class="headerlink" href="#returns_8" title="Permanent link">&para;</a></h4>
@@ -2405,7 +2429,7 @@ of seconds to wait for the connection. Defaults to None.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../../user-guide/http-protocols/" title="HTTP Protocols" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../../user-guide/compression/" title="Compression" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -2414,7 +2438,7 @@ of seconds to wait for the connection. Defaults to None.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                HTTP Protocols
+                Compression
               </span>
             </div>
           </a>

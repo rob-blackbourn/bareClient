@@ -38,7 +38,7 @@
     
     
       
-        <title>SSL - bareClient</title>
+        <title>Compression - bareClient</title>
       
     
     
@@ -81,7 +81,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#ssl" tabindex="0" class="md-skip">
+      <a href="#compression" tabindex="0" class="md-skip">
         Skip to content
       </a>
     
@@ -107,7 +107,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                SSL
+                Compression
               
             </span>
           
@@ -309,56 +309,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        SSL
-      </label>
-    
-    <a href="./" title="SSL" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../ssl/" title="SSL" class="md-nav__link">
       SSL
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#sslcontext" class="md-nav__link">
-    SSLContext
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-helper-arguments" class="md-nav__link">
-    Optional helper arguments
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -390,11 +345,49 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../compression/" title="Compression" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Compression
+      </label>
+    
+    <a href="./" title="Compression" class="md-nav__link md-nav__link--active">
       Compression
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -460,15 +453,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#sslcontext" class="md-nav__link">
-    SSLContext
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#optional-helper-arguments" class="md-nav__link">
-    Optional helper arguments
+  <a href="#usage" class="md-nav__link">
+    Usage
   </a>
   
 </li>
@@ -490,51 +476,49 @@
               
                 
                 
-                <h1 id="ssl">SSL<a class="headerlink" href="#ssl" title="Permanent link">&para;</a></h1>
-<p>The <a href="/api/bareclient/#class-httpclient"><code>HttpClient</code></a>,
-<a href="/api/bareclient/#class-httpsession"><code>HttpSession</code></a>, and the helper functions
-all take a number of optional arguments which may be used to configure SSl.</p>
-<h2 id="sslcontext">SSLContext<a class="headerlink" href="#sslcontext" title="Permanent link">&para;</a></h2>
-<p>If an ssl.SSLContext is passed (e.g. <code>HttpClient(... , ssl_context=ctx)</code>) all
-other arguments are ignored.</p>
-<p>There a two helper functions.</p>
-<ul>
-<li>create_ssl_context - creates a simple ssl context</li>
-<li>create_ssl_context_with_cert_chain - creates a context with a client certificate and key.</li>
-</ul>
-<h2 id="optional-helper-arguments">Optional helper arguments<a class="headerlink" href="#optional-helper-arguments" title="Permanent link">&para;</a></h2>
-<p>There are a number of helper arguments which are useful for making targeted changes
-to the default ssl context.</p>
-<p>The arguments <code>cafile</code>, <code>capath</code>, and <code>cadata</code> are passed directly though to
-<a href="https://docs.python.org/3/library/ssl.html#ssl.create_default_context">ssl.create_default_context</a>.</p>
-<p>The argument <code>ciphers</code> is an iterable that defaults to <code>DEFAULT_CIPHERS</code>. It is
-applied to the
-<a href="https://docs.python.org/3/library/ssl.html#ssl.SSLContext"><code>SSLContext</code></a>
-instance with
-<a href="https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers"><code>set_ciphers</code></a>.
-The following shows how to downgrade the security level for trusted legacy
-servers.</p>
+                <h1 id="compression">Compression<a class="headerlink" href="#compression" title="Permanent link">&para;</a></h1>
+<p>Compression is provided as middleware.</p>
+<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
+<p>The following example uses the middleware for both the client POST and the
+server response by specifying both the <code>content-encoding</code> and the
+<code>accept-encoding</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="n">HttpClient</span><span class="p">,</span> <span class="n">DEFAULT_CIPHERS</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">bareutils</span> <span class="kn">import</span> <span class="n">text_writer</span>
+
+<span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">HttpClient</span><span class="p">,</span>
+    <span class="n">HttpClientMiddlewareCallback</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">bareclient.middlewares</span> <span class="kn">import</span> <span class="n">compression_middleware</span>
 
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">ciphers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">DEFAULT_CIPHERS</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;ALL:@SECLEVEL=1&#39;</span><span class="p">]</span>
-    <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">ciphers</span><span class="o">=</span><span class="n">ciphers</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;content-type&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;text/plain&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;content-encoding&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;gzip&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;accept&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;text/plain&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;accept-encoding&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;gzip&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="n">middleware</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">HttpClientMiddlewareCallback</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">compression_middleware</span>
+    <span class="p">]</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">HttpClient</span><span class="p">(</span>
+            <span class="n">url</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">middleware</span><span class="o">=</span><span class="n">middleware</span><span class="p">,</span>
+            <span class="n">content</span><span class="o">=</span><span class="n">text_writer</span><span class="p">(</span><span class="s1">&#39;Hello, World!&#39;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;status_code&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;more_body&#39;</span><span class="p">]:</span>
-            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;body&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span> <span class="ow">and</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Done&#39;</span><span class="p">)</span>
 
 <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="s1">&#39;https://docs.python.org/3/library/cgi.html&#39;</span><span class="p">))</span>
 </code></pre></div>
-
-<p>The argument <code>options</code> is an iterable of SSL options which are applied as an "or"
-to the
-[<code>SSLContext.options](https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers)
-member variable. By default it is set to</code>DEFAULT_OPTIONS` which is a tuple of
-options which seemed sensible at the time this library was built.</p>
                 
                   
                 
@@ -556,7 +540,7 @@ options which seemed sensible at the time this library was built.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../session/" title="Session" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../middleware/" title="Middleware" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -565,19 +549,19 @@ options which seemed sensible at the time this library was built.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Session
+                Middleware
               </span>
             </div>
           </a>
         
         
-          <a href="../http-protocols/" title="HTTP Protocols" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../api/bareclient/" title="bareclient" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                HTTP Protocols
+                bareclient
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
