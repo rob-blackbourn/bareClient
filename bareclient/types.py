@@ -10,6 +10,7 @@ from typing import (
     TypedDict,
     Union
 )
+import urllib.parse
 
 
 class HttpRequest(TypedDict):
@@ -106,11 +107,27 @@ class Request:
         self.headers = headers
         self.body = body
 
+    @property
+    def url(self) -> str:
+        """The request URL.
+
+        Returns:
+            str: The URL as a string.
+        """
+        return f'{self.scheme}://{self.host}{self.path}'
+
+    @url.setter
+    def url(self, value: str) -> None:
+        parsed_url = urllib.parse.urlparse(value)
+        self.host = parsed_url.netloc
+        self.scheme = parsed_url.scheme
+        self.path = parsed_url.path
+
     def __repr__(self) -> str:
         return f'Request({self.host}, {self.scheme}, {self.path}, {self.method})'
 
     def __str__(self) -> str:
-        return f'{self.method} {self.scheme}://{self.host}/{self.path}'
+        return f' {self.method} {self.url}'
 
 
 class Response:
