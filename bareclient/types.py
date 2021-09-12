@@ -77,7 +77,44 @@ HttpResponses = Union[
 ]
 
 
+class Request:
+    """An HTTP request"""
+
+    def __init__(
+            self,
+            host: str,
+            scheme: str,
+            path: str,
+            method: str,
+            headers: Optional[List[Tuple[bytes, bytes]]],
+            body: Optional[AsyncIterable[bytes]]
+    ) -> None:
+        """An HTTP request.
+
+        Args:
+            host (str): The host (`<host> [ ':' <port>]`).
+            scheme (str): The scheme (`'http'` or `'https'`).
+            path (str): The path.
+            method (str): The method (e.g. `'GET'`).
+            headers (Optional[List[Tuple[bytes, bytes]]]): The headers.
+            body (Optional[AsyncIterable[bytes]]): The body.
+        """
+        self.host = host
+        self.scheme = scheme
+        self.path = path
+        self.method = method
+        self.headers = headers
+        self.body = body
+
+    def __repr__(self) -> str:
+        return f'Request({self.host}, {self.scheme}, {self.path}, {self.method})'
+
+    def __str__(self) -> str:
+        return f'{self.method} {self.scheme}://{self.host}/{self.path}'
+
+
 class Response:
+    """An HTTP response"""
 
     def __init__(
         self,
@@ -85,6 +122,13 @@ class Response:
         headers: List[Tuple[bytes, bytes]],
         body: Optional[AsyncIterable[bytes]]
     ) -> None:
+        """An HTTP response.
+
+        Args:
+            status_code (int): The status code.
+            headers (List[Tuple[bytes, bytes]]): The headers.
+            body (Optional[AsyncIterable[bytes]]): The body.
+        """
         self.status_code = status_code
         self.headers = headers
         self.body = body

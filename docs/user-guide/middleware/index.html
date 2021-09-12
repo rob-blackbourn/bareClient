@@ -494,21 +494,17 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The client supports middleware to provide facilities such as authentication
 and compression.</p>
-<p>A middleware handler has the following structure.</p>
+<p>A middleware handler takes a <a href="/api/bareclient/#class-request"><code>request</code></a> and
+the next handler.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">def</span> <span class="nf">first_middleware</span><span class="p">(</span>
-        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">headers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]],</span>
-        <span class="n">content</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncIterable</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
         <span class="n">handler</span><span class="p">:</span> <span class="n">HttpClientCallback</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
 
     <span class="c1"># Before calling the next handler the input arguments can be modified.</span>
 
     <span class="c1"># Call the next handler</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 
     <span class="c1"># After calling the handler the response may be modified.</span>
 
@@ -516,7 +512,7 @@ and compression.</p>
 </code></pre></div>
 
 <p>Multiple handlers may be defined. The client will call each handler in turn as a nested chain.</p>
-<p>The handlers are passed to the clinet as a list.</p>
+<p>The handlers are passed to the client as a list.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">middleware</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">HttpClientMiddlewareCallback</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">first_middleware</span><span class="p">,</span>
     <span class="n">second_middleware</span><span class="p">,</span>
@@ -531,61 +527,41 @@ and compression.</p>
 <div class="codehilite"><pre><span></span><code><span class="sd">&quot;&quot;&quot;Simple GET&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">AsyncIterable</span><span class="p">,</span>
-    <span class="n">List</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
-    <span class="n">Tuple</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">bareclient</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">HttpClient</span><span class="p">,</span>
     <span class="n">HttpClientCallback</span><span class="p">,</span>
     <span class="n">HttpClientMiddlewareCallback</span><span class="p">,</span>
+    <span class="n">Request</span><span class="p">,</span>
     <span class="n">Response</span>
 <span class="p">)</span>
 
-
 <span class="k">async</span> <span class="k">def</span> <span class="nf">first_middleware</span><span class="p">(</span>
-        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">headers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]],</span>
-        <span class="n">content</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncIterable</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
         <span class="n">handler</span><span class="p">:</span> <span class="n">HttpClientCallback</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;before first&#39;</span><span class="p">)</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;after first&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">response</span>
 
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">second_middleware</span><span class="p">(</span>
-        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">headers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]],</span>
-        <span class="n">content</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncIterable</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
         <span class="n">handler</span><span class="p">:</span> <span class="n">HttpClientCallback</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;before second&#39;</span><span class="p">)</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;after second&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">response</span>
 
 
 <span class="k">async</span> <span class="k">def</span> <span class="nf">third_middleware</span><span class="p">(</span>
-        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">scheme</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">headers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]],</span>
-        <span class="n">content</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AsyncIterable</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
+        <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
         <span class="n">handler</span><span class="p">:</span> <span class="n">HttpClientCallback</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;before third&#39;</span><span class="p">)</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">scheme</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;after third&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">response</span>
 

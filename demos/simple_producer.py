@@ -19,7 +19,7 @@ async def main(url: str) -> None:
             url,
             method='POST',
             headers=[(b'content-type', b'application/json')],
-            content=producer()
+            body=producer()
     ) as response:
         if response_code.is_successful(response.status_code):
             print("OK")

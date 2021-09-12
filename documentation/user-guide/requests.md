@@ -11,7 +11,7 @@ Keyword arguments:
 - **`method`** (str, optional): The HTTP method. Defaults to 'GET'.
 - **`headers`** (Optional[List[Header]], optional): The headers. Defaults to
   None.
-- **`content`** (Optional[Content], optional): The body content. Defaults to
+- **`body`** (Optional[Content], optional): The body content. Defaults to
   None.
 - **`loop`** (Optional[AbstractEventLoop], optional): The optional asyncio
   event loop. Defaults to None.

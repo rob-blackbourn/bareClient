@@ -155,7 +155,7 @@ class HttpSession:
             *,
             method: str = 'GET',
             headers: Optional[List[Header]] = None,
-            content: Optional[Content] = None
+            body: Optional[Content] = None
     ) -> HttpSessionInstance:
         """Make an HTTP request
 
@@ -165,8 +165,8 @@ class HttpSession:
                 to 'GET'.
             headers (Optional[List[Header]], optional): Optional headers.
                 Defaults to None.
-            content (Optional[Content], optional): Optional content, defaults to
-                None. Defaults to None.
+            body (Optional[Content], optional): Optional body content. Defaults
+                to None.
 
         Raises:
             asyncio.TimeoutError: If the connect times out.
@@ -197,7 +197,7 @@ class HttpSession:
             url,
             method=method,
             headers=combined_headers,
-            content=content,
+            body=body,
             loop=self.loop,
             h11_bufsiz=self.h11_bufsiz,
             cafile=self.cafile,

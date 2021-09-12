@@ -19,7 +19,6 @@ from bareclient import HttpSession
 
 
 async def main() -> None:
-    """Session example"""
 
     # Create the session
     session = HttpSession('https://jsonplaceholder.typicode.com')

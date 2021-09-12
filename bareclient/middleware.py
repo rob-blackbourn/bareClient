@@ -1,40 +1,15 @@
 """Requester"""
 
 from functools import partial
-from typing import (
-    Any,
-    AsyncIterable,
-    Awaitable,
-    Coroutine,
-    Callable,
-    List,
-    Optional,
-    Tuple
-)
+from typing import Any, Awaitable, Coroutine, Callable
 
+from .types import Request, Response
 
-from .types import Response
-
-HttpClientCallback = Callable[
-    [
-        str,  # host
-        str,  # scheme
-        str,  # path
-        str,  # method
-        List[Tuple[bytes, bytes]],  # headers
-        Optional[AsyncIterable[bytes]]  # content
-    ],
-    Awaitable[Response]
-]
+HttpClientCallback = Callable[[Request], Awaitable[Response]]
 HttpClientMiddlewareCallback = Callable[
     [
-        str,  # host
-        str,  # scheme
-        str,  # path
-        str,  # method
-        List[Tuple[bytes, bytes]],  # headers
-        Optional[AsyncIterable[bytes]],  # content
-        HttpClientCallback  # callback
+        Request,
+        HttpClientCallback
     ],
     Coroutine[Any, Any, Response]
 ]
@@ -42,21 +17,9 @@ HttpClientMiddlewareCallback = Callable[
 
 async def _call_handler(
         handler: HttpClientCallback,
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]]
+        request: Request
 ) -> Response:
-    return await handler(
-        host,
-        scheme,
-        path,
-        method,
-        headers,
-        content
-    )
+    return await handler(request)
 
 
 def make_middleware_chain(
