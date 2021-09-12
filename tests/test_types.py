@@ -18,3 +18,10 @@ def test_request_url():
     assert request.host == 'docs.python.org'
     assert request.scheme == 'https'
     assert request.path == '/index.html'
+
+    request = Request.from_url(
+        'https://docs.python.org/index.html', 'GET', None, None)
+    assert request.url == 'https://docs.python.org/index.html'
+    assert request.host == 'docs.python.org'
+    assert request.scheme == 'https'
+    assert request.path == '/index.html'

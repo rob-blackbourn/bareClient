@@ -1,5 +1,7 @@
 """Types"""
 
+from __future__ import annotations
+
 from typing import (
     AsyncIterable,
     Dict,
@@ -128,6 +130,24 @@ class Request:
 
     def __str__(self) -> str:
         return f' {self.method} {self.url}'
+
+    @classmethod
+    def from_url(
+            cls,
+            url: str,
+            method: str,
+            headers: Optional[List[Tuple[bytes, bytes]]],
+            body: Optional[AsyncIterable[bytes]]
+    ) -> Request:
+        parsed_url = urllib.parse.urlparse(url)
+        return Request(
+            parsed_url.netloc,
+            parsed_url.scheme,
+            parsed_url.path,
+            method,
+            headers,
+            body
+        )
 
 
 class Response:
