@@ -21,6 +21,7 @@ from .types import (
     HttpResponseConnection,
     HttpResponse,
     HttpResponseBody,
+    Request,
     Response
 )
 
@@ -72,12 +73,7 @@ class RequestHandlerInstance:
 
     def __init__(
             self,
-            host: str,
-            scheme: str,
-            path: str,
-            method: str,
-            headers: Optional[List[Header]],
-            content: Optional[AsyncIterable[bytes]],
+            request: Request,
             send: SendCallable,
             receive: ReceiveCallable,
             middleware: List[HttpClientMiddlewareCallback]
@@ -85,21 +81,11 @@ class RequestHandlerInstance:
         """Initialise the request handler instance
 
         Args:
-            host (str): The host
-            scheme (str): The scheme
-            path (str): The path
-            method (str): The request method
-            headers (Optional[List[Header]]): The request headers
-            content (Optional[AsyncIterable[bytes]]): The content
+            request (Request): The request.
             send (SendCallable): The function to sed the data
             receive (ReceiveCallable): The function to receive the data
         """
-        self.host = host
-        self.scheme = scheme
-        self.path = path
-        self.method = method
-        self.headers = _enrich_headers(host, headers, content)
-        self.content = content
+        self.request = request
         self.send = send
         self.receive = receive
         self.middleware = middleware
@@ -115,52 +101,30 @@ class RequestHandlerInstance:
             handler=self._process
         )
         return await chain(
-            self.host,
-            self.scheme,
-            self.path,
-            self.method,
-            self.headers,
-            self.content
+            self.request,
         )
 
     async def _process(
             self,
-            host: str,
-            scheme: str,
-            path: str,
-            method: str,
-            headers: List[Tuple[bytes, bytes]],
-            content: Optional[AsyncIterable[bytes]]
+            request: Request
     ) -> Response:
-        await self._process_request(
-            host,
-            scheme,
-            path,
-            method,
-            headers,
-            content
-        )
+        await self._process_request(request)
         return await self._process_response()
 
     async def _process_request(
             self,
-            host: str,
-            scheme: str,
-            path: str,
-            method: str,
-            headers: List[Tuple[bytes, bytes]],
-            content: Optional[AsyncIterable[bytes]]
+            request: Request
     ) -> None:
-        body_writer = _make_body_writer(content).__aiter__()
+        body_writer = _make_body_writer(request.body).__aiter__()
         body, more_body = await body_writer.__anext__()
 
         http_request: HttpRequest = {
             'type': 'http.request',
-            'host': host,
-            'scheme': scheme,
-            'path': path,
-            'method': method,
-            'headers': headers,
+            'host': request.host,
+            'scheme': request.scheme,
+            'path': request.path,
+            'method': request.method,
+            'headers': request.headers or [],
             'body': body,
             'more_body': more_body
         }
@@ -237,7 +201,7 @@ class RequestHandler:
             path: str,
             method: str,
             headers: Optional[List[Header]],
-            content: Optional[AsyncIterable[bytes]],
+            body: Optional[AsyncIterable[bytes]],
             middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler
@@ -248,16 +212,18 @@ class RequestHandler:
             path (str): The path
             method (str): The request method
             headers (Optional[List[Header]]): The headers
-            content (Optional[AsyncIterable[bytes]]): The request body
+            body (Optional[AsyncIterable[bytes]]): The request body
         """
-        self.host = host
-        self.scheme = scheme
-        self.path = path
-        self.method = method
-        self.headers = headers or []
-        self.content = content
-        self.instance: Optional[RequestHandlerInstance] = None
+        self.request = Request(
+            host,
+            scheme,
+            path,
+            method,
+            headers,
+            body
+        )
         self.middleware = middleware
+        self.instance: Optional[RequestHandlerInstance] = None
 
     async def __call__(
             self,
@@ -274,12 +240,7 @@ class RequestHandler:
             Response: The response.
         """
         self.instance = RequestHandlerInstance(
-            self.host,
-            self.scheme,
-            self.path,
-            self.method,
-            self.headers,
-            self.content,
+            self.request,
             send,
             receive,
             self.middleware

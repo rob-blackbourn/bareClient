@@ -20,7 +20,7 @@ from .ssl_contexts import (
     DEFAULT_CIPHERS,
     DEFAULT_OPTIONS
 )
-from .types import Response
+from .types import Request, Response
 
 __all__ = [
     'HttpClient',
@@ -38,6 +38,7 @@ __all__ = [
     'DEFAULT_PROTOCOLS',
     'DEFAULT_CIPHERS',
     'DEFAULT_OPTIONS',
+    'Request',
     'Response',
     'HttpClientMiddlewareCallback',
     'HttpClientCallback'

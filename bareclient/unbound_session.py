@@ -144,7 +144,7 @@ class HttpUnboundSession:
             *,
             method: str = 'GET',
             headers: Optional[List[Header]] = None,
-            content: Optional[Content] = None
+            body: Optional[Content] = None
     ) -> HttpUnboundSessionInstance:
         """Make an HTTP request
 
@@ -154,7 +154,7 @@ class HttpUnboundSession:
                 to 'GET'.
             headers (Optional[List[Header]], optional): Optional headers.
                 Defaults to None.
-            content (Optional[Content], optional): Optional content, defaults to
+            body (Optional[Content], optional): Optional content, defaults to
                 None. Defaults to None.
 
         Returns:
@@ -182,7 +182,7 @@ class HttpUnboundSession:
             url,
             method=method,
             headers=combined_headers,
-            content=content,
+            body=body,
             loop=self.loop,
             h11_bufsiz=self.h11_bufsiz,
             cafile=self.cafile,

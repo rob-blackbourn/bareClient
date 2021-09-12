@@ -10,13 +10,11 @@ The following example demonstrates a simple `GET` request.
 import asyncio
 from bareclient import HttpClient
 
-
 async def main(url: str) -> None:
     async with HttpClient(url) as response:
         if response.status_code == 200 and response.body is not None:
             async for part in response.body:
                 print(part)
-
 
 asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
 ```
@@ -33,9 +31,7 @@ import asyncio
 import json
 from bareutils import text_writer
 import bareutils.response_code as response_code
-
 from bareclient import HttpClient
-
 
 async def main(url: str) -> None:
     obj = {'name': 'Rob'}
@@ -45,7 +41,7 @@ async def main(url: str) -> None:
             url,
             method='POST',
             headers=[(b'content-type', b'application/json')],
-            content=text_writer(body)
+            body=text_writer(body)
     ) as response:
         if response_code.is_successful(response.status_code):
             print("OK")

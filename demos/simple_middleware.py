@@ -1,61 +1,42 @@
 """Simple GET"""
 
 import asyncio
-from typing import (
-    AsyncIterable,
-    List,
-    Optional,
-    Tuple
-)
+from typing import List
 from bareclient import (
     HttpClient,
     HttpClientCallback,
     HttpClientMiddlewareCallback,
+    Request,
     Response
 )
 
 
 async def first_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
     print('before first')
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
     print('after first')
     return response
 
 
 async def second_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
     print('before second')
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
     print('after second')
     return response
 
 
 async def third_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
     print('before third')
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
     print('after third')
     return response
 

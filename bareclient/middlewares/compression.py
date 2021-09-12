@@ -20,7 +20,7 @@ from bareutils.compression import (
     CompressorFactory
 )
 
-from ..types import Response
+from ..types import Request, Response
 from ..middleware import HttpClientCallback
 
 Decompressors = Mapping[bytes, DecompressorFactory]
@@ -65,15 +65,11 @@ def _make_body_reader(
 
 
 async def compression_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
-    content = _make_body_writer(headers, content)
-    response = await handler(host, scheme, path, method, headers, content)
+    if request.headers:
+        request.body = _make_body_writer(request.headers, request.body)
+    response = await handler(request)
     response.body = _make_body_reader(response.headers, response.body)
     return response

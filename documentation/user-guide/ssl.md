@@ -39,8 +39,8 @@ async def main(url: str) -> None:
     ciphers = list(DEFAULT_CIPHERS) + ['ALL:@SECLEVEL=1']
     async with HttpClient(url, method='GET', ciphers=ciphers) as response:
         print(response)
-        if response['status_code'] == 200 and response['more_body']:
-            async for part in response['body']:
+        if response['status_code'] == 200 and response.more_body:
+            async for part in response.body:
                 print(part)
     print('Done')
 

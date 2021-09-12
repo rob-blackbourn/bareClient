@@ -5,23 +5,19 @@
 The client supports middleware to provide facilities such as authentication
 and compression.
 
-A middleware handler has the following structure.
+A middleware handler takes a [`request`](/api/bareclient/#class-request) and
+the next handler.
 
 ```python
 async def first_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
 
     # Before calling the next handler the input arguments can be modified.
 
     # Call the next handler
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
 
     # After calling the handler the response may be modified.
 
@@ -30,7 +26,7 @@ async def first_middleware(
 
 Multiple handlers may be defined. The client will call each handler in turn as a nested chain.
 
-The handlers are passed to the clinet as a list.
+The handlers are passed to the client as a list.
 
 ```python
 middleware: List[HttpClientMiddlewareCallback] = [
@@ -50,61 +46,41 @@ Here's a simple example of how to use middleware.
 """Simple GET"""
 
 import asyncio
-from typing import (
-    AsyncIterable,
-    List,
-    Optional,
-    Tuple
-)
+from typing import List
 from bareclient import (
     HttpClient,
     HttpClientCallback,
     HttpClientMiddlewareCallback,
+    Request,
     Response
 )
 
-
 async def first_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
     print('before first')
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
     print('after first')
     return response
 
 
 async def second_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
     print('before second')
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
     print('after second')
     return response
 
 
 async def third_middleware(
-        host: str,
-        scheme: str,
-        path: str,
-        method: str,
-        headers: List[Tuple[bytes, bytes]],
-        content: Optional[AsyncIterable[bytes]],
+        request: Request,
         handler: HttpClientCallback,
 ) -> Response:
     print('before third')
-    response = await handler(host, scheme, path, method, headers, content)
+    response = await handler(request)
     print('after third')
     return response
 

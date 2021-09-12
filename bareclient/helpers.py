@@ -109,7 +109,7 @@ async def request(
             url,
             method=method,
             headers=headers,
-            content=data,
+            body=data,
             loop=loop,
             cafile=cafile,
             capath=capath,

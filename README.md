@@ -50,8 +50,8 @@ from bareclient import HttpClient
 
 async def main(url: str) -> None:
     async with HttpClient(url, method='GET') as response:
-        if response['status_code'] == 200 and response['more_body']:
-            async for part in response['body']:
+        if response.status_code == 200 and response.more_body:
+            async for part in response.body:
                 print(part)
 
 asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
@@ -60,8 +60,6 @@ asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
 There is also an `HttpSession` for maintaining session cookies.
 
 ```python
-"""Simple GET"""
-
 import asyncio
 import json
 
@@ -70,20 +68,18 @@ import bareutils.header as header
 import bareutils.response_code as response_code
 from bareclient import HttpSession
 
-
 async def main() -> None:
-    """Session example"""
 
     session = HttpSession('https://jsonplaceholder.typicode.com')
     async with session.request('/users/1/posts', method='GET') as response:
         # We expect a session cookie to be sent on the initial request.
-        set_cookie = header.find(b'set-cookie', response['headers'])
+        set_cookie = header.find(b'set-cookie', response.headers)
         print("Session cookie!" if set_cookie else "No session cookie")
 
-        if not response_code.is_successful(response['status_code']):
+        if not response_code.is_successful(response.status_code):
             raise Exception("Failed to get posts")
 
-        posts = json.loads(await text_reader(response['body']))
+        posts = json.loads(await text_reader(response.body))
         print(f'We received {len(posts)} posts')
 
         for post in posts:
@@ -92,15 +88,14 @@ async def main() -> None:
             async with session.request(path, method='GET') as response:
                 # As we were sent the session cookie we do not expect to receive
                 # another one, until this one has expired.
-                set_cookie = header.find(b'set-cookie', response['headers'])
+                set_cookie = header.find(b'set-cookie', response.headers)
                 print("Session cookie!" if set_cookie else "No session cookie")
 
-                if not response_code.is_successful(response['status_code']):
+                if not response_code.is_successful(response.status_code):
                     raise Exception("Failed to get comments")
 
-                comments = json.loads(await text_reader(response['body']))
+                comments = json.loads(await text_reader(response.body))
                 print(f'We received {len(comments)} comments')
-
 
 asyncio.run(main())
 ```
@@ -112,12 +107,10 @@ import asyncio
 
 from bareclient import get_json
 
-
 async def main(url: str) -> None:
     """Get some JSON"""
     obj = await get_json(url, headers=[(b'accept-encoding', b'gzip')])
     print(obj)
-
 
 asyncio.run(main('https://jsonplaceholder.typicode.com/todos/1'))
 ```

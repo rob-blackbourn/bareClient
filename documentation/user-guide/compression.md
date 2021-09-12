@@ -20,7 +20,6 @@ from bareclient import (
 )
 from bareclient.middlewares import compression_middleware
 
-
 async def main(url: str) -> None:
 
     headers = [
@@ -36,7 +35,7 @@ async def main(url: str) -> None:
             url,
             headers=headers,
             middleware=middleware,
-            content=text_writer('Hello, World!')
+            body=text_writer('Hello, World!')
     ) as response:
         print(response)
         if response.status_code == 200 and response.body is not None:

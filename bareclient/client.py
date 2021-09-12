@@ -29,7 +29,7 @@ class HttpClient:
             *,
             method: str = 'GET',
             headers: Optional[List[Header]] = None,
-            content: Optional[Content] = None,
+            body: Optional[Content] = None,
             loop: Optional[AbstractEventLoop] = None,
             h11_bufsiz: int = 8096,
             cafile: Optional[str] = None,
@@ -66,7 +66,7 @@ class HttpClient:
             method (str, optional): The HTTP method. Defaults to 'GET'.
             headers (Optional[List[Header]], optional): The headers. Defaults to
                 None.
-            content (Optional[Content], optional): The body content. Defaults to
+            body (Optional[Content], optional): The body content. Defaults to
                 None.
             loop (Optional[AbstractEventLoop], optional): The optional asyncio
                 event loop. Defaults to None.
@@ -103,7 +103,7 @@ class HttpClient:
 
         self.method = method
         self.headers = headers
-        self.content = content
+        self.body = body
         self.loop = loop
         self.h11_bufsiz = h11_bufsiz
         self.cafile = cafile
@@ -125,7 +125,7 @@ class HttpClient:
             self.path,
             self.method,
             self.headers,
-            self.content,
+            self.body,
             self.middleware
         )
         response = await connect(

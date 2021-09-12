@@ -1,14 +1,8 @@
 """Basic Authorization"""
 
 from base64 import b64encode
-from typing import (
-    AsyncIterable,
-    List,
-    Optional,
-    Tuple
-)
 
-from ..types import Response
+from ..types import Request, Response
 from ..middleware import (
     HttpClientCallback,
     HttpClientMiddlewareCallback
@@ -35,15 +29,14 @@ def create_basic_auth_middleware(
     ]
 
     async def basic_auth_middleware(
-            host: str,
-            scheme: str,
-            path: str,
-            method: str,
-            headers: List[Tuple[bytes, bytes]],
-            content: Optional[AsyncIterable[bytes]],
+            request: Request,
             handler: HttpClientCallback,
     ) -> Response:
-        headers = headers + authorization_headers
-        return await handler(host, scheme, path, method, headers, content)
+        headers = authorization_headers.copy()
+        if request.headers:
+            headers += request.headers
+        request.headers = headers
+
+        return await handler(request)
 
     return basic_auth_middleware

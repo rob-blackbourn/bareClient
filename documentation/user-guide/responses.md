@@ -17,7 +17,7 @@ Fields:
 ## Response Body
 
 The response body (`response.body`) may be `None` or an async iterator. It can be
-iterated over asynchronusly as follows.
+iterated over asynchronously as follows.
 
 ```python
 async for part in response.body:
