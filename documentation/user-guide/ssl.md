@@ -11,8 +11,8 @@ other arguments are ignored.
 
 There a two helper functions.
 
-* create_ssl_context - creates a simple ssl context
-* create_ssl_context_with_cert_chain - creates a context with a client certificate and key.
+- create_ssl_context - creates a simple ssl context
+- create_ssl_context_with_cert_chain - creates a context with a client certificate and key.
 
 ## Optional helper arguments
 
@@ -39,7 +39,7 @@ async def main(url: str) -> None:
     ciphers = list(DEFAULT_CIPHERS) + ['ALL:@SECLEVEL=1']
     async with HttpClient(url, method='GET', ciphers=ciphers) as response:
         print(response)
-        if response['status_code'] == 200 and response.more_body:
+        if response.status_code == 200 and response.body:
             async for part in response.body:
                 print(part)
     print('Done')

@@ -109,7 +109,7 @@ class RequestHandlerInstance:
             request: Request
     ) -> Response:
         await self._process_request(request)
-        return await self._process_response()
+        return await self._process_response(request.url)
 
     async def _process_request(
             self,
@@ -146,7 +146,7 @@ class RequestHandlerInstance:
             }
             await self.send(http_request_body)
 
-    async def _process_response(self) -> Response:
+    async def _process_response(self, url: str) -> Response:
         response = await self.receive()
 
         if response['type'] == 'http.disconnect':
@@ -160,6 +160,7 @@ class RequestHandlerInstance:
                 else None
             )
             return Response(
+                url,
                 http_response['status_code'],
                 http_response['headers'],
                 body_reader
