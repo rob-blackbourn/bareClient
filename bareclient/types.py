@@ -212,7 +212,7 @@ class Response:
 
         Args:
             loads (Callable[[bytes], Any], optional): The function
-            to parse the JSON. Defaults to `json.loads`.
+                to parse the JSON. Defaults to `json.loads`.
 
         Returns:
             Optional[Any]: The unpacked JSON or None if the body was empty.
@@ -223,6 +223,11 @@ class Response:
         return (loads or json.loads)(buf)
 
     async def raise_for_status(self) -> None:
+        """Raise an error for a non 200 status code.
+
+        Raises:
+            HTTPError: If the status code was not a 200 code.
+        """
         if 200 <= self.status_code < 300:
             return
 

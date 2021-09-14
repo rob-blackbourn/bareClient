@@ -478,23 +478,17 @@
                 
                 <h1 id="responses">Responses<a class="headerlink" href="#responses" title="Permanent link">&para;</a></h1>
 <p>The response is yielded in the <code>HttpClient</code> async context.</p>
-<p>The response object has the following fields:</p>
-<p>Fields:</p>
-<ul>
-<li><strong><code>status_code</code></strong> (<em>int</em>) - The HTTP status code.</li>
-<li><strong><code>headers</code></strong> (<em>List[[byte string, byte string]]</em>) - A list of [name,
-  value] two-item iterables, where name is the header name, and value is the
-  header value. Order must be preserved in the HTTP response. Header names
-  must be lowercased. Optional; defaults to an empty list. Pseudo headers
-  (present in HTTP/2 and HTTP/3) must not be present.</li>
-<li><strong><code>body</code></strong> (<em>Optional[AsyncIterable[byte string]]</em>) - The body content if any.</li>
-</ul>
+<p>See the api reference for the documentation of the (<code>Response</code>)[/api/bareclient/#class-response]
+class.</p>
 <h2 id="response-body">Response Body<a class="headerlink" href="#response-body" title="Permanent link">&para;</a></h2>
 <p>The response body (<code>response.body</code>) may be <code>None</code> or an async iterator. It can be
 iterated over asynchronously as follows.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">async</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
 </code></pre></div>
+
+<p>The response body is only available in the context of the response, and can only
+be read once.</p>
                 
                   
                 

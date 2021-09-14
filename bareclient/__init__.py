@@ -2,7 +2,6 @@
 
 from .client import HttpClient
 from .helpers import (
-    request,
     get,
     get_text,
     get_json,
@@ -22,7 +21,6 @@ from .types import Request, Response
 
 __all__ = [
     'HttpClient',
-    'request',
     'get',
     'get_text',
     'get_json',
