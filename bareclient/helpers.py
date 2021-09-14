@@ -4,12 +4,11 @@ from asyncio import AbstractEventLoop
 import json
 import ssl
 from typing import Any, Callable, Iterable, List, Optional, Union
-from urllib.error import HTTPError
 from urllib.parse import urlparse
 
 from baretypes import Headers
 import bareutils.header as header
-from bareutils import bytes_writer
+from bareutils import bytes_writer, text_writer
 
 from .client import HttpClient
 from .constants import USER_AGENT, DEFAULT_PROTOCOLS
@@ -34,7 +33,7 @@ async def request(
         chunk_size: int = -1,
         connect_timeout: Optional[Union[int, float]] = None,
         middleware: Optional[List[HttpClientMiddlewareCallback]] = None
-) -> bytes:
+) -> Optional[bytes]:
     """Gets bytes from a url.
 
     ```python
@@ -81,7 +80,7 @@ async def request(
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
-        bytes: The bytes received.
+        Optional[bytes]: The bytes received.
     """
 
     headers = [] if headers is None else list(headers)
@@ -121,22 +120,8 @@ async def request(
             connect_timeout=connect_timeout,
             middleware=middleware
     ) as response:
-        buf = b''
-        if response.body is not None:
-            async for part in response.body:
-                buf += part
-        if response.status_code < 200 or response.status_code >= 400:
-            raise HTTPError(
-                url,
-                response.status_code,
-                buf.decode(),
-                {
-                    name.decode(): value.decode()
-                    for name, value in response.headers
-                },
-                None
-            )
-        return buf
+        await response.raise_for_status()
+        return await response.raw()
 
 
 async def get(
@@ -153,7 +138,7 @@ async def get(
         options: Iterable[int] = DEFAULT_OPTIONS,
         connect_timeout: Optional[Union[int, float]] = None,
         middleware: Optional[List[HttpClientMiddlewareCallback]] = None
-) -> bytes:
+) -> Optional[bytes]:
     """Issues a GET request
 
     Args:
@@ -187,23 +172,25 @@ async def get(
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
-        bytes: [description]
+        Optional[bytes]: [description]
     """
-    return await request(
-        url,
-        'GET',
-        headers=headers,
-        loop=loop,
-        cafile=cafile,
-        capath=capath,
-        cadata=cadata,
-        ssl_context=ssl_context,
-        protocols=protocols,
-        ciphers=ciphers,
-        options=options,
-        connect_timeout=connect_timeout,
-        middleware=middleware
-    )
+    async with HttpClient(
+            url,
+            method='GET',
+            headers=headers,
+            loop=loop,
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata,
+            ssl_context=ssl_context,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options,
+            connect_timeout=connect_timeout,
+            middleware=middleware
+    ) as response:
+        await response.raise_for_status()
+        return await response.raw()
 
 
 async def get_text(
@@ -221,7 +208,7 @@ async def get_text(
         options: Iterable[int] = DEFAULT_OPTIONS,
         connect_timeout: Optional[Union[int, float]] = None,
         middleware: Optional[List[HttpClientMiddlewareCallback]] = None
-) -> str:
+) -> Optional[str]:
     """Issues a GET request returning a string
 
     The following gets some text:
@@ -268,7 +255,7 @@ async def get_text(
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
-        str: [description]
+        Optional[str]: [description]
     """
 
     headers = [] if headers is None else list(headers)
@@ -276,28 +263,30 @@ async def get_text(
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'text/plain'))
 
-    buf = await get(
-        url,
-        headers=headers,
-        loop=loop,
-        cafile=cafile,
-        capath=capath,
-        cadata=cadata,
-        ssl_context=ssl_context,
-        protocols=protocols,
-        ciphers=ciphers,
-        options=options,
-        connect_timeout=connect_timeout,
-        middleware=middleware
-    )
-    return buf.decode(encoding)
+    async with HttpClient(
+            url,
+            method='GET',
+            headers=headers,
+            loop=loop,
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata,
+            ssl_context=ssl_context,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options,
+            connect_timeout=connect_timeout,
+            middleware=middleware
+    ) as response:
+        await response.raise_for_status()
+        return await response.text(encoding)
 
 
 async def get_json(
         url: str,
         *,
         headers: Headers = None,
-        loads: Callable[[str], Any] = json.loads,
+        loads: Callable[[bytes], Any] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
@@ -308,7 +297,7 @@ async def get_json(
         options: Iterable[int] = DEFAULT_OPTIONS,
         connect_timeout: Optional[Union[int, float]] = None,
         middleware: Optional[List[HttpClientMiddlewareCallback]] = None
-) -> Any:
+) -> Optional[Any]:
     """Issues a GET request returning a JSON object
 
     The following gets some json:
@@ -328,7 +317,7 @@ async def get_json(
         url (str): The url
         headers (Headers, optional): Any extra headers required. Defaults to
             None.
-        loads (Callable[[str], Any], optional): The function to loads the
+        loads (Callable[[bytes], Any], optional): The function to loads the
             JSON object from the string. Defaults to json.loads.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.
@@ -357,29 +346,30 @@ async def get_json(
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
-        Any: The decoded JSON object
+        Optional[Any]: The decoded JSON object
     """
     headers = [] if headers is None else list(headers)
 
     if not header.find(b'accept', headers):
         headers.append((b'accept', b'application/json'))
 
-    text = await get_text(
-        url,
-        headers=headers,
-        encoding='utf-8',
-        loop=loop,
-        cafile=cafile,
-        capath=capath,
-        cadata=cadata,
-        ssl_context=ssl_context,
-        protocols=protocols,
-        ciphers=ciphers,
-        options=options,
-        connect_timeout=connect_timeout,
-        middleware=middleware
-    )
-    return loads(text)
+    async with HttpClient(
+            url,
+            method='GET',
+            headers=headers,
+            loop=loop,
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata,
+            ssl_context=ssl_context,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options,
+            connect_timeout=connect_timeout,
+            middleware=middleware
+    ) as response:
+        await response.raise_for_status()
+        return await response.json(loads)
 
 
 async def post(
@@ -398,7 +388,7 @@ async def post(
         chunk_size: int = -1,
         connect_timeout: Optional[Union[int, float]] = None,
         middleware: Optional[List[HttpClientMiddlewareCallback]] = None
-) -> bytes:
+) -> Optional[bytes]:
     """Issues a POST request
 
     Args:
@@ -435,25 +425,28 @@ async def post(
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
-        bytes: The response body
+        Optional[bytes]: The response body
     """
-    return await request(
-        url,
-        method='POST',
-        content=content,
-        headers=headers,
-        loop=loop,
-        cafile=cafile,
-        capath=capath,
-        cadata=cadata,
-        ssl_context=ssl_context,
-        protocols=protocols,
-        ciphers=ciphers,
-        options=options,
-        chunk_size=chunk_size,
-        connect_timeout=connect_timeout,
-        middleware=middleware
-    )
+    data = bytes_writer(content, chunk_size) if content else None
+
+    async with HttpClient(
+            url,
+            method='POST',
+            headers=headers,
+            body=data,
+            loop=loop,
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata,
+            ssl_context=ssl_context,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options,
+            connect_timeout=connect_timeout,
+            middleware=middleware
+    ) as response:
+        await response.raise_for_status()
+        return await response.raw()
 
 
 async def post_text(
@@ -473,7 +466,7 @@ async def post_text(
         chunk_size: int = -1,
         connect_timeout: Optional[Union[int, float]] = None,
         middleware: Optional[List[HttpClientMiddlewareCallback]] = None
-) -> str:
+) -> Optional[str]:
     """Issues a POST request with a str body
 
     Args:
@@ -522,30 +515,33 @@ async def post_text(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'text/plain'))
 
-    response = await post(
-        url,
-        content=content,
-        headers=headers,
-        loop=loop,
-        cafile=cafile,
-        capath=capath,
-        cadata=cadata,
-        ssl_context=ssl_context,
-        protocols=protocols,
-        ciphers=ciphers,
-        options=options,
-        chunk_size=chunk_size,
-        connect_timeout=connect_timeout,
-        middleware=middleware
-    )
-    return response.decode(encoding=encoding)
+    data = bytes_writer(content, chunk_size) if content else None
+
+    async with HttpClient(
+            url,
+            method='POST',
+            headers=headers,
+            body=data,
+            loop=loop,
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata,
+            ssl_context=ssl_context,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options,
+            connect_timeout=connect_timeout,
+            middleware=middleware
+    ) as response:
+        await response.raise_for_status()
+        return await response.text()
 
 
 async def post_json(
         url: str,
         obj: Any,
         *,
-        loads: Callable[[str], Any] = json.loads,
+        loads: Callable[[bytes], Any] = json.loads,
         dumps: Callable[[Any], str] = json.dumps,
         headers: Headers = None,
         loop: Optional[AbstractEventLoop] = None,
@@ -580,7 +576,7 @@ async def post_json(
     Args:
         url (str): The url
         obj (Any): The JSON payload
-        loads (Callable[[str], Any], optional): The function used to decode
+        loads (Callable[[bytes], Any], optional): The function used to decode
             the response. Defaults to json.loads.
         dumps (Callable[[Any], str], optional): The function used to encode
             the request. Defaults to json.dumps.
@@ -627,21 +623,23 @@ async def post_json(
     if not header.find(b'content-type', headers):
         headers.append((b'content-type', b'application/json'))
 
-    text = await post_text(
-        url,
-        text=content,
-        encoding='utf-8',
-        headers=headers,
-        loop=loop,
-        cafile=cafile,
-        capath=capath,
-        cadata=cadata,
-        ssl_context=ssl_context,
-        protocols=protocols,
-        ciphers=ciphers,
-        options=options,
-        chunk_size=chunk_size,
-        connect_timeout=connect_timeout,
-        middleware=middleware
-    )
-    return loads(text)
+    data = text_writer(content, chunk_size=chunk_size) if content else None
+
+    async with HttpClient(
+            url,
+            method='POST',
+            headers=headers,
+            body=data,
+            loop=loop,
+            cafile=cafile,
+            capath=capath,
+            cadata=cadata,
+            ssl_context=ssl_context,
+            protocols=protocols,
+            ciphers=ciphers,
+            options=options,
+            connect_timeout=connect_timeout,
+            middleware=middleware
+    ) as response:
+        await response.raise_for_status()
+        return await response.json(loads)
