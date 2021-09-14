@@ -1,8 +1,6 @@
 """bareclient"""
 
 from .client import HttpClient
-from .session import HttpSession
-from .unbound_session import HttpUnboundSession
 from .helpers import (
     request,
     get,
@@ -24,8 +22,6 @@ from .types import Request, Response
 
 __all__ = [
     'HttpClient',
-    'HttpSession',
-    'HttpUnboundSession',
     'request',
     'get',
     'get_text',

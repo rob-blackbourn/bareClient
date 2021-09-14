@@ -15,28 +15,6 @@ CookieKey = Tuple[bytes, bytes, bytes]
 CookieCache = Dict[CookieKey, Cookie]
 
 
-def extract_cookies_from_response(
-        cookie_cache: CookieCache,
-        response: Response,
-        now: datetime
-) -> CookieCache:
-    """Extract cookies from the response
-
-    Args:
-        cookie_cache (CookieCache): The cookie cache
-        response (Response): The response
-        now (datetime): The current time
-
-    Returns:
-        CookieCache: The updated cookie cache
-    """
-    header_cookies = cast(
-        Mapping[bytes, List[Dict[str, Any]]],
-        header.set_cookie(response.headers)
-    )
-    return extract_cookies(cookie_cache, header_cookies, now)
-
-
 def extract_cookies(
         cookie_cache: CookieCache,
         header_cookies: Mapping[bytes, List[Dict[str, Any]]],
@@ -137,6 +115,7 @@ def gather_cookies(
 
 
 class SessionMiddleware:
+    """Session Middleware"""
 
     def __init__(
             self,
