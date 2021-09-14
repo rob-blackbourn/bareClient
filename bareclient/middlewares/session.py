@@ -1,52 +1,18 @@
-"""Utilities"""
+"""Session middleware"""
 
-from datetime import datetime
-import logging
-from typing import (
-    Any,
-    Dict,
-    List,
-    Mapping,
-    Tuple,
-    TypeVar,
-    cast
-)
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Mapping, Optional, Tuple, cast
 
-import bareutils.header as header
+from bareutils import header
 from bareutils.cookies import encode_cookies
 
-from .types import Response
-
-T = TypeVar('T')
-
-LOGGER = logging.getLogger(__name__)
+from ..middleware import HttpClientCallback
+from ..types import Request, Response
 
 
 Cookie = Dict[str, Any]
 CookieKey = Tuple[bytes, bytes, bytes]
 CookieCache = Dict[CookieKey, Cookie]
-
-
-def extract_cookies_from_response(
-        cookie_cache: CookieCache,
-        response: Response,
-        now: datetime
-) -> CookieCache:
-    """Extract cookies from the response
-
-    Args:
-        cookie_cache (CookieCache): The cookie cache
-        response (Response): The response
-        now (datetime): The current time
-
-    Returns:
-        CookieCache: The updated cookie cache
-    """
-    header_cookies = cast(
-        Mapping[bytes, List[Dict[str, Any]]],
-        header.set_cookie(response.headers)
-    )
-    return extract_cookies(cookie_cache, header_cookies, now)
 
 
 def extract_cookies(
@@ -146,3 +112,57 @@ def gather_cookies(
             for cookie in cookies.values()
         }
     )
+
+
+class SessionMiddleware:
+    """Session Middleware"""
+
+    def __init__(
+            self,
+            cookies: Optional[Mapping[bytes, List[Cookie]]] = None,
+    ) -> None:
+        self.cookies = extract_cookies({}, cookies or {}, datetime.utcnow())
+
+    def _prepare_request(self, now: datetime, request: Request) -> Request:
+        cookies = gather_cookies(
+            self.cookies,
+            request.scheme.encode(),
+            request.host.encode(),
+            request.path.encode(),
+            now
+        )
+
+        if not cookies:
+            headers = request.headers
+        else:
+            headers = [(b'cookie', cookies)]
+            if request.headers:
+                headers += request.headers
+
+        return Request(
+            request.host,
+            request.scheme,
+            request.path,
+            request.method,
+            headers,
+            request.body
+        )
+
+    def _process_response(self, now: datetime, response: Response) -> None:
+        header_cookies = cast(
+            Mapping[bytes, List[Dict[str, Any]]],
+            header.set_cookie(response.headers)
+        )
+        self.cookies = extract_cookies(self.cookies, header_cookies, now)
+
+    async def __call__(
+            self,
+            request: Request,
+            handler: HttpClientCallback
+    ) -> Response:
+        now = datetime.now().astimezone(timezone.utc)
+
+        request = self._prepare_request(now, request)
+        response = await handler(request)
+        self._process_response(now, response)
+        return response

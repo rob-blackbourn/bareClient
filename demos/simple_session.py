@@ -1,47 +1,43 @@
-"""Simple Session"""
+"""Session Middleware"""
 
 import asyncio
-import json
+from typing import List
 
-from bareutils import text_reader
 import bareutils.header as header
 import bareutils.response_code as response_code
-from bareclient import HttpSession
+from bareclient import HttpClient, HttpClientMiddlewareCallback
+from bareclient.middlewares import SessionMiddleware
 
 
 async def main() -> None:
-    """Session example"""
+    """Session middleware example"""
 
-    # Create the session
-    session = HttpSession('https://jsonplaceholder.typicode.com')
+    middleware: List[HttpClientMiddlewareCallback] = [SessionMiddleware()]
 
-    async with session.request('/users/1/posts', method='GET') as response:
+    async with HttpClient(
+            'https://en.wikipedia.org/wiki/HTTP_cookie',
+            method='GET',
+            middleware=middleware
+    ) as response:
         # We expect a session cookie to be sent on the initial request.
-        set_cookie = header.find(b'set-cookie', response.headers)
+        set_cookie = header.find_all(b'set-cookie', response.headers)
         print("Session cookie!" if set_cookie else "No session cookie")
 
         if not response_code.is_successful(response.status_code):
-            raise Exception("Failed to get posts")
+            raise Exception("Failed to get page")
 
-        posts = json.loads(await text_reader(response.body)) if response.body else []
-        print(f'We received {len(posts)} posts')
+    async with HttpClient(
+            'https://en.wikipedia.org/wiki/Web_browser',
+            method='GET',
+            middleware=middleware
+    ) as response:
+        # As we were sent the session cookie we do not expect to receive
+        # another one, until this one has expired.
+        set_cookie = header.find_all(b'set-cookie', response.headers)
+        print("Session cookie!" if set_cookie else "No session cookie")
 
-        for post in posts:
-            path = f'/posts/{post["id"]}/comments'
-            print(f'Requesting comments from "{path}""')
-            async with session.request(path, method='GET') as response:
-                # As we were sent the session cookie we do not expect to receive
-                # another one, until this one has expired.
-                set_cookie = header.find(b'set-cookie', response.headers)
-                print("Session cookie!" if set_cookie else "No session cookie")
-
-                if not response_code.is_successful(response.status_code):
-                    raise Exception("Failed to get comments")
-
-                comments = json.loads(
-                    await text_reader(response.body)
-                ) if response.body else []
-                print(f'We received {len(comments)} comments')
+        if not response_code.is_successful(response.status_code):
+            raise Exception("Failed to get page")
 
 
 asyncio.run(main())

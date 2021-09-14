@@ -78,9 +78,7 @@
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/.venv/bin/mkdocs",
-      "args": [
-        "build"
-      ],
+      "args": ["build"],
       "console": "integratedTerminal",
       "justMyCode": false
     }
