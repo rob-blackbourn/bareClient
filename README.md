@@ -13,6 +13,10 @@ It was written to allow a web server which had negotiated the HTTP/2 protocol
 for make outgoing HTTP/2 calls. This increases performance and simplifies proxy
 configuration in a micro-service architecture.
 
+## Branch
+
+This is the v4 maintenance branch.
+
 ## Installation
 
 The package can be installed with pip.
@@ -25,10 +29,10 @@ This is a Python3.7 and later package.
 
 It has dependencies on:
 
-* [bareTypes](https://github.com/rob-blackbourn/bareTypes)
-* [bareUtils](https://github.com/rob-blackbourn/bareUtils)
-* [h11](https://github.com/python-hyper/h11)
-* [h2](https://github.com/python-hyper/hyper-h2)
+- [bareTypes](https://github.com/rob-blackbourn/bareTypes)
+- [bareUtils](https://github.com/rob-blackbourn/bareUtils)
+- [h11](https://github.com/python-hyper/h11)
+- [h2](https://github.com/python-hyper/hyper-h2)
 
 ## Usage
 
