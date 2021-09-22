@@ -9,14 +9,13 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Tuple,
     cast
 )
 
 import h2.connection
 import h2.events
 import h2.settings
-
-from baretypes import Header
 
 from ..types import (
     HttpRequest,
@@ -159,7 +158,7 @@ class H2Protocol(HttpProtocol):
             host: str,
             path: str,
             method: str,
-            headers: List[Header]
+            headers: List[Tuple[bytes, bytes]]
     ) -> int:
         stream_id = self.h2_state.get_next_available_stream_id()
         headers = [
@@ -223,7 +222,7 @@ class H2Protocol(HttpProtocol):
             event = await self._receive_event()
 
         status_code = 200
-        headers: List[Header] = []
+        headers: List[Tuple[bytes, bytes]] = []
         for name, value in event.headers:
             if name == b":status":
                 status_code = int(value)

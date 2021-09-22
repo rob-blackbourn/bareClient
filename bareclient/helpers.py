@@ -3,11 +3,9 @@
 from asyncio import AbstractEventLoop
 import json
 import ssl
-from typing import Any, Callable, Iterable, List, Optional, Union
+from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
-from baretypes import Headers
-import bareutils.header as header
-from bareutils import bytes_writer, text_writer
+from bareutils import bytes_writer, text_writer, header
 
 from .client import HttpClient
 from .constants import DEFAULT_PROTOCOLS
@@ -18,7 +16,7 @@ from .middleware import HttpClientMiddlewareCallback
 async def get(
         url: str,
         *,
-        headers: Headers = None,
+        headers: List[Tuple[bytes, bytes]] = None,
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
@@ -34,7 +32,7 @@ async def get(
 
     Args:
         url (str): The url
-        headers (Headers, optional): Any extra headers required. Defaults to
+        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
             None.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.
@@ -87,7 +85,7 @@ async def get(
 async def get_text(
         url: str,
         *,
-        headers: Headers = None,
+        headers: List[Tuple[bytes, bytes]] = None,
         loop: Optional[AbstractEventLoop] = None,
         encoding: str = 'utf-8',
         cafile: Optional[str] = None,
@@ -117,7 +115,7 @@ async def get_text(
 
     Args:
         url (str): The url
-        headers (Headers, optional): Any extra headers required. Defaults to
+        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
             None.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.
@@ -176,7 +174,7 @@ async def get_text(
 async def get_json(
         url: str,
         *,
-        headers: Headers = None,
+        headers: List[Tuple[bytes, bytes]] = None,
         loads: Callable[[bytes], Any] = json.loads,
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
@@ -206,7 +204,7 @@ async def get_json(
 
     Args:
         url (str): The url
-        headers (Headers, optional): Any extra headers required. Defaults to
+        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
             None.
         loads (Callable[[bytes], Any], optional): The function to loads the
             JSON object from the string. Defaults to json.loads.
@@ -267,7 +265,7 @@ async def post(
         url: str,
         content: bytes,
         *,
-        headers: Headers = None,
+        headers: List[Tuple[bytes, bytes]] = None,
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
@@ -285,7 +283,7 @@ async def post(
     Args:
         url (str): The url
         content (bytes): The body content
-        headers (Headers, optional): Any extra headers required. Defaults to
+        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
             None.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.
@@ -345,7 +343,7 @@ async def post_text(
         text: str,
         *,
         encoding='utf-8',
-        headers: Headers = None,
+        headers: List[Tuple[bytes, bytes]] = None,
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
@@ -363,7 +361,7 @@ async def post_text(
     Args:
         url (str): The url
         content (bytes): The body content
-        headers (Headers, optional): Any extra headers required. Defaults to
+        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
             None.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.
@@ -434,7 +432,7 @@ async def post_json(
         *,
         loads: Callable[[bytes], Any] = json.loads,
         dumps: Callable[[Any], str] = json.dumps,
-        headers: Headers = None,
+        headers: List[Tuple[bytes, bytes]] = None,
         loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
@@ -471,7 +469,7 @@ async def post_json(
             the response. Defaults to json.loads.
         dumps (Callable[[Any], str], optional): The function used to encode
             the request. Defaults to json.dumps.
-        headers (Headers, optional): Any extra headers required. Defaults to
+        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
             None.
         loop (Optional[AbstractEventLoop], optional): The optional asyncio event
             loop.. Defaults to None.

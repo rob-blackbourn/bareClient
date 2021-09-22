@@ -8,8 +8,8 @@ from typing import (
     Tuple,
     cast
 )
-from baretypes import Header
-import bareutils.header as header
+
+from bareutils import header
 
 from .acgi import ReceiveCallable, SendCallable
 from .constants import USER_AGENT
@@ -28,9 +28,9 @@ from .types import (
 
 def _enrich_headers(
         host: str,
-        headers: Optional[List[Header]],
+        headers: Optional[List[Tuple[bytes, bytes]]],
         content: Optional[AsyncIterable[bytes]]
-) -> List[Header]:
+) -> List[Tuple[bytes, bytes]]:
     headers = [] if not headers else list(headers)
     if not header.find(b'user-agent', headers):
         headers.append((b'user-agent', USER_AGENT))
@@ -201,7 +201,7 @@ class RequestHandler:
             scheme: str,
             path: str,
             method: str,
-            headers: Optional[List[Header]],
+            headers: Optional[List[Tuple[bytes, bytes]]],
             body: Optional[AsyncIterable[bytes]],
             middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
@@ -212,7 +212,7 @@ class RequestHandler:
             scheme (str): The scheme
             path (str): The path
             method (str): The request method
-            headers (Optional[List[Header]]): The headers
+            headers (Optional[List[Tuple[bytes, bytes]]]): The headers
             body (Optional[AsyncIterable[bytes]]): The request body
         """
         self.request = Request(

@@ -8,8 +8,7 @@ from typing import (
     Tuple
 )
 
-from bareutils import header
-from bareutils.compression import (
+from bareutils import (
     compression_reader_adapter,
     compression_writer_adapter,
     make_gzip_decompressobj,
@@ -17,7 +16,8 @@ from bareutils.compression import (
     DecompressorFactory,
     make_gzip_compressobj,
     make_deflate_compressobj,
-    CompressorFactory
+    CompressorFactory,
+    header
 )
 
 from ..types import Request, Response

@@ -3,8 +3,7 @@
 import asyncio
 from typing import List
 
-import bareutils.header as header
-import bareutils.response_code as response_code
+from bareutils import header, response_code
 from bareclient import HttpClient, HttpClientMiddlewareCallback
 from bareclient.middlewares import SessionMiddleware
 
