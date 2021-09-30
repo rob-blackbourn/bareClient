@@ -26,19 +26,18 @@ from .types import (
 )
 
 
-def _enrich_headers(
-        host: str,
-        headers: Optional[List[Tuple[bytes, bytes]]],
-        content: Optional[AsyncIterable[bytes]]
-) -> List[Tuple[bytes, bytes]]:
-    headers = [] if not headers else list(headers)
+def _enrich_headers(request: Request) -> List[Tuple[bytes, bytes]]:
+    headers = [] if not request.headers else list(request.headers)
     if not header.find(b'user-agent', headers):
         headers.append((b'user-agent', USER_AGENT))
     if not header.find(b'host', headers):
-        headers.append((b'host', host.encode('ascii')))
-    if content and not (
-            header.find(b'content-length', headers)
-            or header.find(b'transfer-encoding', headers)
+        headers.append((b'host', request.host.encode('ascii')))
+    if (
+            request.body and not
+            (
+                header.find(b'content-length', headers)
+                or header.find(b'transfer-encoding', headers)
+            )
     ):
         headers.append((b'transfer-encoding', b'chunked'))
     return headers
@@ -53,15 +52,16 @@ async def _make_body_writer(
         more_body = True
         content_iter = content.__aiter__()
         try:
-            first = await content_iter.__anext__()
+            first: Optional[bytes] = await content_iter.__anext__()
         except StopAsyncIteration:
             more_body = False
             yield None, more_body
 
         while more_body:
             try:
-                second = await content_iter.__anext__()
+                second: Optional[bytes] = await content_iter.__anext__()
             except StopAsyncIteration:
+                second = None
                 more_body = False
 
             yield first, more_body
@@ -117,6 +117,7 @@ class RequestHandlerInstance:
     ) -> None:
         body_writer = _make_body_writer(request.body).__aiter__()
         body, more_body = await body_writer.__anext__()
+        headers = _enrich_headers(request)
 
         http_request: HttpRequest = {
             'type': 'http.request',
@@ -124,7 +125,7 @@ class RequestHandlerInstance:
             'scheme': request.scheme,
             'path': request.path,
             'method': request.method,
-            'headers': request.headers or [],
+            'headers': headers,
             'body': body,
             'more_body': more_body
         }
