@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bareclient"
-version = "5.0.0-alpha.7"
+version = "5.0.0-alpha.8"
 description = "A lightweight asyncio HTTP client"
 authors = ["Rob Blackbourn <rob.blackbourn@gmail.com>"]
 license = "Apache-2.0"
