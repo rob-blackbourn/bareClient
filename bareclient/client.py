@@ -4,13 +4,13 @@ from asyncio import AbstractEventLoop
 import urllib.parse
 from ssl import SSLContext
 from typing import (
+    AsyncIterable,
     Iterable,
     List,
     Optional,
+    Tuple,
     Union
 )
-
-from baretypes import Header, Content
 
 from .requester import RequestHandler
 from .acgi import connect
@@ -28,8 +28,8 @@ class HttpClient:
             url: str,
             *,
             method: str = 'GET',
-            headers: Optional[List[Header]] = None,
-            body: Optional[Content] = None,
+            headers: Optional[List[Tuple[bytes, bytes]]] = None,
+            body: Optional[AsyncIterable[bytes]] = None,
             loop: Optional[AbstractEventLoop] = None,
             h11_bufsiz: int = 8096,
             cafile: Optional[str] = None,
@@ -64,9 +64,9 @@ class HttpClient:
         Args:
             url (str): The url
             method (str, optional): The HTTP method. Defaults to 'GET'.
-            headers (Optional[List[Header]], optional): The headers. Defaults to
+            headers (Optional[List[Tuple[bytes, bytes]]], optional): The headers. Defaults to
                 None.
-            body (Optional[Content], optional): The body content. Defaults to
+            body (Optional[AsyncIterable[bytes]], optional): The body content. Defaults to
                 None.
             loop (Optional[AbstractEventLoop], optional): The optional asyncio
                 event loop. Defaults to None.

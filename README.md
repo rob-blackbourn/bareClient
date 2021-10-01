@@ -17,10 +17,10 @@ configuration in a micro-service architecture.
 
 The client has the following notable features:
 
-* Lightweight
-* Uses asyncio
-* Supports HTTP versions 1.0, 1.1, 2
-* Supports middleware
+- Lightweight
+- Uses asyncio
+- Supports HTTP versions 1.0, 1.1, 2
+- Supports middleware
 
 ## Installation
 
@@ -34,10 +34,10 @@ This is a Python3.7 and later package.
 
 It has dependencies on:
 
-* [bareTypes](https://github.com/rob-blackbourn/bareTypes)
-* [bareUtils](https://github.com/rob-blackbourn/bareUtils)
-* [h11](https://github.com/python-hyper/h11)
-* [h2](https://github.com/python-hyper/hyper-h2)
+- [bareTypes](https://github.com/rob-blackbourn/bareTypes)
+- [bareUtils](https://github.com/rob-blackbourn/bareUtils)
+- [h11](https://github.com/python-hyper/h11)
+- [h2](https://github.com/python-hyper/hyper-h2)
 
 ## Usage
 
@@ -63,9 +63,7 @@ There is also an `HttpSession` for maintaining session cookies.
 import asyncio
 import json
 
-from bareutils import text_reader
-import bareutils.header as header
-import bareutils.response_code as response_code
+from bareutils import text_reader, header, response_code
 from bareclient import HttpSession
 
 async def main() -> None:

@@ -29,8 +29,7 @@ The following code demonstrates a simple `POST` request.
 ```python
 import asyncio
 import json
-from bareutils import text_writer
-from bareutils import response_code
+from bareutils import text_writer, response_code
 from bareclient import HttpClient
 
 async def main(url: str) -> None:

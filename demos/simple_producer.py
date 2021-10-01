@@ -2,7 +2,7 @@
 
 import asyncio
 
-import bareutils.response_code as response_code
+from bareutils import response_code
 
 from bareclient import HttpClient
 

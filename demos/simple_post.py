@@ -2,8 +2,7 @@
 
 import asyncio
 import json
-from bareutils import text_writer
-import bareutils.response_code as response_code
+from bareutils import text_writer, response_code
 
 from bareclient import HttpClient
 
