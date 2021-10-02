@@ -1,8 +1,8 @@
 # SSL
 
-The [`HttpClient`](/api/bareclient/#class-httpclient),
-[`HttpSession`](/api/bareclient/#class-httpsession), and the helper functions
-all take a number of optional arguments which may be used to configure SSl.
+The [`HttpClient`](/5.0/api/bareclient/#class-httpclient),
+and the helper functions take a number of optional arguments which may be used
+to configure SSl.
 
 ## SSLContext
 

@@ -5,7 +5,7 @@
 The client supports middleware to provide facilities such as authentication
 and compression.
 
-A middleware handler takes a [`request`](/api/bareclient/#class-request) and
+A middleware handler takes a [`request`](/5.0/api/bareclient/#class-request) and
 the next handler.
 
 ```python
