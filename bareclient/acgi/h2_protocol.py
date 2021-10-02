@@ -17,7 +17,7 @@ import h2.connection
 import h2.events
 import h2.settings
 
-from ..types import (
+from .types import (
     HttpRequest,
     HttpRequestBody,
     HttpResponse,

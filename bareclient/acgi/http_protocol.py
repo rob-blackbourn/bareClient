@@ -3,7 +3,7 @@
 from abc import ABCMeta, abstractmethod
 from asyncio import StreamReader, StreamWriter
 
-from ..types import HttpRequests, HttpResponses
+from .types import HttpRequests, HttpResponses
 
 
 class HttpProtocol(metaclass=ABCMeta):

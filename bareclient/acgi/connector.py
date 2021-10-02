@@ -16,7 +16,7 @@ from urllib.error import URLError
 
 from ..ssl_contexts import create_ssl_context
 from ..response import Response
-from ..types import HttpRequests, HttpResponses
+from .types import HttpRequests, HttpResponses
 
 from .utils import (
     get_negotiated_protocol

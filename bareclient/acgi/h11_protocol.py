@@ -10,7 +10,7 @@ import h11
 
 from .asyncio_events import MessageEvent
 from .http_protocol import HttpProtocol
-from ..types import (
+from .types import (
     HttpRequest,
     HttpRequestBody,
     HttpResponse,
