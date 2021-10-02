@@ -1,13 +1,13 @@
-"""Simple GET"""
+"""A GET using http/2"""
 
 import asyncio
 from bareclient import HttpClient
 
 
 async def main(url: str) -> None:
-    async with HttpClient(url) as response:
+    async with HttpClient(url, method='GET', protocols=['h2']) as response:
         print(response)
-        if response.ok and response.body is not None:
+        if response.status == 200 and response.body is not None:
             async for part in response.body:
                 print(part)
     print('Done')
