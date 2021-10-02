@@ -7,7 +7,8 @@ from bareutils import header
 from bareutils.cookies import encode_cookies
 
 from ..middleware import HttpClientCallback
-from ..types import Request, Response
+from ..request import Request
+from ..response import Response
 
 
 Cookie = Dict[str, Any]

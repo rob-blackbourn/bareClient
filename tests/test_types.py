@@ -1,6 +1,6 @@
-"""Tests for types.py"""
+"""Tests for request.py"""
 
-from bareclient.types import Request
+from bareclient.request import Request
 
 
 def test_request_url():

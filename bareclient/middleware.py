@@ -3,7 +3,8 @@
 from functools import partial
 from typing import Any, Awaitable, Coroutine, Callable
 
-from .types import Request, Response
+from .request import Request
+from .response import Response
 
 HttpClientCallback = Callable[[Request], Awaitable[Response]]
 HttpClientMiddlewareCallback = Callable[

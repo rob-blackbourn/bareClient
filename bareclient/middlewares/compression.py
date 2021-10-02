@@ -20,7 +20,8 @@ from bareutils import (
     header
 )
 
-from ..types import Request, Response
+from ..request import Request
+from ..response import Response
 from ..middleware import HttpClientCallback
 
 Decompressors = Mapping[bytes, DecompressorFactory]

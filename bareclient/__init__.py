@@ -17,7 +17,8 @@ from .ssl_contexts import (
     DEFAULT_CIPHERS,
     DEFAULT_OPTIONS
 )
-from .types import Request, Response
+from .request import Request
+from .response import Response
 
 __all__ = [
     'HttpClient',

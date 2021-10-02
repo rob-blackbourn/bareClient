@@ -2,7 +2,8 @@
 
 from base64 import b64encode
 
-from ..types import Request, Response
+from ..request import Request
+from ..response import Response
 from ..middleware import (
     HttpClientCallback,
     HttpClientMiddlewareCallback
