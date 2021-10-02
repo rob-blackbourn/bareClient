@@ -49,6 +49,6 @@ asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
 
 The argument `options` is an iterable of SSL options which are applied as an "or"
 to the
-[`SSLContext.options](https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers)
+[`SSLContext.options`](https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers)
 member variable. By default it is set to `DEFAULT_OPTIONS` which is a tuple of
 options which seemed sensible at the time this library was built.

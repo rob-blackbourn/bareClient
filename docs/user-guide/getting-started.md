@@ -1,6 +1,7 @@
 # Getting Started
 
-The basic usage is to create an [`HttpClient`](/5.0/api/bareclient/#class-httpclient).
+The basic usage is to create an
+[`HttpClient`](https://rob-blackbourn.github.io/bareClient/5.0/api/bareclient/#class-httpclient).
 
 ## GET
 

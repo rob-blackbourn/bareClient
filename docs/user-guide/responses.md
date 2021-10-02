@@ -3,7 +3,7 @@
 The response is yielded in the `HttpClient` async context.
 
 See the api reference for the documentation of the
-[`Response`](/5.0/api/bareclient/#class-response)
+[`Response`](https://rob-blackbourn.github.io/bareClient/5.0/api/bareclient/#class-response)
 class.
 
 ## Response Body

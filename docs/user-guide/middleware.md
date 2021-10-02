@@ -5,8 +5,9 @@
 The client supports middleware to provide facilities such as authentication
 and compression.
 
-A middleware handler takes a [`request`](/5.0/api/bareclient/#class-request) and
-the next handler.
+A middleware handler takes a
+[`request`](https://rob-blackbourn.github.io/bareClient/5.0/api/bareclient/#class-request)
+and the next handler.
 
 ```python
 async def first_middleware(
