@@ -149,8 +149,8 @@ async def get_text(
 
     headers = [] if headers is None else list(headers)
 
-    if not header.find(b'accept', headers):
-        headers.append((b'accept', b'text/plain'))
+    if not header.find(header.ACCEPT, headers):
+        headers.append((header.ACCEPT, b'text/plain'))
 
     async with HttpClient(
             url,
@@ -239,8 +239,8 @@ async def get_json(
     """
     headers = [] if headers is None else list(headers)
 
-    if not header.find(b'accept', headers):
-        headers.append((b'accept', b'application/json'))
+    if not header.find(header.ACCEPT, headers):
+        headers.append((header.ACCEPT, b'application/json'))
 
     async with HttpClient(
             url,
@@ -397,12 +397,12 @@ async def post_text(
 
     headers = [] if headers is None else list(headers)
 
-    if not header.find(b'accept', headers):
-        headers.append((b'accept', b'text/plain'))
+    if not header.find(header.ACCEPT, headers):
+        headers.append((header.ACCEPT, b'text/plain'))
 
     content = text.encode(encoding=encoding)
-    if not header.find(b'content-type', headers):
-        headers.append((b'content-type', b'text/plain'))
+    if not header.find(header.CONTENT_TYPE, headers):
+        headers.append((header.CONTENT_TYPE, b'text/plain'))
 
     data = bytes_writer(content, chunk_size) if content else None
 
@@ -505,12 +505,12 @@ async def post_json(
 
     headers = [] if headers is None else list(headers)
 
-    if not header.find(b'accept', headers):
-        headers.append((b'accept', b'application/json'))
+    if not header.find(header.ACCEPT, headers):
+        headers.append((header.ACCEPT, b'application/json'))
 
     content = dumps(obj)
-    if not header.find(b'content-type', headers):
-        headers.append((b'content-type', b'application/json'))
+    if not header.find(header.CONTENT_TYPE, headers):
+        headers.append((header.CONTENT_TYPE, b'application/json'))
 
     data = text_writer(content, chunk_size=chunk_size) if content else None
 

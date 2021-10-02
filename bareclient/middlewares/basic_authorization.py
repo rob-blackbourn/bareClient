@@ -2,6 +2,8 @@
 
 from base64 import b64encode
 
+from bareutils import header
+
 from ..request import Request
 from ..response import Response
 from ..middleware import (
@@ -26,7 +28,7 @@ def create_basic_auth_middleware(
 
     authorization = b64encode(f"{username}:{password}".encode('ascii'))
     authorization_headers = [
-        (b'authorization', b'Basic ' + authorization)
+        (header.AUTHORIZATION, b'Basic ' + authorization)
     ]
 
     async def basic_auth_middleware(

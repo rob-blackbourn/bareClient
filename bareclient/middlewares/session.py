@@ -136,7 +136,7 @@ class SessionMiddleware:
         if not cookies:
             headers = request.headers
         else:
-            headers = [(b'cookie', cookies)]
+            headers = [(header.COOKIE, cookies)]
             if request.headers:
                 headers += request.headers
 
