@@ -2,7 +2,8 @@
 
 The response is yielded in the `HttpClient` async context.
 
-See the api reference for the documentation of the (`Response`)[/api/bareclient/#class-response]
+See the api reference for the documentation of the
+[`Response`](/api/bareclient/#class-response)
 class.
 
 ## Response Body
