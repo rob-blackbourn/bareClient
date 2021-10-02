@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from bareutils import text_writer, response_code
+from bareutils import text_writer
 
 from bareclient import HttpClient
 
@@ -17,7 +17,7 @@ async def main(url: str) -> None:
             headers=[(b'content-type', b'application/json')],
             body=text_writer(body)
     ) as response:
-        if response_code.is_successful(response.status_code):
+        if response.ok:
             print("OK")
 
 asyncio.run(main('https://beast.jetblack.net:9009/test/api/info'))

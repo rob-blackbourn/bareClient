@@ -50,7 +50,7 @@ from bareclient import HttpClient
 
 async def main(url: str) -> None:
     async with HttpClient(url, method='GET') as response:
-        if response.status_code == 200 and response.more_body:
+        if response.status == 200 and response.more_body:
             async for part in response.body:
                 print(part)
 
@@ -74,7 +74,7 @@ async def main() -> None:
         set_cookie = header.find(b'set-cookie', response.headers)
         print("Session cookie!" if set_cookie else "No session cookie")
 
-        if not response_code.is_successful(response.status_code):
+        if not response_code.is_successful(response.status):
             raise Exception("Failed to get posts")
 
         posts = json.loads(await text_reader(response.body))
@@ -89,7 +89,7 @@ async def main() -> None:
                 set_cookie = header.find(b'set-cookie', response.headers)
                 print("Session cookie!" if set_cookie else "No session cookie")
 
-                if not response_code.is_successful(response.status_code):
+                if not response_code.is_successful(response.status):
                     raise Exception("Failed to get comments")
 
                 comments = json.loads(await text_reader(response.body))

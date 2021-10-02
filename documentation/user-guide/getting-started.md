@@ -12,7 +12,7 @@ from bareclient import HttpClient
 
 async def main(url: str) -> None:
     async with HttpClient(url) as response:
-        if response.status_code == 200 and response.body is not None:
+        if response.status == 200 and response.body is not None:
             async for part in response.body:
                 print(part)
 
@@ -42,7 +42,7 @@ async def main(url: str) -> None:
             headers=[(b'content-type', b'application/json')],
             body=text_writer(body)
     ) as response:
-        if response_code.is_successful(response.status_code):
+        if response_code.is_successful(response.status):
             print("OK")
 
 asyncio.run(main('http://localhost:9009/test/api/info'))

@@ -30,7 +30,7 @@ async def main() -> None:
         set_cookie = header.find_all(b'set-cookie', response.headers)
         print("Session cookie!" if set_cookie else "No session cookie")
 
-        if not response_code.is_successful(response.status_code):
+        if not response_code.is_successful(response.status):
             raise Exception("Failed to get page")
 
     async with HttpClient(
@@ -43,7 +43,7 @@ async def main() -> None:
         set_cookie = header.find_all(b'set-cookie', response.headers)
         print("Session cookie!" if set_cookie else "No session cookie")
 
-        if not response_code.is_successful(response.status_code):
+        if not response_code.is_successful(response.status):
             raise Exception("Failed to get page")
 
 asyncio.run(main())

@@ -93,7 +93,7 @@ async def main(url: str) -> None:
     ]
     async with HttpClient(url, middleware=middleware) as response:
         print(response)
-        if response.status_code == 200 and response.body is not None:
+        if response.status == 200 and response.body is not None:
             async for part in response.body:
                 print(f'read {len(part)} bytes')
     print('Done')
@@ -110,7 +110,7 @@ before third
 after third
 after second
 after first
-Response(status_code=200, ...)
+Response(status=200, ...)
 read 16384 bytes
 read 16384 bytes
 read 16384 bytes

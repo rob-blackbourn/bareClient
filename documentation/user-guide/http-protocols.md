@@ -12,7 +12,7 @@ from bareclient import HttpClient, DEFAULT_CIPHERS
 async def main(url: str) -> None:
     async with HttpClient(url, method='GET', protocols=['h2']) as response:
         print(response)
-        if response.status_code == 200 and response.body is not None:
+        if response.status == 200 and response.body is not None:
             async for part in response.body:
                 print(part)
     print('Done')

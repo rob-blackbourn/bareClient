@@ -54,7 +54,7 @@ class HttpClient:
         async def main(url: str) -> None:
             async with HttpClient(url, method='GET') as response:
                 print(response)
-                if response.status_code == 200 and response.body is not None:
+                if response.status == 200 and response.body is not None:
                     async for part in response.body:
                         print(part)
 

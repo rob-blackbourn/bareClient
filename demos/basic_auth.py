@@ -14,7 +14,7 @@ async def main(url: str) -> None:
     ]
     async with HttpClient(url, middleware=middleware) as response:
         print(response)
-        if response.status_code == 200 and response.body is not None:
+        if response.status == 200 and response.body is not None:
             text = await text_reader(response.body)
             print(text)
     print('Done')

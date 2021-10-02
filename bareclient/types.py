@@ -162,7 +162,7 @@ class Response:
     def __init__(
         self,
         url: str,
-        status_code: int,
+        status: int,
         headers: List[Tuple[bytes, bytes]],
         body: Optional[AsyncIterable[bytes]]
     ) -> None:
@@ -170,12 +170,12 @@ class Response:
 
         Args:
             url (str): The url.
-            status_code (int): The status code.
+            status (int): The status code.
             headers (List[Tuple[bytes, bytes]]): The headers.
             body (Optional[AsyncIterable[bytes]]): The body.
         """
         self.url = url
-        self.status_code = status_code
+        self.status = status
         self.headers = headers
         self.body = body
 
@@ -228,13 +228,13 @@ class Response:
         Raises:
             HTTPError: If the status code was not a 200 code.
         """
-        if 200 <= self.status_code < 300:
+        if 200 <= self.status < 300:
             return
 
         body = await self.text()
         raise HTTPError(
             self.url,
-            self.status_code,
+            self.status,
             body or '',
             {
                 name.decode(): value.decode()
@@ -243,8 +243,12 @@ class Response:
             None
         )
 
+    @property
+    def ok(self) -> bool:
+        return 200 <= self.status < 300
+
     def __repr__(self) -> str:
-        return f"Response(status_code={self.status_code}, ...)"
+        return f"Response(status={self.status}, ...)"
 
     def __str__(self) -> str:
         return repr(self)
