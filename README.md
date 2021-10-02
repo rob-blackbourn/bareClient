@@ -1,13 +1,19 @@
 # bareClient
 
-A simple asyncio http Python client package supporting HTTP versions 1.0, 1.1
+An asyncio HTTP Python client package supporting HTTP versions 1.0, 1.1
 and 2 (read the [docs](https://rob-blackbourn.github.io/bareClient/)).
 
 This is the client companion to the ASGI server side web framework
 [bareASGI](https://github.com/rob-blackbourn/bareASGI) and follows the same
-"bare" approach. It makes little attempt to provide any helpful features which
-might do unnecessary work, providing a foundation for whatever feature set is
-required.
+"bare" approach. It provides only the essential functionality and makes little
+attempt to provide any helpful features which might do unnecessary work.
+
+This package is suitable for:
+
+- A foundation for async HTTP/2 clients,
+- Async REST client API's,
+- Containers requiring a small image size,
+- Integration with ASGI web servers requiring async HTTP client access.
 
 ## Features
 
