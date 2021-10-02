@@ -12,8 +12,7 @@ from typing import (
     Union
 )
 
-from .requester import RequestHandler
-from .acgi import connect
+from .acgi import connect, RequestHandler
 from .constants import DEFAULT_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS

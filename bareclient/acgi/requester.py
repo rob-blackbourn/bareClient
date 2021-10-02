@@ -11,12 +11,13 @@ from typing import (
 
 from bareutils import header
 
-from .acgi import ReceiveCallable, SendCallable
-from .constants import USER_AGENT
-from .middleware import HttpClientMiddlewareCallback, make_middleware_chain
-from .request import Request
-from .response import Response
-from .acgi.types import (
+from ..acgi import ReceiveCallable, SendCallable
+from ..constants import USER_AGENT
+from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
+from ..request import Request
+from ..response import Response
+
+from .types import (
     HttpRequest,
     HttpRequestBody,
     HttpDisconnect,

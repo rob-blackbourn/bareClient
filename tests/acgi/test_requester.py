@@ -2,7 +2,7 @@
 
 import pytest
 
-from bareclient.requester import _make_body_writer
+from bareclient.acgi.requester import _make_body_writer
 
 
 @pytest.mark.asyncio
