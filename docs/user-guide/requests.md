@@ -27,17 +27,3 @@ Keyword arguments:
   to None.
 - **`middleware`** (Optional[List[HttpClientMiddlewareCallback]], optional): The
   middleware. Defaults to None.
-
-## HttpSession
-
-For an `HttpSession` there is a request method which takes the following arguments:
-
-The first argument is the `path`. The remaining are keyword arguments:
-
-Keyword arguments:
-
-- **`method`** (str, optional): The HTTP method. Defaults to 'GET'.
-- **`headers`** (Optional[List[Header]], optional): The headers. Defaults to
-  None.
-- **`content`** (Optional[Content], optional): The body content. Defaults to
-  None.
