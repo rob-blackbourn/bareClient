@@ -13,9 +13,11 @@ from typing import (
 )
 
 from .acgi import connect, RequestHandler
+from .connection import Connection
 from .constants import DEFAULT_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .request import Request
 from .response import Response
 
 
@@ -94,54 +96,45 @@ class HttpClient:
         parsed_url = urllib.parse.urlparse(url)
         if parsed_url.hostname is None:
             raise ValueError('no hostname in url: ' + url)
-        self.scheme = parsed_url.scheme
-        self.netloc = parsed_url.netloc
-        self.hostname = parsed_url.hostname
-        self.path = parsed_url.path
-        self.port = parsed_url.port
 
-        self.method = method
-        self.headers = headers
-        self.body = body
         self.loop = loop
-        self.h11_bufsiz = h11_bufsiz
-        self.cafile = cafile
-        self.capath = capath
-        self.cadata = cadata
-        self.ssl_context = ssl_context
-        self.protocols = protocols
-        self.ciphers = ciphers
-        self.options = options
-        self.connect_timeout = connect_timeout
         self.middleware = middleware or []
+
+        self.connection = Connection(
+            parsed_url.scheme,
+            parsed_url.hostname,
+            parsed_url.port,
+            h11_bufsiz,
+            cafile,
+            capath,
+            cadata,
+            ssl_context,
+            protocols,
+            ciphers,
+            options,
+            connect_timeout
+        )
+
+        self.request = Request(
+            parsed_url.netloc,
+            parsed_url.scheme,
+            parsed_url.path,
+            method,
+            headers,
+            body
+        )
 
         self.handler: Optional[RequestHandler] = None
 
     async def __aenter__(self) -> Response:
         self.handler = RequestHandler(
-            self.netloc,
-            self.scheme,
-            self.path,
-            self.method,
-            self.headers,
-            self.body,
+            self.request,
             self.middleware
         )
         response = await connect(
-            self.scheme,
-            self.hostname,
-            self.port,
+            self.connection,
             self.handler,
-            cafile=self.cafile,
-            capath=self.capath,
-            cadata=self.cadata,
-            ssl_context=self.ssl_context,
-            loop=self.loop,
-            h11_bufsiz=self.h11_bufsiz,
-            protocols=self.protocols,
-            ciphers=self.ciphers,
-            options=self.options,
-            connect_timeout=self.connect_timeout
+            loop=self.loop
         )
         return response
 

@@ -18,6 +18,14 @@
       "justMyCode": false
     },
     {
+      "name": "Simple Proxy",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/demos/simple_proxy.py",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "Simple POST",
       "type": "python",
       "request": "launch",

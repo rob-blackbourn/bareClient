@@ -199,12 +199,7 @@ class RequestHandler:
 
     def __init__(
             self,
-            host: str,
-            scheme: str,
-            path: str,
-            method: str,
-            headers: Optional[List[Tuple[bytes, bytes]]],
-            body: Optional[AsyncIterable[bytes]],
+            request: Request,
             middleware: List[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler
@@ -217,14 +212,7 @@ class RequestHandler:
             headers (Optional[List[Tuple[bytes, bytes]]]): The headers
             body (Optional[AsyncIterable[bytes]]): The request body
         """
-        self.request = Request(
-            host,
-            scheme,
-            path,
-            method,
-            headers,
-            body
-        )
+        self.request = request
         self.middleware = middleware
         self.instance: Optional[RequestHandlerInstance] = None
 
