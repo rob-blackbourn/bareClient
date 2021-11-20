@@ -2,7 +2,6 @@
 
 import asyncio
 from asyncio import AbstractEventLoop
-from ssl import SSLContext
 from typing import (
     Any,
     Awaitable,
@@ -13,7 +12,6 @@ from typing import (
 from urllib.error import URLError
 
 from ..connection import Connection
-from ..ssl_contexts import create_ssl_context
 from ..response import Response
 from .types import HttpRequests, HttpResponses
 
@@ -52,17 +50,10 @@ async def connect(
     Returns:
         Response: The response message.
     """
-    if connection.ssl_context is None and connection.scheme == 'https':
-        ssl_context: Optional[SSLContext] = create_ssl_context(
-            connection.cafile,
-            connection.capath,
-            connection.cadata,
-            protocols=connection.protocols,
-            ciphers=connection.ciphers,
-            options=connection.options
-        )
-    else:
-        ssl_context = connection.ssl_context
+    ssl_context = (
+        connection.ssl.context if connection.scheme == 'https'
+        else None
+    )
 
     if connection.hostname is None:
         raise URLError('unspecified hostname')
