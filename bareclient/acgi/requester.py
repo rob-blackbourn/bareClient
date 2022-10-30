@@ -5,6 +5,7 @@ from typing import (
     AsyncIterator,
     List,
     Optional,
+    Sequence,
     Tuple,
     cast
 )
@@ -55,8 +56,9 @@ async def _make_body_writer(
         try:
             first: Optional[bytes] = await content_iter.__anext__()
         except StopAsyncIteration:
+            first = None
             more_body = False
-            yield None, more_body
+            yield first, more_body
 
         while more_body:
             try:
@@ -77,7 +79,7 @@ class RequestHandlerInstance:
             request: Request,
             send: SendCallable,
             receive: ReceiveCallable,
-            middleware: List[HttpClientMiddlewareCallback]
+            middleware: Sequence[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler instance
 
@@ -200,18 +202,8 @@ class RequestHandler:
     def __init__(
             self,
             request: Request,
-            middleware: List[HttpClientMiddlewareCallback]
+            middleware: Sequence[HttpClientMiddlewareCallback]
     ) -> None:
-        """Initialise the request handler
-
-        Args:
-            host (str): The host
-            scheme (str): The scheme
-            path (str): The path
-            method (str): The request method
-            headers (Optional[List[Tuple[bytes, bytes]]]): The headers
-            body (Optional[AsyncIterable[bytes]]): The request body
-        """
         self.request = request
         self.middleware = middleware
         self.instance: Optional[RequestHandlerInstance] = None

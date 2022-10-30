@@ -75,10 +75,6 @@ def create_ssl_context(
         ctx.options |= option
     ctx.set_ciphers(':'.join(ciphers))
     ctx.set_alpn_protocols(list(protocols))
-    try:
-        ctx.set_npn_protocols(list(protocols))
-    except NotImplementedError:
-        LOGGER.debug("Can't set npn protocols")
     return ctx
 
 

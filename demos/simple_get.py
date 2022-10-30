@@ -1,15 +1,19 @@
 """Simple GET"""
 
 import asyncio
-from bareclient import HttpClient
+from bareclient import HttpSession
 
 
-async def main(url: str) -> None:
-    async with HttpClient(url) as response:
+async def main(scheme: str, host: str, path: str) -> None:
+    async with HttpSession(scheme, host) as session:
+        response = await session.request(path)
         print(response)
         if response.ok and response.body is not None:
             async for part in response.body:
                 print(part)
+        reposnse = await session.request(path)
+        print(response)
+
     print('Done')
 
-asyncio.run(main('https://docs.python.org/3/library/cgi.html'))
+asyncio.run(main('https', 'docs.python.org', '/3/library/cgi.html'))

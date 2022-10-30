@@ -131,10 +131,13 @@ class HttpClient:
             self.request,
             self.middleware
         )
-        response = await connect(
+        http_protocol = await connect(
             self._connection_details,
-            self.handler,
             loop=self.loop
+        )
+        response = await self.handler(
+            http_protocol.receive,
+            http_protocol.send
         )
         return response
 

@@ -31,24 +31,19 @@ Application = Callable[
 
 
 async def connect(
-        connection: ConnectionDetails,
-        application: Application,
-        loop: Optional[AbstractEventLoop]
-) -> Response:
+        connection: ConnectionDetails
+) -> HttpProtocol:
     """Connect to the web server and run the application
 
     Args:
         connection (Connection): The connection.
-        application (Application): The ACGI application.
-        loop (Optional[AbstractEventLoop]): The optional asyncio event
-            loop.
 
     Raises:
         URLError: Raised for an invalid url
         asyncio.TimeoutError: Raised for a connection timeout.
 
     Returns:
-        Response: The response message.
+        HttpProtocol: The http protocol.
     """
     ssl_context = (
         connection.ssl.context if connection.scheme == 'https'
@@ -71,7 +66,6 @@ async def connect(
     future = asyncio.open_connection(
         connection.hostname,
         port,
-        loop=loop,
         ssl=ssl_context
     )
     reader, writer = await asyncio.wait_for(
@@ -88,4 +82,4 @@ async def connect(
     else:
         http_protocol = H11Protocol(reader, writer, connection.h11_bufsiz)
 
-    return await application(http_protocol.receive, http_protocol.send)
+    return http_protocol

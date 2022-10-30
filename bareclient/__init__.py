@@ -19,6 +19,7 @@ from .ssl_contexts import (
 )
 from .request import Request
 from .response import Response
+from .session import HttpSession
 
 __all__ = [
     'HttpClient',
@@ -36,5 +37,6 @@ __all__ = [
     'Request',
     'Response',
     'HttpClientMiddlewareCallback',
-    'HttpClientCallback'
+    'HttpClientCallback',
+    'HttpSession'
 ]
