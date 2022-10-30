@@ -2,7 +2,9 @@
 
 import asyncio
 from typing import (
+    List,
     Optional,
+    Tuple,
     cast
 )
 
@@ -91,6 +93,7 @@ class H11Protocol(HttpProtocol):
         )
 
         buf = self._h11_state.send(request)
+        assert buf is not None, "A request should always have data"
         self.writer.write(buf)
         await self.writer.drain()
         http_response_connection: HttpResponseConnection = {
@@ -118,10 +121,12 @@ class H11Protocol(HttpProtocol):
     ) -> None:
         if body is not None:
             buf = self._h11_state.send(h11.Data(data=body))
+            assert buf is not None, "A non-empty body should always have data"
             self.writer.write(buf)
 
         if not more_body:
             buf = self._h11_state.send(h11.EndOfMessage())
+            assert buf is not None, "End of message should always have data"
             self.writer.write(buf)
 
         await self.writer.drain()
@@ -153,7 +158,7 @@ class H11Protocol(HttpProtocol):
             },
             'http_version': '1.1',
             'status_code': event.status_code,
-            'headers': event.headers,
+            'headers': cast(List[Tuple[bytes, bytes]], event.headers),
             'more_body': more_body,
             'stream_id': None
         }
@@ -182,7 +187,7 @@ class H11Protocol(HttpProtocol):
             elif isinstance(event, h11.Data):
                 http_response_body: HttpResponseBody = {
                     'type': 'http.response.body',
-                    'body': event.data,
+                    'body': event.data,  # type: ignore
                     'more_body': True,
                     'stream_id': None
                 }

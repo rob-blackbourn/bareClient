@@ -228,7 +228,7 @@ class H2Protocol(HttpProtocol):
 
         status_code = 200
         headers: List[Tuple[bytes, bytes]] = []
-        for name, value in event.headers:
+        for name, value in cast(List[Tuple[bytes, bytes]], event.headers):
             if name == b":status":
                 status_code = int(value)
             elif not name.startswith(b":"):
@@ -255,6 +255,7 @@ class H2Protocol(HttpProtocol):
                 self.h2_state.acknowledge_received_data(
                     event.flow_controlled_length, event.stream_id
                 )
+                assert event.data is not None, "data received cannot be None"
                 http_response_body: HttpResponseBody = {
                     'type': 'http.response.body',
                     'body': event.data,
@@ -276,6 +277,7 @@ class H2Protocol(HttpProtocol):
             events = self.h2_state.receive_data(data)
             for event in events:
                 if isinstance(event, h2.events.WindowUpdated):
+                    assert event.stream_id is not None, "window updated always has stream_id"
                     if event.stream_id == 0:
                         for update_event in self.window_update_event.values():
                             update_event.set()
