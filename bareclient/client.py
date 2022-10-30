@@ -13,7 +13,7 @@ from typing import (
 )
 
 from .acgi import connect, RequestHandler
-from .connection import Connection
+from .connection import ConnectionDetails
 from .constants import DEFAULT_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
@@ -100,7 +100,7 @@ class HttpClient:
         self.loop = loop
         self.middleware = middleware or []
 
-        self.connection = Connection(
+        self._connection_details = ConnectionDetails(
             parsed_url.scheme,
             parsed_url.hostname,
             parsed_url.port,
@@ -132,7 +132,7 @@ class HttpClient:
             self.middleware
         )
         response = await connect(
-            self.connection,
+            self._connection_details,
             self.handler,
             loop=self.loop
         )

@@ -11,7 +11,7 @@ from typing import (
 )
 from urllib.error import URLError
 
-from ..connection import Connection
+from ..connection import ConnectionDetails
 from ..response import Response
 from .types import HttpRequests, HttpResponses
 
@@ -31,7 +31,7 @@ Application = Callable[
 
 
 async def connect(
-        connection: Connection,
+        connection: ConnectionDetails,
         application: Application,
         loop: Optional[AbstractEventLoop]
 ) -> Response:

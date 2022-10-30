@@ -40,7 +40,7 @@ class SSLConfig:
         return self._context
 
 
-class Connection:
+class ConnectionDetails:
 
     def __init__(
             self,
