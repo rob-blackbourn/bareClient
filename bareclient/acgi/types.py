@@ -13,7 +13,8 @@ from typing import (
 )
 
 
-class HttpRequest(TypedDict):
+class HttpACGIRequest(TypedDict):
+    """An HTTP request"""
 
     type: Literal['http.request']
     host: str
@@ -25,7 +26,8 @@ class HttpRequest(TypedDict):
     more_body: bool
 
 
-class HttpRequestBody(TypedDict):
+class HttpACGIRequestBody(TypedDict):
+    """An HTTP request body"""
 
     type: Literal['http.request.body']
     body: bytes
@@ -33,14 +35,16 @@ class HttpRequestBody(TypedDict):
     stream_id: Optional[int]
 
 
-class HttpResponseConnection(TypedDict):
+class HttpACGIResponseConnection(TypedDict):
+    """An HTTP connection response"""
 
     type: Literal['http.response.connection']
     http_version: Literal['h11', 'h2']
     stream_id: Optional[int]
 
 
-class HttpResponse(TypedDict):
+class HttpACGIResponse(TypedDict):
+    """An HTTP response"""
 
     type: Literal['http.response']
     acgi: Dict[str, str]
@@ -51,7 +55,8 @@ class HttpResponse(TypedDict):
     stream_id: Optional[int]
 
 
-class HttpResponseBody(TypedDict):
+class HttpACGIResponseBody(TypedDict):
+    """An HTTP response body"""
 
     type: Literal['http.response.body']
     body: bytes
@@ -59,20 +64,21 @@ class HttpResponseBody(TypedDict):
     stream_id: Optional[int]
 
 
-class HttpDisconnect(TypedDict):
+class HttpACGIDisconnect(TypedDict):
+    """An HTTP disconnect"""
 
     type: Literal['http.disconnect']
     stream_id: Optional[int]
 
 
-HttpRequests = Union[
-    HttpRequest,
-    HttpRequestBody,
-    HttpDisconnect
+HttpACGIRequests = Union[
+    HttpACGIRequest,
+    HttpACGIRequestBody,
+    HttpACGIDisconnect
 ]
-HttpResponses = Union[
-    HttpResponseConnection,
-    HttpResponse,
-    HttpResponseBody,
-    HttpDisconnect
+HttpACGIResponses = Union[
+    HttpACGIResponseConnection,
+    HttpACGIResponse,
+    HttpACGIResponseBody,
+    HttpACGIDisconnect
 ]

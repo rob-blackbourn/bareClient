@@ -25,6 +25,7 @@ from .acgi.http_protocol import HttpProtocol
 
 
 class SessionInstance:
+    """A session instance"""
 
     def __init__(
             self,
@@ -73,12 +74,14 @@ class SessionInstance:
         return response
 
     async def close(self) -> None:
+        """Close the session"""
         if self._handler is None:
             return
         await self._handler.close()
 
 
 class HttpSession:
+    """An HTTP session"""
 
     def __init__(
             self,

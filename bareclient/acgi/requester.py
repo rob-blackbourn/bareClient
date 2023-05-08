@@ -19,12 +19,12 @@ from ..request import Request
 from ..response import Response
 
 from .types import (
-    HttpRequest,
-    HttpRequestBody,
-    HttpDisconnect,
-    HttpResponseConnection,
-    HttpResponse,
-    HttpResponseBody
+    HttpACGIRequest,
+    HttpACGIRequestBody,
+    HttpACGIDisconnect,
+    HttpACGIResponseConnection,
+    HttpACGIResponse,
+    HttpACGIResponseBody
 )
 
 
@@ -122,7 +122,7 @@ class RequestHandlerInstance:
         body, more_body = await body_writer.__anext__()
         headers = _enrich_headers(request)
 
-        http_request: HttpRequest = {
+        http_request: HttpACGIRequest = {
             'type': 'http.request',
             'host': request.host,
             'scheme': request.scheme,
@@ -135,14 +135,14 @@ class RequestHandlerInstance:
         await self.send(http_request)
 
         connection = cast(
-            HttpResponseConnection,
+            HttpACGIResponseConnection,
             await self.receive()
         )
 
         stream_id: Optional[int] = connection['stream_id']
 
         async for body, more_body in body_writer:
-            http_request_body: HttpRequestBody = {
+            http_request_body: HttpACGIRequestBody = {
                 'type': 'http.request.body',
                 'body': body or b'',
                 'more_body': more_body,
@@ -157,7 +157,7 @@ class RequestHandlerInstance:
             raise IOError('server disconnected')
 
         if response['type'] == 'http.response':
-            http_response = cast(HttpResponse, response)
+            http_response = cast(HttpACGIResponse, response)
             body_reader = (
                 self._body_reader()
                 if http_response.get('more_body', False)
@@ -179,7 +179,7 @@ class RequestHandlerInstance:
             if response['type'] == 'http.disconnect':
                 raise IOError('server disconnected')
             elif response['type'] == 'http.response.body':
-                http_response_body = cast(HttpResponseBody, response)
+                http_response_body = cast(HttpACGIResponseBody, response)
                 yield http_response_body['body']
                 more_body = response['more_body']
             else:
@@ -189,7 +189,7 @@ class RequestHandlerInstance:
 
     async def close(self) -> None:
         """Close the request"""
-        http_disconnect: HttpDisconnect = {
+        http_disconnect: HttpACGIDisconnect = {
             'type': 'http.disconnect',
             'stream_id': None
         }

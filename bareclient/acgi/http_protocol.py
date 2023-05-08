@@ -3,7 +3,7 @@
 from abc import ABCMeta, abstractmethod
 from asyncio import StreamReader, StreamWriter
 
-from .types import HttpRequests, HttpResponses
+from .types import HttpACGIRequests, HttpACGIResponses
 
 
 class HttpProtocol(metaclass=ABCMeta):
@@ -24,7 +24,7 @@ class HttpProtocol(metaclass=ABCMeta):
         self.writer = writer
 
     @abstractmethod
-    async def send(self, message: HttpRequests) -> None:
+    async def send(self, message: HttpACGIRequests) -> None:
         """Send a message to the web server
 
         Args:
@@ -32,7 +32,7 @@ class HttpProtocol(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    async def receive(self) -> HttpResponses:
+    async def receive(self) -> HttpACGIResponses:
         """Receive a message from the web server
 
         Returns:

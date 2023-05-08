@@ -13,17 +13,17 @@ import h11
 from .asyncio_events import MessageEvent
 from .http_protocol import HttpProtocol
 from .types import (
-    HttpRequest,
-    HttpRequestBody,
-    HttpResponse,
-    HttpResponseConnection,
-    HttpResponseBody,
-    HttpDisconnect,
-    HttpRequests,
-    HttpResponses
+    HttpACGIRequest,
+    HttpACGIRequestBody,
+    HttpACGIResponse,
+    HttpACGIResponseConnection,
+    HttpACGIResponseBody,
+    HttpACGIDisconnect,
+    HttpACGIRequests,
+    HttpACGIResponses
 )
 
-MappingMessageEvent = MessageEvent[HttpResponses]
+MappingMessageEvent = MessageEvent[HttpACGIResponses]
 
 
 class H11Protocol(HttpProtocol):
@@ -55,20 +55,20 @@ class H11Protocol(HttpProtocol):
             self._h11_state.start_next_cycle()
         self._is_message_ended = False
 
-    async def send(self, message: HttpRequests) -> None:
+    async def send(self, message: HttpACGIRequests) -> None:
 
         request_type: str = message['type']
 
         if request_type == 'http.request':
-            await self._send_request(cast(HttpRequest, message))
+            await self._send_request(cast(HttpACGIRequest, message))
         elif request_type == 'http.request.body':
-            await self._send_request_body(cast(HttpRequestBody, message))
+            await self._send_request_body(cast(HttpACGIRequestBody, message))
         elif request_type == 'http.disconnect':
             await self._disconnect()
         else:
             raise Exception(f'unknown request type: {request_type}')
 
-    async def receive(self) -> HttpResponses:
+    async def receive(self) -> HttpACGIResponses:
 
         message = await self._connection_event.wait_with_message()
         if message is not None:
@@ -81,7 +81,7 @@ class H11Protocol(HttpProtocol):
         message = await self._receive_body_event()
         return message
 
-    async def _send_request(self, message: HttpRequest) -> None:
+    async def _send_request(self, message: HttpACGIRequest) -> None:
 
         self._connect()
         self._is_initialised = True
@@ -96,7 +96,7 @@ class H11Protocol(HttpProtocol):
         assert buf is not None, "A request should always have data"
         self.writer.write(buf)
         await self.writer.drain()
-        http_response_connection: HttpResponseConnection = {
+        http_response_connection: HttpACGIResponseConnection = {
             'type': 'http.response.connection',
             'http_version': 'h11',
             'stream_id': None
@@ -108,7 +108,7 @@ class H11Protocol(HttpProtocol):
         await self._send_request_data(body, more_body)
         asyncio.create_task(self._receive_response())
 
-    async def _send_request_body(self, message: HttpRequestBody) -> None:
+    async def _send_request_body(self, message: HttpACGIRequestBody) -> None:
         await self._send_request_data(
             message.get('body', b''),
             message.get('more_body', False)
@@ -151,7 +151,7 @@ class H11Protocol(HttpProtocol):
             elif name == b'transfer-encoding' and value == b'chunked':
                 more_body = True
 
-        http_response: HttpResponse = {
+        http_response: HttpACGIResponse = {
             'type': 'http.response',
             'acgi': {
                 'version': "1.0"
@@ -179,13 +179,13 @@ class H11Protocol(HttpProtocol):
         self.writer.close()
         await self.writer.wait_closed()
 
-    async def _receive_body_event(self) -> HttpResponses:
+    async def _receive_body_event(self) -> HttpACGIResponses:
         while True:
             event = self._h11_state.next_event()
             if event is h11.NEED_DATA:
                 self._h11_state.receive_data(await self.reader.read(self._bufsiz))
             elif isinstance(event, h11.Data):
-                http_response_body: HttpResponseBody = {
+                http_response_body: HttpACGIResponseBody = {
                     'type': 'http.response.body',
                     'body': event.data,  # type: ignore
                     'more_body': True,
@@ -202,7 +202,7 @@ class H11Protocol(HttpProtocol):
                 }
                 return http_response_body
             elif isinstance(event, h11.ConnectionClosed):
-                http_disconnect: HttpDisconnect = {
+                http_disconnect: HttpACGIDisconnect = {
                     'type': 'http.disconnect',
                     'stream_id': None
                 }

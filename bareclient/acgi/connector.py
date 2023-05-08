@@ -13,7 +13,7 @@ from urllib.error import URLError
 
 from ..connection import ConnectionDetails
 from ..response import Response
-from .types import HttpRequests, HttpResponses
+from .types import HttpACGIRequests, HttpACGIResponses
 
 from .utils import (
     get_negotiated_protocol
@@ -22,8 +22,8 @@ from .http_protocol import HttpProtocol
 from .h11_protocol import H11Protocol
 from .h2_protocol import H2Protocol
 
-SendCallable = Callable[[HttpRequests], Coroutine[Any, Any, None]]
-ReceiveCallable = Callable[[], Awaitable[HttpResponses]]
+SendCallable = Callable[[HttpACGIRequests], Coroutine[Any, Any, None]]
+ReceiveCallable = Callable[[], Awaitable[HttpACGIResponses]]
 Application = Callable[
     [ReceiveCallable, SendCallable],
     Coroutine[Any, Any, Response]
