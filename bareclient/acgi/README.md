@@ -16,7 +16,7 @@ Sent from the client to ACGI to request an http connection.
 - `scheme` (Unicode String) - The scheme
 - `path` (Unicode String) - The path
 - `method` (Unicode string) - The HTTP request method
-- `headers` (List[[byte string, byte string]]) – An iterable of [name, value] two-item iterables, where name is the header name, and value is the header value.
+- `headers` (Sequence[[byte string, byte string]]) – An iterable of [name, value] two-item iterables, where name is the header name, and value is the header value.
 - `body` (byte string) - The body of the request.
 - `more_body` (bool) - If `True` there is more body, otherwise `False`
 
@@ -47,7 +47,7 @@ Sent from the ACGI to the client to pass the response.
 - `acgi` (Dict[str, str]) `{ "version": "1.0" }`
 - `http_version` (Unicode string) - `"2"`
 - `status_code` (int) - The status code
-- `headers` (List[[byte string, byte string]]) – An iterable of [name, value] two-item iterables, where name is the header name, and value is the header value.
+- `headers` (Sequence[[byte string, byte string]]) – An iterable of [name, value] two-item iterables, where name is the header name, and value is the header value.
 - `more_body` (bool) - `True` if there is more body to read, otherwise `False`
 - `stream_id` (Optional[int]) - The stream id for the response for an h2 connection.
 

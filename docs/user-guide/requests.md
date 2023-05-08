@@ -9,7 +9,7 @@ The first argument is the `url`. The remaining are keyword arguments:
 Keyword arguments:
 
 - **`method`** (str, optional): The HTTP method. Defaults to 'GET'.
-- **`headers`** (Optional[List[Header]], optional): The headers. Defaults to
+- **`headers`** (Optional[Sequence[Header]], optional): The headers. Defaults to
   None.
 - **`body`** (Optional[Content], optional): The body content. Defaults to
   None.

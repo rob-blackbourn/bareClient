@@ -1,12 +1,10 @@
 """An HTTP Session"""
 
-from asyncio import AbstractEventLoop
 from ssl import SSLContext
 from types import TracebackType
 from typing import (
     AsyncIterable,
     Iterable,
-    List,
     Optional,
     Sequence,
     Tuple,
@@ -43,7 +41,7 @@ class SessionInstance:
             path: str,
             *,
             method: str = "GET",
-            headers: Optional[List[Tuple[bytes, bytes]]] = None,
+            headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
             body: Optional[AsyncIterable[bytes]] = None
     ):
         if self._http_protocol is None:

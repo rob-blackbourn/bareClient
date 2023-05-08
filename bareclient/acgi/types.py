@@ -7,6 +7,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
     TypedDict,
     Union
@@ -21,7 +22,7 @@ class HttpACGIRequest(TypedDict):
     scheme: str
     path: str
     method: str
-    headers: List[Tuple[bytes, bytes]]
+    headers: Sequence[Tuple[bytes, bytes]]
     body: Optional[bytes]
     more_body: bool
 
@@ -50,7 +51,7 @@ class HttpACGIResponse(TypedDict):
     acgi: Dict[str, str]
     http_version: str
     status_code: int
-    headers: List[Tuple[bytes, bytes]]
+    headers: Sequence[Tuple[bytes, bytes]]
     more_body: bool
     stream_id: Optional[int]
 

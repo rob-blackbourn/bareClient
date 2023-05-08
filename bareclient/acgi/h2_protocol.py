@@ -9,6 +9,7 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Sequence,
     Tuple,
     cast
 )
@@ -159,7 +160,7 @@ class H2Protocol(HttpProtocol):
             host: str,
             path: str,
             method: str,
-            headers: List[Tuple[bytes, bytes]]
+            headers: Sequence[Tuple[bytes, bytes]]
     ) -> int:
         stream_id = self.h2_state.get_next_available_stream_id()
         headers = [
@@ -228,7 +229,7 @@ class H2Protocol(HttpProtocol):
 
         status_code = 200
         headers: List[Tuple[bytes, bytes]] = []
-        for name, value in cast(List[Tuple[bytes, bytes]], event.headers):
+        for name, value in event.headers or []:
             if name == b":status":
                 status_code = int(value)
             elif not name.startswith(b":"):
