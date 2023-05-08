@@ -7,13 +7,14 @@ from typing import (
     Any,
     AsyncIterable,
     Callable,
-    List,
     Optional,
+    Sequence,
     Tuple,
 )
-from urllib.error import HTTPError
 
 from bareutils import text_reader, bytes_reader
+
+from .errors import HttpClientError
 
 
 class Response:
@@ -23,7 +24,7 @@ class Response:
         self,
         url: str,
         status: int,
-        headers: List[Tuple[bytes, bytes]],
+        headers: Sequence[Tuple[bytes, bytes]],
         body: Optional[AsyncIterable[bytes]]
     ) -> None:
         """An HTTP response.
@@ -31,7 +32,7 @@ class Response:
         Args:
             url (str): The url.
             status (int): The status code.
-            headers (List[Tuple[bytes, bytes]]): The headers.
+            headers (Sequence[Tuple[bytes, bytes]]): The headers.
             body (Optional[AsyncIterable[bytes]]): The body.
         """
         self.url = url
@@ -80,27 +81,23 @@ class Response:
         buf = await self.raw()
         if buf is None:
             return None
-        return (loads or json.loads)(buf)
+        return loads(buf)
 
     async def raise_for_status(self) -> None:
         """Raise an error for a non 200 status code.
 
         Raises:
-            HTTPError: If the status code was not a 200 code.
+            HttpClientError: If the status code was not a 200 code.
         """
         if 200 <= self.status < 300:
             return
 
         body = await self.text()
-        raise HTTPError(
+        raise HttpClientError(
             self.url,
             self.status,
             body or '',
-            {
-                name.decode(): value.decode()
-                for name, value in self.headers
-            },
-            None
+            self.headers
         )
 
     @property

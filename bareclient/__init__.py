@@ -10,6 +10,7 @@ from .helpers import (
     post_json
 )
 from .constants import DEFAULT_PROTOCOLS
+from .errors import HttpClientError
 from .middleware import HttpClientMiddlewareCallback, HttpClientCallback
 from .ssl_contexts import (
     create_ssl_context,
@@ -36,6 +37,7 @@ __all__ = [
     'DEFAULT_OPTIONS',
     'Request',
     'Response',
+    'HttpClientError',
     'HttpClientMiddlewareCallback',
     'HttpClientCallback',
     'HttpSession'

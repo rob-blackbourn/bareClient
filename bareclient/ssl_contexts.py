@@ -82,7 +82,7 @@ def create_ssl_context_with_cert_chain(
         certfile: str,
         keyfile: str,
         password: Optional[Callable[[], AnyStr]] = None,
-        verify_mode: int = ssl.CERT_REQUIRED,
+        verify_mode: ssl.VerifyMode = ssl.CERT_REQUIRED,
         check_hostname: bool = True,
         *,
         protocols: Iterable[str] = DEFAULT_PROTOCOLS,

@@ -2,9 +2,8 @@
 
 import asyncio
 import logging
-from urllib.error import HTTPError
 
-from bareclient import get_json
+from bareclient import get_json, HttpClientError
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -20,7 +19,7 @@ async def main(url: str) -> None:
         print(obj)
     except asyncio.TimeoutError as error:
         print(error)
-    except HTTPError as error:
+    except HttpClientError as error:
         print(error)
 
 asyncio.run(main('https://jsonplaceholder.typicode.com/todos/1'))

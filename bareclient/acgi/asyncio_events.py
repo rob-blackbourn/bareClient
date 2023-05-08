@@ -9,7 +9,7 @@ T = TypeVar('T')
 class MessageEvent(asyncio.Event, Generic[T]):
     """An event taking a message when set"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.message: Optional[T] = None
 

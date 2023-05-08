@@ -2,9 +2,9 @@
 
 from typing import (
     AsyncIterable,
-    List,
     Mapping,
     Optional,
+    Sequence,
     Tuple
 )
 
@@ -40,7 +40,7 @@ DEFAULT_COMPRESSORS: Compressors = {
 
 
 def _make_body_writer(
-    headers: List[Tuple[bytes, bytes]],
+    headers: Sequence[Tuple[bytes, bytes]],
     body: Optional[AsyncIterable[bytes]]
 ) -> Optional[AsyncIterable[bytes]]:
     content_encoding = header.content_encoding(headers)
@@ -53,7 +53,7 @@ def _make_body_writer(
 
 
 def _make_body_reader(
-    headers: List[Tuple[bytes, bytes]],
+    headers: Sequence[Tuple[bytes, bytes]],
     body: Optional[AsyncIterable[bytes]]
 ) -> Optional[AsyncIterable[bytes]]:
     content_encoding = header.content_encoding(headers)

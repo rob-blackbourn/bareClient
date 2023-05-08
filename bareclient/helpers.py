@@ -1,9 +1,8 @@
 """Helpers"""
 
-from asyncio import AbstractEventLoop
 import json
 import ssl
-from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Union
 
 from bareutils import bytes_writer, text_writer, header
 
@@ -16,8 +15,7 @@ from .middleware import HttpClientMiddlewareCallback
 async def get(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
@@ -32,10 +30,8 @@ async def get(
 
     Args:
         url (str): The url
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         cafile (Optional[str], optional): The path to a file of concatenated CA
             certificates in PEM format. Defaults to None.
         capath (Optional[str], optional): The path to a directory containing
@@ -57,7 +53,7 @@ async def get(
             Optional middleware. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -67,7 +63,6 @@ async def get(
             url,
             method='GET',
             headers=headers,
-            loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata,
@@ -85,8 +80,7 @@ async def get(
 async def get_text(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
         encoding: str = 'utf-8',
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
@@ -115,10 +109,8 @@ async def get_text(
 
     Args:
         url (str): The url
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         cafile (Optional[str], optional): The path to a file of concatenated CA
             certificates in PEM format. Defaults to None.
         capath (Optional[str], optional): The path to a directory containing
@@ -140,7 +132,7 @@ async def get_text(
             Optional middleware. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -156,7 +148,6 @@ async def get_text(
             url,
             method='GET',
             headers=headers,
-            loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata,
@@ -174,9 +165,8 @@ async def get_text(
 async def get_json(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
         loads: Callable[[bytes], Any] = json.loads,
-        loop: Optional[AbstractEventLoop] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
@@ -204,12 +194,10 @@ async def get_json(
 
     Args:
         url (str): The url
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         loads (Callable[[bytes], Any], optional): The function to loads the
             JSON object from the string. Defaults to json.loads.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
         cafile (Optional[str], optional): The path to a file of concatenated CA
             certificates in PEM format. Defaults to None.
         capath (Optional[str], optional): The path to a directory containing
@@ -231,7 +219,7 @@ async def get_json(
             Optional middleware. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -246,7 +234,6 @@ async def get_json(
             url,
             method='GET',
             headers=headers,
-            loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata,
@@ -265,8 +252,7 @@ async def post(
         url: str,
         content: bytes,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
@@ -283,10 +269,8 @@ async def post(
     Args:
         url (str): The url
         content (bytes): The body content
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         cafile (Optional[str], optional): The path to a file of concatenated CA
             certificates in PEM format. Defaults to None.
         capath (Optional[str], optional): The path to a directory containing
@@ -310,7 +294,7 @@ async def post(
             Optional middleware. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -323,7 +307,6 @@ async def post(
             method='POST',
             headers=headers,
             body=data,
-            loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata,
@@ -343,8 +326,7 @@ async def post_text(
         text: str,
         *,
         encoding='utf-8',
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
@@ -361,10 +343,8 @@ async def post_text(
     Args:
         url (str): The url
         content (bytes): The body content
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         cafile (Optional[str], optional): The path to a file of concatenated CA
             certificates in PEM format. Defaults to None.
         capath (Optional[str], optional): The path to a directory containing
@@ -388,7 +368,7 @@ async def post_text(
             Optional middleware. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -411,7 +391,6 @@ async def post_text(
             method='POST',
             headers=headers,
             body=data,
-            loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata,
@@ -432,8 +411,7 @@ async def post_json(
         *,
         loads: Callable[[bytes], Any] = json.loads,
         dumps: Callable[[Any], str] = json.dumps,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
         cafile: Optional[str] = None,
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
@@ -469,10 +447,8 @@ async def post_json(
             the response. Defaults to json.loads.
         dumps (Callable[[Any], str], optional): The function used to encode
             the request. Defaults to json.dumps.
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         cafile (Optional[str], optional): The path to a file of concatenated CA
             certificates in PEM format. Defaults to None.
         capath (Optional[str], optional): The path to a directory containing
@@ -496,7 +472,7 @@ async def post_json(
             Optional middleware. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -519,7 +495,6 @@ async def post_json(
             method='POST',
             headers=headers,
             body=data,
-            loop=loop,
             cafile=cafile,
             capath=capath,
             cadata=cadata,

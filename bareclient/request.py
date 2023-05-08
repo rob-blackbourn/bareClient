@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import AsyncIterable, List, Optional, Tuple
+from typing import AsyncIterable, Optional, Sequence, Tuple
 import urllib.parse
 
 
@@ -15,7 +15,7 @@ class Request:
             scheme: str,
             path: str,
             method: str,
-            headers: Optional[List[Tuple[bytes, bytes]]],
+            headers: Optional[Sequence[Tuple[bytes, bytes]]],
             body: Optional[AsyncIterable[bytes]]
     ) -> None:
         """An HTTP request.
@@ -25,7 +25,7 @@ class Request:
             scheme (str): The scheme (`'http'` or `'https'`).
             path (str): The path.
             method (str): The method (e.g. `'GET'`).
-            headers (Optional[List[Tuple[bytes, bytes]]]): The headers.
+            headers (Optional[Sequence[Tuple[bytes, bytes]]]): The headers.
             body (Optional[AsyncIterable[bytes]]): The body.
         """
         self.host = host
@@ -62,7 +62,7 @@ class Request:
             cls,
             url: str,
             method: str,
-            headers: Optional[List[Tuple[bytes, bytes]]],
+            headers: Optional[Sequence[Tuple[bytes, bytes]]],
             body: Optional[AsyncIterable[bytes]]
     ) -> Request:
         """Create a request using a url.
@@ -70,7 +70,7 @@ class Request:
         Args:
             url (str): The url.
             method (str): The request method: e.g. "POST".
-            headers (Optional[List[Tuple[bytes, bytes]]]): The headers.
+            headers (Optional[Sequence[Tuple[bytes, bytes]]]): The headers.
             body (Optional[AsyncIterable[bytes]]): The body.
 
         Returns:

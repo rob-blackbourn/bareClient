@@ -1,16 +1,16 @@
 """The HTTP Client"""
 
-from asyncio import AbstractEventLoop
-import urllib.parse
 from ssl import SSLContext
 from typing import (
     AsyncIterable,
     Iterable,
     List,
     Optional,
+    Sequence,
     Tuple,
     Union
 )
+import urllib.parse
 
 from .acgi import connect, RequestHandler
 from .connection import ConnectionDetails
@@ -29,9 +29,8 @@ class HttpClient:
             url: str,
             *,
             method: str = 'GET',
-            headers: Optional[List[Tuple[bytes, bytes]]] = None,
+            headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
             body: Optional[AsyncIterable[bytes]] = None,
-            loop: Optional[AbstractEventLoop] = None,
             h11_bufsiz: int = 8096,
             cafile: Optional[str] = None,
             capath: Optional[str] = None,
@@ -65,12 +64,10 @@ class HttpClient:
         Args:
             url (str): The url
             method (str, optional): The HTTP method. Defaults to 'GET'.
-            headers (Optional[List[Tuple[bytes, bytes]]], optional): The headers. Defaults to
+            headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): The headers. Defaults to
                 None.
             body (Optional[AsyncIterable[bytes]], optional): The body content. Defaults to
                 None.
-            loop (Optional[AbstractEventLoop], optional): The optional asyncio
-                event loop. Defaults to None.
             h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to
                 8096.
             cafile (Optional[str], optional): The path to a file of concatenated
@@ -97,7 +94,6 @@ class HttpClient:
         if parsed_url.hostname is None:
             raise ValueError('no hostname in url: ' + url)
 
-        self.loop = loop
         self.middleware = middleware or []
 
         self._connection_details = ConnectionDetails(
@@ -131,10 +127,7 @@ class HttpClient:
             self.request,
             self.middleware
         )
-        http_protocol = await connect(
-            self._connection_details,
-            loop=self.loop
-        )
+        http_protocol = await connect(self._connection_details)
         response = await self.handler(
             http_protocol.receive,
             http_protocol.send
