@@ -1,13 +1,11 @@
 """Connections"""
 
 import asyncio
-from asyncio import AbstractEventLoop
 from typing import (
     Any,
     Awaitable,
     Callable,
-    Coroutine,
-    Optional
+    Coroutine
 )
 from urllib.error import URLError
 
@@ -30,9 +28,7 @@ Application = Callable[
 ]
 
 
-async def connect(
-        connection: ConnectionDetails
-) -> HttpProtocol:
+async def connect(connection: ConnectionDetails) -> HttpProtocol:
     """Connect to the web server and run the application
 
     Args:
