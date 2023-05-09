@@ -7,7 +7,7 @@ from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple, Uni
 from bareutils import bytes_writer, text_writer, header
 
 from .client import HttpClient
-from .constants import DEFAULT_PROTOCOLS
+from .constants import DEFAULT_ALPN_PROTOCOLS
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .middleware import HttpClientMiddlewareCallback
 
@@ -20,7 +20,7 @@ async def get(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         connect_timeout: Optional[Union[int, float]] = None,
@@ -41,8 +41,8 @@ async def get(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        alpn_protocols (Iterable[str], optional): The supported ALPN protocols.
+            Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -67,7 +67,7 @@ async def get(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            protocols=protocols,
+            alpn_protocols=alpn_protocols,
             ciphers=ciphers,
             options=options,
             connect_timeout=connect_timeout,
@@ -86,7 +86,7 @@ async def get_text(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         connect_timeout: Optional[Union[int, float]] = None,
@@ -120,8 +120,8 @@ async def get_text(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        alpn_protocols (Iterable[str], optional): The supported ALPN protocols.
+            Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -152,7 +152,7 @@ async def get_text(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            protocols=protocols,
+            alpn_protocols=alpn_protocols,
             ciphers=ciphers,
             options=options,
             connect_timeout=connect_timeout,
@@ -171,7 +171,7 @@ async def get_json(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         connect_timeout: Optional[Union[int, float]] = None,
@@ -207,8 +207,8 @@ async def get_json(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        alpn_protocols (Iterable[str], optional): The supported ALPN protocols.
+            Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -238,7 +238,7 @@ async def get_json(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            protocols=protocols,
+            alpn_protocols=alpn_protocols,
             ciphers=ciphers,
             options=options,
             connect_timeout=connect_timeout,
@@ -257,7 +257,7 @@ async def post(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
@@ -280,8 +280,8 @@ async def post(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        alpn_protocols (Iterable[str], optional): The supported ALPN protocols.
+            Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -311,7 +311,7 @@ async def post(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            protocols=protocols,
+            alpn_protocols=alpn_protocols,
             ciphers=ciphers,
             options=options,
             connect_timeout=connect_timeout,
@@ -331,7 +331,7 @@ async def post_text(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
@@ -354,8 +354,8 @@ async def post_text(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        alpn_protocols (Iterable[str], optional): The supported ALPN protocols.
+            Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -395,7 +395,7 @@ async def post_text(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            protocols=protocols,
+            alpn_protocols=alpn_protocols,
             ciphers=ciphers,
             options=options,
             connect_timeout=connect_timeout,
@@ -416,7 +416,7 @@ async def post_json(
         capath: Optional[str] = None,
         cadata: Optional[str] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
@@ -458,8 +458,8 @@ async def post_json(
             certificates. Defaults to None.
         ssl_context (Optional[SSLContext], optional): An ssl context to be
             used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
+        alpn_protocols (Iterable[str], optional): The supported ALPN protocols.
+            Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers. Defaults
             to DEFAULT_CIPHERS.
         options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
@@ -499,7 +499,7 @@ async def post_json(
             capath=capath,
             cadata=cadata,
             ssl_context=ssl_context,
-            protocols=protocols,
+            alpn_protocols=alpn_protocols,
             ciphers=ciphers,
             options=options,
             connect_timeout=connect_timeout,

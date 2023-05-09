@@ -9,7 +9,7 @@ from .helpers import (
     post_text,
     post_json
 )
-from .constants import DEFAULT_PROTOCOLS
+from .constants import DEFAULT_ALPN_PROTOCOLS
 from .errors import HttpClientError
 from .middleware import HttpClientMiddlewareCallback, HttpClientCallback
 from .ssl_contexts import (
@@ -32,7 +32,7 @@ __all__ = [
     'post_json',
     'create_ssl_context',
     'create_ssl_context_with_cert_chain',
-    'DEFAULT_PROTOCOLS',
+    'DEFAULT_ALPN_PROTOCOLS',
     'DEFAULT_CIPHERS',
     'DEFAULT_OPTIONS',
     'Request',

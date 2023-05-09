@@ -14,4 +14,4 @@ USER_AGENT = f'bareClient/{DIST_VERSION} ({SYSNAME}; {RELEASE}; {MACHINE})'.enco
     'ascii'
 )
 
-DEFAULT_PROTOCOLS = ("h2", "http/1.1")
+DEFAULT_ALPN_PROTOCOLS = ("h2", "http/1.1")

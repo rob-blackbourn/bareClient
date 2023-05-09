@@ -14,7 +14,7 @@ import urllib.parse
 
 from .acgi import connect, RequestHandler
 from .connection import ConnectionDetails
-from .constants import DEFAULT_PROTOCOLS
+from .constants import DEFAULT_ALPN_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .request import Request
@@ -36,7 +36,7 @@ class HttpClient:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             ssl_context: Optional[SSLContext] = None,
-            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+            alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
             connect_timeout: Optional[Union[int, float]] = None,
@@ -64,10 +64,10 @@ class HttpClient:
         Args:
             url (str): The url
             method (str, optional): The HTTP method. Defaults to 'GET'.
-            headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): The headers. Defaults to
-                None.
-            body (Optional[AsyncIterable[bytes]], optional): The body content. Defaults to
-                None.
+            headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): The
+                headers. Defaults to None.
+            body (Optional[AsyncIterable[bytes]], optional): The body content.
+                Defaults to None.
             h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to
                 8096.
             cafile (Optional[str], optional): The path to a file of concatenated
@@ -79,12 +79,12 @@ class HttpClient:
                 DER-encoded certificates. Defaults to None.
             ssl_context (Optional[SSLContext], optional): An ssl context to be
                 used instead of generating one from the certificates.
-            protocols (Iterable[str], optional): The supported protocols. Defaults
-                to DEFAULT_PROTOCOLS.
+            alpn_protocols (Iterable[str], optional): The supported protocols.
+                Defaults to DEFAULT_ALPN_PROTOCOLS.
             ciphers (Iterable[str], optional): The supported ciphers. Defaults
                 to DEFAULT_CIPHERS.
-            options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-                to DEFAULT_OPTIONS.
+            options (Iterable[int], optional): The ssl.SSLContext.options.
+                Defaults to DEFAULT_OPTIONS.
             connect_timeout (Optional[Union[int, float]], optional): The number
                 of seconds to wait for the connection. Defaults to None.
             middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
@@ -105,7 +105,7 @@ class HttpClient:
             cafile,
             capath,
             cadata,
-            protocols,
+            alpn_protocols,
             ciphers,
             options,
             connect_timeout

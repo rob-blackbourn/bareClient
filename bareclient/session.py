@@ -13,7 +13,7 @@ from typing import (
 )
 
 from .connection import ConnectionDetails
-from .constants import DEFAULT_PROTOCOLS
+from .constants import DEFAULT_ALPN_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .request import Request
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
@@ -92,7 +92,7 @@ class HttpSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             ssl_context: Optional[SSLContext] = None,
-            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
+            protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
             connect_timeout: Optional[Union[int, float]] = None,

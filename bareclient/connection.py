@@ -14,7 +14,7 @@ class SSLConfig:
             cafile: Optional[str],
             capath: Optional[str],
             cadata: Optional[str],
-            protocols: Iterable[str],
+            alpn_protocols: Iterable[str],
             ciphers: Iterable[str],
             options: Iterable[int]
     ) -> None:
@@ -22,7 +22,7 @@ class SSLConfig:
         self.cafile = cafile
         self.capath = capath
         self.cadata = cadata
-        self.protocols = protocols
+        self.alpn_protocols = alpn_protocols
         self.ciphers = ciphers
         self.options = options
 
@@ -33,7 +33,7 @@ class SSLConfig:
                 self.cafile,
                 self.capath,
                 self.cadata,
-                protocols=self.protocols,
+                alpn_protocols=self.alpn_protocols,
                 ciphers=self.ciphers,
                 options=self.options
             )
@@ -52,7 +52,7 @@ class ConnectionDetails:
             cafile: Optional[str],
             capath: Optional[str],
             cadata: Optional[str],
-            protocols: Iterable[str],
+            alpn_protocols: Iterable[str],
             ciphers: Iterable[str],
             options: Iterable[int],
             connect_timeout: Optional[Union[int, float]]
@@ -67,7 +67,7 @@ class ConnectionDetails:
             cafile,
             capath,
             cadata,
-            protocols,
+            alpn_protocols,
             ciphers,
             options
         )
