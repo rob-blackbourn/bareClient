@@ -23,7 +23,7 @@ Keyword arguments:
 - **`cadata`** (Optional[str], optional): Either an ASCII string of one or
   more PEM-encoded certificates or a bytes-like object of
   DER-encoded certificates. Defaults to None.
-- **`protocols`** (Optional[List[str]], optional): The protocols. Defaults
-  to None.
+- **`alpn_protocols`** (Optional[List[str]], optional): The alpn_protocols.
+  Defaults to None.
 - **`middleware`** (Optional[List[HttpClientMiddlewareCallback]], optional): The
   middleware. Defaults to None.

@@ -92,7 +92,7 @@ class HttpSession:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             ssl_context: Optional[SSLContext] = None,
-            protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
+            alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
             connect_timeout: Optional[Union[int, float]] = None,
@@ -107,7 +107,7 @@ class HttpSession:
             cafile,
             capath,
             cadata,
-            protocols,
+            alpn_protocols,
             ciphers,
             options,
             connect_timeout
