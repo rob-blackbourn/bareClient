@@ -1,6 +1,6 @@
 """Config"""
 
-from ssl import SSLContext
+from ssl import SSLContext, Options
 from typing import Iterable, Optional, Union
 
 from .constants import DEFAULT_ALPN_PROTOCOLS, AlpnProtocol
@@ -20,7 +20,7 @@ class HttpClientConfig:
             ssl_context: Optional[SSLContext] = None,
             alpn_protocols: Iterable[AlpnProtocol] = DEFAULT_ALPN_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS,
+            options: Iterable[Options] = DEFAULT_OPTIONS,
             connect_timeout: Optional[Union[int, float]] = None,
     ) -> None:
         self.h11_bufsiz = h11_bufsiz

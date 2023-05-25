@@ -9,7 +9,7 @@ from typing import (
     Optional
 )
 
-from .constants import DEFAULT_ALPN_PROTOCOLS
+from .constants import DEFAULT_ALPN_PROTOCOLS, AlpnProtocol
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ def create_ssl_context(
         capath: Optional[str],
         cadata: Optional[str],
         *,
-        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
+        alpn_protocols: Iterable[AlpnProtocol] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> ssl.SSLContext:
@@ -85,7 +85,7 @@ def create_ssl_context_with_cert_chain(
         verify_mode: ssl.VerifyMode = ssl.CERT_REQUIRED,
         check_hostname: bool = True,
         *,
-        alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
+        alpn_protocols: Iterable[AlpnProtocol] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
         options: Iterable[int] = DEFAULT_OPTIONS
 ) -> ssl.SSLContext:
