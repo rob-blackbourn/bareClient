@@ -123,7 +123,7 @@ def create_ssl_context_with_cert_chain(
     ssl_context.load_cert_chain(
         certfile=certfile,
         keyfile=keyfile,
-        password=password  # type: ignore
+        password=password
     )
 
     return ssl_context
