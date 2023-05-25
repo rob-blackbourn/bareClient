@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from bareclient import get_json, HttpClientError
+from bareclient import get_json, HttpClientError, HttpClientConfig
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -14,7 +14,7 @@ async def main(url: str) -> None:
         obj = await get_json(
             url,
             headers=[(b'accept-encoding', b'gzip')],
-            connect_timeout=5
+            config=HttpClientConfig(connect_timeout=5)
         )
         print(obj)
     except asyncio.TimeoutError as error:

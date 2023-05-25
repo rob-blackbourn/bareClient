@@ -25,13 +25,11 @@ def main_httpx():
         'http://': 'http://127.0.0.1:8080',
         'https://': 'http://127.0.0.1:8080',
     }
-    url_http = 'http://goodoldquiettreasure.neverssl.com/online'
-    url_https = 'https://wttr.in/Dunedin?0'
 
-    r = httpx.get(url_http, proxies=proxies)
-    print(r.text)
+    # r = httpx.get("http://example.com/index.html", proxies=proxies)
+    # print(r.text)
 
-    r = httpx.get(url_https, proxies=proxies, verify=False)
+    r = httpx.get("https://example.com/index.html", proxies=proxies, verify=False)
     print(r.text)
 
 

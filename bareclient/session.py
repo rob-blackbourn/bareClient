@@ -1,22 +1,18 @@
 """An HTTP Session"""
 
-from ssl import SSLContext
 from types import TracebackType
 from typing import (
     AsyncIterable,
-    Iterable,
     Optional,
     Sequence,
     Tuple,
     Type,
-    Union
 )
 
+from .config import HttpClientConfig
 from .connection import ConnectionDetails
-from .constants import DEFAULT_ALPN_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
 from .request import Request
-from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 
 from .acgi import connect, RequestHandler
 from .acgi.http_protocol import HttpProtocol
@@ -28,10 +24,12 @@ class SessionInstance:
     def __init__(
             self,
             connection_details: ConnectionDetails,
-            middleware: Sequence[HttpClientMiddlewareCallback]
+            middleware: Sequence[HttpClientMiddlewareCallback],
+            config: HttpClientConfig
     ) -> None:
         self._connection_details = connection_details
         self._middleware = middleware
+        self._config = config
 
         self._http_protocol: Optional[HttpProtocol] = None
         self._handler: Optional[RequestHandler] = None
@@ -46,7 +44,8 @@ class SessionInstance:
     ):
         if self._http_protocol is None:
             self._http_protocol = await connect(
-                self._connection_details
+                self._connection_details,
+                self._config
             )
 
         host = self._connection_details.hostname
@@ -87,32 +86,16 @@ class HttpSession:
             hostname: str,
             *,
             port: Optional[int] = None,
-            h11_bufsiz: int = 8096,
-            cafile: Optional[str] = None,
-            capath: Optional[str] = None,
-            cadata: Optional[str] = None,
-            ssl_context: Optional[SSLContext] = None,
-            alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
-            ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS,
-            connect_timeout: Optional[Union[int, float]] = None,
             middleware: Sequence[HttpClientMiddlewareCallback] = (),
+            config: Optional[HttpClientConfig] = None
     ) -> None:
         self._connection_details = ConnectionDetails(
             scheme,
             hostname,
             port,
-            h11_bufsiz,
-            ssl_context,
-            cafile,
-            capath,
-            cadata,
-            alpn_protocols,
-            ciphers,
-            options,
-            connect_timeout
         )
         self._middleware = middleware
+        self._config = config or HttpClientConfig()
         self._instance: Optional[SessionInstance] = None
 
     async def __aenter__(self) -> SessionInstance:
@@ -120,6 +103,7 @@ class HttpSession:
         self._instance = SessionInstance(
             self._connection_details,
             self._middleware,
+            self._config
         )
         return self._instance
 

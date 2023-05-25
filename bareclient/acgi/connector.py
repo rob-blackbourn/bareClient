@@ -9,6 +9,7 @@ from typing import (
 )
 from urllib.error import URLError
 
+from ..config import HttpClientConfig
 from ..connection import ConnectionDetails
 from ..response import Response
 from .types import HttpACGIRequests, HttpACGIResponses
@@ -28,11 +29,12 @@ Application = Callable[
 ]
 
 
-async def connect(connection: ConnectionDetails) -> HttpProtocol:
+async def connect(connection: ConnectionDetails, config: HttpClientConfig) -> HttpProtocol:
     """Connect to the web server and run the application
 
     Args:
-        connection (Connection): The connection.
+        connection (Connection): The connection details.
+        config (HttpClientConfig): The HTTP client configuration.
 
     Raises:
         URLError: Raised for an invalid url
@@ -42,7 +44,7 @@ async def connect(connection: ConnectionDetails) -> HttpProtocol:
         HttpProtocol: The http protocol.
     """
     ssl_context = (
-        connection.ssl.context if connection.scheme == 'https'
+        config.ssl_context if connection.scheme == 'https'
         else None
     )
 
@@ -66,7 +68,7 @@ async def connect(connection: ConnectionDetails) -> HttpProtocol:
     )
     reader, writer = await asyncio.wait_for(
         future,
-        timeout=connection.connect_timeout
+        timeout=config.connect_timeout
     )
 
     negotiated_protocol = get_negotiated_protocol(
@@ -76,6 +78,6 @@ async def connect(connection: ConnectionDetails) -> HttpProtocol:
     if negotiated_protocol == 'h2':
         http_protocol: HttpProtocol = H2Protocol(reader, writer)
     else:
-        http_protocol = H11Protocol(reader, writer, connection.h11_bufsiz)
+        http_protocol = H11Protocol(reader, writer, config.h11_bufsiz)
 
     return http_protocol

@@ -1,6 +1,9 @@
 """bareclient"""
 
 from .client import HttpClient
+from .config import HttpClientConfig
+from .constants import DEFAULT_ALPN_PROTOCOLS
+from .errors import HttpClientError
 from .helpers import (
     get,
     get_text,
@@ -9,8 +12,6 @@ from .helpers import (
     post_text,
     post_json
 )
-from .constants import DEFAULT_ALPN_PROTOCOLS
-from .errors import HttpClientError
 from .middleware import HttpClientMiddlewareCallback, HttpClientCallback
 from .ssl_contexts import (
     create_ssl_context,
@@ -24,6 +25,7 @@ from .session import HttpSession
 
 __all__ = [
     'HttpClient',
+    'HttpClientConfig',
     'get',
     'get_text',
     'get_json',

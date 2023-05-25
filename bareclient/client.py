@@ -1,22 +1,18 @@
 """The HTTP Client"""
 
-from ssl import SSLContext
 from typing import (
     AsyncIterable,
-    Iterable,
     List,
     Optional,
     Sequence,
     Tuple,
-    Union
 )
 import urllib.parse
 
 from .acgi import connect, RequestHandler
+from .config import HttpClientConfig
 from .connection import ConnectionDetails
-from .constants import DEFAULT_ALPN_PROTOCOLS
 from .middleware import HttpClientMiddlewareCallback
-from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .request import Request
 from .response import Response
 
@@ -31,16 +27,8 @@ class HttpClient:
             method: str = 'GET',
             headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
             body: Optional[AsyncIterable[bytes]] = None,
-            h11_bufsiz: int = 8096,
-            cafile: Optional[str] = None,
-            capath: Optional[str] = None,
-            cadata: Optional[str] = None,
-            ssl_context: Optional[SSLContext] = None,
-            alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
-            ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS,
-            connect_timeout: Optional[Union[int, float]] = None,
-            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
+            config: Optional[HttpClientConfig] = None,
     ) -> None:
         """Make an HTTP client.
 
@@ -70,25 +58,10 @@ class HttpClient:
                 Defaults to None.
             h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to
                 8096.
-            cafile (Optional[str], optional): The path to a file of concatenated
-                CA certificates in PEM format. Defaults to None.
-            capath (Optional[str], optional): The path to a directory containing
-                several CA certificates in PEM format. Defaults to None.
-            cadata (Optional[str], optional): Either an ASCII string of one or
-                more PEM-encoded certificates or a bytes-like object of
-                DER-encoded certificates. Defaults to None.
-            ssl_context (Optional[SSLContext], optional): An ssl context to be
-                used instead of generating one from the certificates.
-            alpn_protocols (Iterable[str], optional): The supported protocols.
-                Defaults to DEFAULT_ALPN_PROTOCOLS.
-            ciphers (Iterable[str], optional): The supported ciphers. Defaults
-                to DEFAULT_CIPHERS.
-            options (Iterable[int], optional): The ssl.SSLContext.options.
-                Defaults to DEFAULT_OPTIONS.
-            connect_timeout (Optional[Union[int, float]], optional): The number
-                of seconds to wait for the connection. Defaults to None.
             middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
                 Optional middleware. Defaults to None.
+            config (Optional[HttpClientConfig], optional): Optional config for
+                the HttpClient. Defaults to None.
         """
         parsed_url = urllib.parse.urlparse(url)
         if parsed_url.hostname is None:
@@ -100,16 +73,8 @@ class HttpClient:
             parsed_url.scheme,
             parsed_url.hostname,
             parsed_url.port,
-            h11_bufsiz,
-            ssl_context,
-            cafile,
-            capath,
-            cadata,
-            alpn_protocols,
-            ciphers,
-            options,
-            connect_timeout
         )
+        self._config = config or HttpClientConfig()
 
         self.request = Request(
             parsed_url.netloc,
@@ -127,7 +92,7 @@ class HttpClient:
             self.request,
             self.middleware
         )
-        http_protocol = await connect(self._connection_details)
+        http_protocol = await connect(self._connection_details, self._config)
         response = await self.handler(
             http_protocol.receive,
             http_protocol.send
