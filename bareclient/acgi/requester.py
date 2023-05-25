@@ -12,12 +12,12 @@ from typing import (
 
 from bareutils import header
 
-from ..acgi import ReceiveCallable, SendCallable
 from ..constants import USER_AGENT
 from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from ..request import Request
 from ..response import Response
 
+from .http_protocol import HttpProtocol
 from .types import (
     HttpACGIRequest,
     HttpACGIRequestBody,
@@ -77,8 +77,7 @@ class RequestHandlerInstance:
     def __init__(
             self,
             request: Request,
-            send: SendCallable,
-            receive: ReceiveCallable,
+            http_protocol: HttpProtocol,
             middleware: Sequence[HttpClientMiddlewareCallback]
     ) -> None:
         """Initialise the request handler instance
@@ -89,8 +88,7 @@ class RequestHandlerInstance:
             receive (ReceiveCallable): The function to receive the data
         """
         self.request = request
-        self.send = send
-        self.receive = receive
+        self.http_protocol = http_protocol
         self.middleware = middleware
 
     async def process(self) -> Response:
@@ -132,11 +130,11 @@ class RequestHandlerInstance:
             'body': body,
             'more_body': more_body
         }
-        await self.send(http_request)
+        await self.http_protocol.send(http_request)
 
         connection = cast(
             HttpACGIResponseConnection,
-            await self.receive()
+            await self.http_protocol.receive()
         )
 
         stream_id: Optional[int] = connection['stream_id']
@@ -148,10 +146,10 @@ class RequestHandlerInstance:
                 'more_body': more_body,
                 'stream_id': stream_id
             }
-            await self.send(http_request_body)
+            await self.http_protocol.send(http_request_body)
 
     async def _process_response(self, url: str) -> Response:
-        response = await self.receive()
+        response = await self.http_protocol.receive()
 
         if response['type'] == 'http.disconnect':
             raise IOError('server disconnected')
@@ -175,7 +173,7 @@ class RequestHandlerInstance:
     async def _body_reader(self) -> AsyncIterator[bytes]:
         more_body = True
         while more_body:
-            response = await self.receive()
+            response = await self.http_protocol.receive()
             if response['type'] == 'http.disconnect':
                 raise IOError('server disconnected')
             elif response['type'] == 'http.response.body':
@@ -193,7 +191,7 @@ class RequestHandlerInstance:
             'type': 'http.disconnect',
             'stream_id': None
         }
-        await self.send(http_disconnect)
+        await self.http_protocol.send(http_disconnect)
 
 
 class RequestHandler:
@@ -210,8 +208,7 @@ class RequestHandler:
 
     async def __call__(
             self,
-            receive: ReceiveCallable,
-            send: SendCallable
+            http_protocol: HttpProtocol
     ) -> Response:
         """Call the request handle instance
 
@@ -224,8 +221,7 @@ class RequestHandler:
         """
         self.instance = RequestHandlerInstance(
             self.request,
-            send,
-            receive,
+            http_protocol,
             self.middleware
         )
         response = await self.instance.process()

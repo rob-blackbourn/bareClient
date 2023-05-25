@@ -63,10 +63,7 @@ class SessionInstance:
 
         handler = RequestHandler(request, self._middleware)
 
-        response = await handler(
-            self._http_protocol.receive,
-            self._http_protocol.send
-        )
+        response = await handler(self._http_protocol)
 
         return response
 

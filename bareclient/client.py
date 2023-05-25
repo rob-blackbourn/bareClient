@@ -93,10 +93,7 @@ class HttpClient:
             self.middleware
         )
         http_protocol = await connect(self._connection_details, self._config)
-        response = await self.handler(
-            http_protocol.receive,
-            http_protocol.send
-        )
+        response = await self.handler(http_protocol)
         return response
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
