@@ -3,7 +3,7 @@
 from ssl import SSLContext
 from typing import Iterable, Optional, Union
 
-from .constants import DEFAULT_ALPN_PROTOCOLS
+from .constants import DEFAULT_ALPN_PROTOCOLS, AlpnProtocol
 from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS, create_ssl_context
 
 
@@ -18,7 +18,7 @@ class HttpClientConfig:
             capath: Optional[str] = None,
             cadata: Optional[str] = None,
             ssl_context: Optional[SSLContext] = None,
-            alpn_protocols: Iterable[str] = DEFAULT_ALPN_PROTOCOLS,
+            alpn_protocols: Iterable[AlpnProtocol] = DEFAULT_ALPN_PROTOCOLS,
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[int] = DEFAULT_OPTIONS,
             connect_timeout: Optional[Union[int, float]] = None,
