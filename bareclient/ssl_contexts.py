@@ -6,14 +6,15 @@ from typing import (
     AnyStr,
     Callable,
     Iterable,
-    Optional
+    Optional,
+    Sequence
 )
 
 from .constants import DEFAULT_ALPN_PROTOCOLS, AlpnProtocol
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_CIPHERS = (
+DEFAULT_CIPHERS: Sequence[str] = (
     "ECDHE+AESGCM",
     "ECDHE+CHACHA20",
     "DHE+AESGCM",

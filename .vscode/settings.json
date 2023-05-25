@@ -29,6 +29,7 @@
     "cadata",
     "cafile",
     "capath",
+    "CHACHA",
     "Decompressor",
     "decompressors",
     "ECDH",
