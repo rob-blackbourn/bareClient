@@ -52,9 +52,9 @@ async def _make_body_writer(
         yield None, False
     else:
         more_body = True
-        content_iter = content.__aiter__()
+        content_iter = aiter(content)
         try:
-            first: Optional[bytes] = await content_iter.__anext__()
+            first: Optional[bytes] = await anext(content_iter)
         except StopAsyncIteration:
             first = None
             more_body = False
@@ -62,7 +62,7 @@ async def _make_body_writer(
 
         while more_body:
             try:
-                second: Optional[bytes] = await content_iter.__anext__()
+                second: Optional[bytes] = await anext(content_iter)
             except StopAsyncIteration:
                 second = None
                 more_body = False
@@ -116,8 +116,8 @@ class RequestHandlerInstance:
             self,
             request: Request
     ) -> None:
-        body_writer = _make_body_writer(request.body).__aiter__()
-        body, more_body = await body_writer.__anext__()
+        body_writer = aiter(_make_body_writer(request.body))
+        body, more_body = await anext(body_writer)
         headers = _enrich_headers(request)
 
         http_request: HttpACGIRequest = {
