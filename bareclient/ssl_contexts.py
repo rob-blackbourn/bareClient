@@ -2,19 +2,19 @@
 
 import logging
 import ssl
+from ssl import SSLContext, Purpose, Options
 from typing import (
     AnyStr,
     Callable,
     Iterable,
     Optional,
-    Sequence
 )
 
 from .constants import DEFAULT_ALPN_PROTOCOLS, AlpnProtocol
 
 LOGGER = logging.getLogger(__name__)
 
-DEFAULT_CIPHERS: Sequence[str] = (
+DEFAULT_CIPHERS: Iterable[str] = (
     "ECDHE+AESGCM",
     "ECDHE+CHACHA20",
     "DHE+AESGCM",
@@ -30,7 +30,7 @@ DEFAULT_CIPHERS: Sequence[str] = (
     "!MD5",
     "!DSS",
 )
-DEFAULT_OPTIONS = (
+DEFAULT_OPTIONS: Iterable[Options] = (
     ssl.OP_NO_SSLv2,
     ssl.OP_NO_SSLv3,
     ssl.OP_NO_TLSv1,
@@ -46,8 +46,8 @@ def create_ssl_context(
         *,
         alpn_protocols: Iterable[AlpnProtocol] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS
-) -> ssl.SSLContext:
+        options: Iterable[Options] = DEFAULT_OPTIONS
+) -> SSLContext:
     """Create an ssl context suitable for https
 
     Args:
@@ -60,14 +60,14 @@ def create_ssl_context(
             Defaults to DEFAULT_ALPN_PROTOCOLS.
         ciphers (Iterable[str], optional): The supported ciphers.
             Defaults to DEFAULT_CIPHERS.
-        options (Iterable[str], optional): The SSLContext options.
+        options (Iterable[Options], optional): The SSLContext options.
             Defaults to DEFAULT_OPTIONS.
 
     Returns:
-        ssl.SSLContext: An ssl context
+        SSLContext: An ssl context
     """
     ctx = ssl.create_default_context(
-        purpose=ssl.Purpose.SERVER_AUTH,
+        purpose=Purpose.SERVER_AUTH,
         cafile=cafile,
         capath=capath,
         cadata=cadata
@@ -88,8 +88,8 @@ def create_ssl_context_with_cert_chain(
         *,
         alpn_protocols: Iterable[AlpnProtocol] = DEFAULT_ALPN_PROTOCOLS,
         ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS
-) -> ssl.SSLContext:
+        options: Iterable[Options] = DEFAULT_OPTIONS
+) -> SSLContext:
     """Create an ssl context with load_cert_chain
 
     Args:
@@ -105,13 +105,13 @@ def create_ssl_context_with_cert_chain(
             Defaults to DEFAULT_PROTOCOLS.
         ciphers (Iterable[str], optional): The ciphers.
             Defaults to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The SSLContext options.
+        options (Iterable[Options], optional): The SSLContext options.
             Defaults to DEFAULT_OPTIONS.
 
     Returns:
-        ssl.SSLContext: [description]
+        SSLContext: [description]
     """
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context = SSLContext(ssl.PROTOCOL_TLS)
     for option in options:
         ssl_context.options |= option
     ssl_context.set_ciphers(':'.join(ciphers))
