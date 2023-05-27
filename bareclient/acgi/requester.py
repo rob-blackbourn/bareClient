@@ -13,12 +13,18 @@ from typing import (
 from bareutils import header
 
 from ..config import HttpClientConfig
+from ..connection import ConnectionDetails
 from ..constants import USER_AGENT
 from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from ..request import Request
 from ..response import Response
 
+from .utils import (
+    get_negotiated_protocol
+)
 from .http_protocol import HttpProtocol
+from .h11_protocol import H11Protocol
+from .h2_protocol import H2Protocol
 from .types import (
     HttpACGIRequest,
     HttpACGIRequestBody,
@@ -193,6 +199,59 @@ class Requester:
 
     def __init__(self) -> None:
         self._instance: Optional[RequesterInstance] = None
+
+    async def establish_tunnel(
+            self,
+            connection_details: ConnectionDetails,
+            http_protocol: HttpProtocol,
+            config: HttpClientConfig
+    ) -> HttpProtocol:
+        port = (
+            connection_details.port or
+            80 if connection_details.scheme == 'http'
+            else 443
+        )
+        headers: Sequence[Tuple[bytes, bytes]] = [
+            (b'host', connection_details.hostname.encode('utf8'))
+        ]
+        path = f"{connection_details.hostname}:{port}"
+        http_request: HttpACGIRequest = {
+            'type': 'http.request',
+            'host': connection_details.hostname,
+            'scheme': connection_details.scheme,
+            'path': path,
+            'method': 'CONNECT',
+            'headers': headers,
+            'body': None,
+            'more_body': False
+        }
+        await http_protocol.send(http_request)
+
+        connection = cast(
+            HttpACGIResponseConnection,
+            await http_protocol.receive()
+        )
+
+        ssl_context = config.ssl_context
+        await http_protocol.writer.start_tls(ssl_context)
+
+        negotiated_protocol = get_negotiated_protocol(
+            http_protocol.writer
+        ) if ssl_context else None
+
+        if negotiated_protocol == 'h2':
+            http_protocol = H2Protocol(
+                http_protocol.reader,
+                http_protocol.writer
+            )
+        else:
+            http_protocol = H11Protocol(
+                http_protocol.reader,
+                http_protocol.writer,
+                config.h11_bufsiz
+            )
+
+        return http_protocol
 
     async def __call__(
             self,

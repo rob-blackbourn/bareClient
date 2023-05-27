@@ -22,6 +22,7 @@ class HttpClientConfig:
             ciphers: Iterable[str] = DEFAULT_CIPHERS,
             options: Iterable[Options] = DEFAULT_OPTIONS,
             connect_timeout: Optional[Union[int, float]] = None,
+            proxy: Optional[str] = None
     ) -> None:
         self.h11_bufsiz = h11_bufsiz
         self.cafile = cafile
@@ -32,6 +33,7 @@ class HttpClientConfig:
         self.ciphers = ciphers
         self.options = options
         self.connect_timeout = connect_timeout
+        self.proxy = proxy
 
     @property
     def ssl_context(self) -> SSLContext:

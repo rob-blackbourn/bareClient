@@ -9,12 +9,13 @@ from typing import (
 )
 import urllib.parse
 
-from .acgi import connect, Requester
-from .config import HttpClientConfig
-from .connection import ConnectionDetails
-from .middleware import HttpClientMiddlewareCallback
-from .request import Request
 from .response import Response
+from .request import Request
+from .middleware import HttpClientMiddlewareCallback
+from .connection import ConnectionDetails, ConnectionType
+from .config import HttpClientConfig
+
+from .acgi import connect, Requester
 
 
 class HttpClient:
@@ -56,30 +57,54 @@ class HttpClient:
                 headers. Defaults to None.
             body (Optional[AsyncIterable[bytes]], optional): The body content.
                 Defaults to None.
-            h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to
-                8096.
             middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
                 Optional middleware. Defaults to None.
             config (Optional[HttpClientConfig], optional): Optional config for
                 the HttpClient. Defaults to None.
         """
-        parsed_url = urllib.parse.urlparse(url)
-        if parsed_url.hostname is None:
-            raise ValueError('no hostname in url: ' + url)
-
         self.middleware = middleware or []
-
-        self._connection_details = ConnectionDetails(
-            parsed_url.scheme,
-            parsed_url.hostname,
-            parsed_url.port,
-        )
         self._config = config or HttpClientConfig()
 
+        target_url = urllib.parse.urlparse(url)
+        if target_url.hostname is None:
+            raise ValueError('no hostname in url: ' + url)
+
+        self._target_details = ConnectionDetails(
+            target_url.scheme,
+            target_url.hostname,
+            target_url.port,
+        )
+
+        proxy_url = (
+            None if not self._config.proxy
+            else urllib.parse.urlparse(self._config.proxy)
+        )
+        if proxy_url is not None and proxy_url.hostname is None:
+            raise ValueError('no hostname in proxy url: ' + url)
+        self._proxy_details = (
+            None if proxy_url is None or proxy_url.hostname is None
+            else ConnectionDetails(
+                proxy_url.scheme,
+                proxy_url.hostname,
+                proxy_url.port,
+            )
+        )
+
+        self._connection_type: ConnectionType = (
+            'direct' if self._proxy_details is None
+            else 'proxy' if self._target_details.scheme == 'http'
+            else 'tunnel'
+        )
+
+        target_path = (
+            url if self._connection_type == 'proxy'
+            else target_url.path
+        )
+
         self.request = Request(
-            parsed_url.netloc,
-            parsed_url.scheme,
-            parsed_url.path,
+            target_url.netloc,
+            target_url.scheme,
+            target_path,
             method,
             headers,
             body
@@ -88,8 +113,17 @@ class HttpClient:
         self._requester: Optional[Requester] = None
 
     async def __aenter__(self) -> Response:
+        connection_details = self._proxy_details or self._target_details
+        http_protocol = await connect(connection_details, self._config)
         self._requester = Requester()
-        http_protocol = await connect(self._connection_details, self._config)
+        if self._connection_type == 'tunnel':
+            http_protocol = await self._requester.establish_tunnel(
+                self._target_details,
+                http_protocol,
+                self._config
+            )
+            print('here')
+
         response = await self._requester(
             self.request,
             self.middleware,

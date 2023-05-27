@@ -91,7 +91,7 @@ class HttpSession:
             middleware: Sequence[HttpClientMiddlewareCallback] = (),
             config: Optional[HttpClientConfig] = None
     ) -> None:
-        self._connection_details = ConnectionDetails(
+        self._target_details = ConnectionDetails(
             scheme,
             hostname,
             port,
@@ -103,7 +103,7 @@ class HttpSession:
     async def __aenter__(self) -> SessionInstance:
         assert self._instance is None, "instance already set"
         self._instance = SessionInstance(
-            self._connection_details,
+            self._target_details,
             self._middleware,
             self._config
         )

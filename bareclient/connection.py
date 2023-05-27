@@ -1,6 +1,8 @@
 """The Connection"""
 
-from typing import Optional
+from typing import Literal, Optional
+
+ConnectionType = Literal['direct', 'proxy', 'tunnel']
 
 
 class ConnectionDetails:
