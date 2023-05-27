@@ -12,6 +12,7 @@ from typing import (
 
 from bareutils import header
 
+from ..config import HttpClientConfig
 from ..constants import USER_AGENT
 from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from ..request import Request
@@ -71,39 +72,32 @@ async def _make_body_writer(
             first = second
 
 
-class RequestHandlerInstance:
-    """The request handler"""
+class RequesterInstance:
+    """The requester instance"""
 
     def __init__(
             self,
-            request: Request,
             http_protocol: HttpProtocol,
-            middleware: Sequence[HttpClientMiddlewareCallback]
+            config: HttpClientConfig
     ) -> None:
-        """Initialise the request handler instance
+        self._http_protocol = http_protocol
+        self._config = config
 
-        Args:
-            request (Request): The request.
-            send (SendCallable): The function to sed the data
-            receive (ReceiveCallable): The function to receive the data
-        """
-        self.request = request
-        self.http_protocol = http_protocol
-        self.middleware = middleware
-
-    async def process(self) -> Response:
+    async def process(
+            self,
+            request: Request,
+            middleware: Sequence[HttpClientMiddlewareCallback]
+    ) -> Response:
         """Process the request
 
         Returns:
             Response: The response message.
         """
         chain = make_middleware_chain(
-            *self.middleware,
+            *middleware,
             handler=self._process
         )
-        return await chain(
-            self.request,
-        )
+        return await chain(request)
 
     async def _process(
             self,
@@ -130,11 +124,11 @@ class RequestHandlerInstance:
             'body': body,
             'more_body': more_body
         }
-        await self.http_protocol.send(http_request)
+        await self._http_protocol.send(http_request)
 
         connection = cast(
             HttpACGIResponseConnection,
-            await self.http_protocol.receive()
+            await self._http_protocol.receive()
         )
 
         stream_id: Optional[int] = connection['stream_id']
@@ -146,10 +140,10 @@ class RequestHandlerInstance:
                 'more_body': more_body,
                 'stream_id': stream_id
             }
-            await self.http_protocol.send(http_request_body)
+            await self._http_protocol.send(http_request_body)
 
     async def _process_response(self, url: str) -> Response:
-        response = await self.http_protocol.receive()
+        response = await self._http_protocol.receive()
 
         if response['type'] == 'http.disconnect':
             raise IOError('server disconnected')
@@ -173,7 +167,7 @@ class RequestHandlerInstance:
     async def _body_reader(self) -> AsyncIterator[bytes]:
         more_body = True
         while more_body:
-            response = await self.http_protocol.receive()
+            response = await self._http_protocol.receive()
             if response['type'] == 'http.disconnect':
                 raise IOError('server disconnected')
             elif response['type'] == 'http.response.body':
@@ -191,43 +185,27 @@ class RequestHandlerInstance:
             'type': 'http.disconnect',
             'stream_id': None
         }
-        await self.http_protocol.send(http_disconnect)
+        await self._http_protocol.send(http_disconnect)
 
 
-class RequestHandler:
-    """A request handler"""
+class Requester:
+    """A requester"""
 
-    def __init__(
-            self,
-            request: Request,
-            middleware: Sequence[HttpClientMiddlewareCallback]
-    ) -> None:
-        self.request = request
-        self.middleware = middleware
-        self.instance: Optional[RequestHandlerInstance] = None
+    def __init__(self) -> None:
+        self._instance: Optional[RequesterInstance] = None
 
     async def __call__(
             self,
-            http_protocol: HttpProtocol
+            request: Request,
+            middleware: Sequence[HttpClientMiddlewareCallback],
+            http_protocol: HttpProtocol,
+            config: HttpClientConfig
     ) -> Response:
-        """Call the request handle instance
-
-        Args:
-            receive (ReceiveCallable): The function to receive data
-            send (SendCallable): The function to send data
-
-        Returns:
-            Response: The response.
-        """
-        self.instance = RequestHandlerInstance(
-            self.request,
-            http_protocol,
-            self.middleware
-        )
-        response = await self.instance.process()
+        self._instance = RequesterInstance(http_protocol, config)
+        response = await self._instance.process(request, middleware)
         return response
 
     async def close(self):
         """Close the request"""
-        if self.instance is not None:
-            await self.instance.close()
+        if self._instance is not None:
+            await self._instance.close()

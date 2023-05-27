@@ -9,7 +9,7 @@ from typing import (
 )
 import urllib.parse
 
-from .acgi import connect, RequestHandler
+from .acgi import connect, Requester
 from .config import HttpClientConfig
 from .connection import ConnectionDetails
 from .middleware import HttpClientMiddlewareCallback
@@ -85,17 +85,19 @@ class HttpClient:
             body
         )
 
-        self.handler: Optional[RequestHandler] = None
+        self._requester: Optional[Requester] = None
 
     async def __aenter__(self) -> Response:
-        self.handler = RequestHandler(
-            self.request,
-            self.middleware
-        )
+        self._requester = Requester()
         http_protocol = await connect(self._connection_details, self._config)
-        response = await self.handler(http_protocol)
+        response = await self._requester(
+            self.request,
+            self.middleware,
+            http_protocol,
+            self._config
+        )
         return response
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        if self.handler is not None:
-            await self.handler.close()
+        if self._requester is not None:
+            await self._requester.close()

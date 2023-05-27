@@ -14,7 +14,7 @@ from .connection import ConnectionDetails
 from .middleware import HttpClientMiddlewareCallback
 from .request import Request
 
-from .acgi import connect, RequestHandler
+from .acgi import connect, Requester
 from .acgi.http_protocol import HttpProtocol
 
 
@@ -32,7 +32,7 @@ class SessionInstance:
         self._config = config
 
         self._http_protocol: Optional[HttpProtocol] = None
-        self._handler: Optional[RequestHandler] = None
+        self._handler: Optional[Requester] = None
 
     async def request(
             self,
@@ -61,9 +61,14 @@ class SessionInstance:
             body
         )
 
-        handler = RequestHandler(request, self._middleware)
+        requester = Requester()
 
-        response = await handler(self._http_protocol)
+        response = await requester(
+            request,
+            self._middleware,
+            self._http_protocol,
+            self._config
+        )
 
         return response
 
