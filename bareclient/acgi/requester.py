@@ -16,7 +16,6 @@ from bareutils import header
 from ..config import HttpClientConfig
 from ..connection import ConnectionDetails
 from ..constants import USER_AGENT
-from ..errors import HttpClientError
 from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from ..request import Request
 from ..response import Response

@@ -1,6 +1,7 @@
 """Connections"""
 
 import asyncio
+import logging
 from typing import (
     Any,
     Awaitable,
@@ -27,6 +28,9 @@ Application = Callable[
     [ReceiveCallable, SendCallable],
     Coroutine[Any, Any, Response]
 ]
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 async def connect(connection: ConnectionDetails, config: HttpClientConfig) -> HttpProtocol:
@@ -61,6 +65,13 @@ async def connect(connection: ConnectionDetails, config: HttpClientConfig) -> Ht
         else:
             raise URLError('unspecified port')
 
+    LOGGER.debug(
+        "Connecting to %s on port %s %s ssl",
+        connection.hostname,
+        port,
+        'using' if ssl_context is not None else 'not using'
+    )
+
     future = asyncio.open_connection(
         connection.hostname,
         port,
@@ -74,6 +85,8 @@ async def connect(connection: ConnectionDetails, config: HttpClientConfig) -> Ht
     negotiated_protocol = get_negotiated_protocol(
         writer
     ) if ssl_context else None
+
+    LOGGER.debug("Negotiated protocol %s", negotiated_protocol)
 
     if negotiated_protocol == 'h2':
         http_protocol: HttpProtocol = H2Protocol(reader, writer)

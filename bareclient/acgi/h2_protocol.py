@@ -26,7 +26,8 @@ from .types import (
     HttpACGIResponseBody,
     HttpACGIDisconnect,
     HttpACGIRequests,
-    HttpACGIResponses
+    HttpACGIResponses,
+    HttpProtocolError
 )
 
 from .http_protocol import HttpProtocol
@@ -73,7 +74,7 @@ class H2Protocol(HttpProtocol):
             if self.on_close:
                 await self.on_close()
         else:
-            raise RuntimeError(f'unknown request type: {message_type}')
+            raise HttpProtocolError(f'unknown request type: {message_type}')
 
     async def receive(self) -> HttpACGIResponses:
         return await self.responses.get()

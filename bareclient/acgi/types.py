@@ -82,3 +82,7 @@ HttpACGIResponses = Union[
     HttpACGIResponseBody,
     HttpACGIDisconnect
 ]
+
+
+class HttpProtocolError(Exception):
+    pass

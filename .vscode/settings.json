@@ -1,8 +1,5 @@
 {
-  "editor.rulers": [
-    80,
-    120
-  ],
+  "editor.rulers": [80, 120],
   "editor.formatOnSave": true,
   "python.defaultInterpreterPath": ".venv/bin/python",
   "cSpell.words": [
@@ -28,6 +25,8 @@
     "cafile",
     "capath",
     "CHACHA",
+    "compressobj",
+    "decompressobj",
     "Decompressor",
     "decompressors",
     "ECDH",
@@ -39,9 +38,7 @@
     "SYSNAME",
     "uname"
   ],
-  "python.testing.pytestArgs": [
-    "tests"
-  ],
+  "python.testing.pytestArgs": ["tests"],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "[python]": {

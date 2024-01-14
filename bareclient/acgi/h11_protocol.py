@@ -20,7 +20,8 @@ from .types import (
     HttpACGIResponseBody,
     HttpACGIDisconnect,
     HttpACGIRequests,
-    HttpACGIResponses
+    HttpACGIResponses,
+    HttpProtocolError
 )
 
 MappingMessageEvent = MessageEvent[HttpACGIResponses]
@@ -66,7 +67,7 @@ class H11Protocol(HttpProtocol):
         elif request_type == 'http.disconnect':
             await self._disconnect()
         else:
-            raise Exception(f'unknown request type: {request_type}')
+            raise HttpProtocolError(f'unknown request type: {request_type}')
 
     async def receive(self) -> HttpACGIResponses:
 
@@ -144,7 +145,7 @@ class H11Protocol(HttpProtocol):
             elif isinstance(event, (h11.ConnectionClosed, h11.EndOfMessage)):
                 raise ConnectionError('Failed to receive response')
             else:
-                raise ValueError('Unknown event')
+                raise HttpProtocolError('Unknown event')
 
         more_body = False
         for name, value in event.headers:
@@ -210,4 +211,4 @@ class H11Protocol(HttpProtocol):
                 }
                 return http_disconnect
             else:
-                raise ValueError('Unknown event')
+                raise HttpProtocolError('Unknown event')
