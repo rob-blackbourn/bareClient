@@ -86,8 +86,10 @@ class H11Protocol(HttpProtocol):
         self._connect()
         self._is_initialised = True
 
+        method = message['method']
+
         request = h11.Request(
-            method=message['method'],
+            method=method,
             target=message['path'],
             headers=message.get('headers', [])
         )

@@ -5,8 +5,6 @@
   ],
   "editor.formatOnSave": true,
   "python.defaultInterpreterPath": ".venv/bin/python",
-  "python.linting.pylintEnabled": true,
-  "python.linting.mypyEnabled": true,
   "cSpell.words": [
     "acgi",
     "aenter",
@@ -48,6 +46,5 @@
   "python.testing.pytestEnabled": true,
   "[python]": {
     "editor.defaultFormatter": "ms-python.autopep8"
-  },
-  "python.formatting.provider": "none"
+  }
 }

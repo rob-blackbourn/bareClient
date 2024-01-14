@@ -91,8 +91,10 @@ class HttpClient:
         )
 
         self._connection_type: ConnectionType = (
-            'direct' if self._proxy_details is None
-            else 'proxy' if self._target_details.scheme == 'http'
+            'direct'
+            if self._proxy_details is None
+            else 'proxy'
+            if self._target_details.scheme == 'http'
             else 'tunnel'
         )
 

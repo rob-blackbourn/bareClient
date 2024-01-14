@@ -1,5 +1,6 @@
 """Requester"""
 
+import logging
 from typing import (
     AsyncIterable,
     AsyncIterator,
@@ -15,6 +16,7 @@ from bareutils import header
 from ..config import HttpClientConfig
 from ..connection import ConnectionDetails
 from ..constants import USER_AGENT
+from ..errors import HttpClientError
 from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
 from ..request import Request
 from ..response import Response
@@ -33,6 +35,8 @@ from .types import (
     HttpACGIResponse,
     HttpACGIResponseBody
 )
+
+LOGGER = logging.getLogger(__name__)
 
 
 def _enrich_headers(request: Request) -> List[Tuple[bytes, bytes]]:
@@ -215,6 +219,14 @@ class Requester:
             (b'host', connection_details.hostname.encode('utf8'))
         ]
         path = f"{connection_details.hostname}:{port}"
+
+        LOGGER.debug(
+            "Tunnelling to %s for %s with %s",
+            connection_details.hostname,
+            connection_details.scheme,
+            path
+        )
+
         http_request: HttpACGIRequest = {
             'type': 'http.request',
             'host': connection_details.hostname,
@@ -227,9 +239,17 @@ class Requester:
         }
         await http_protocol.send(http_request)
 
-        connection = cast(
-            HttpACGIResponseConnection,
-            await http_protocol.receive()
+        response = await http_protocol.receive()
+        assert response['type'] == 'http.response.connection'
+
+        response = await http_protocol.receive()
+        assert response['type'] == 'http.response'
+
+        status_event = cast(HttpACGIResponse, response)
+        LOGGER.debug(
+            "CONNECT succeeded with status %s and version %s",
+            status_event['status_code'],
+            status_event['http_version']
         )
 
         ssl_context = config.ssl_context
@@ -238,6 +258,8 @@ class Requester:
         negotiated_protocol = get_negotiated_protocol(
             http_protocol.writer
         ) if ssl_context else None
+
+        LOGGER.debug("Negotiated http protocol %s", negotiated_protocol)
 
         if negotiated_protocol == 'h2':
             http_protocol = H2Protocol(
