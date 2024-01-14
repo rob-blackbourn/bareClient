@@ -29,7 +29,7 @@ Keywork arguments:
 - **`cadata`** (Optional[str], optional): Either an ASCII string of one or
   more PEM-encoded certificates or a bytes-like object of
   DER-encoded certificates. Defaults to None.
-- **`ssl_context`** (`Optional[SSLCOntext]`, optional): An explicit SSL context to use for the connection. Defaults to None.
+- **`ssl_context`** (`Optional[SSLContext]`, optional): An explicit SSL context to use for the connection. Defaults to None.
 - **`alpn_protocols`** (Optional[List[str]], optional): The alpn_protocols.
   Defaults to None.
 - **`ciphers`** ('Iterable[str]', optional): The ciphers to use in an SSL connection. Defaults to `DEFAULT_CIPHERS`.
