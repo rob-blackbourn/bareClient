@@ -13,27 +13,25 @@ from typing import (
 
 from bareutils import header
 
-from ..config import HttpClientConfig
-from ..connection import ConnectionDetails
-from ..constants import USER_AGENT
-from ..middleware import HttpClientMiddlewareCallback, make_middleware_chain
-from ..request import Request
-from ..response import Response
-
-from .utils import (
-    get_negotiated_protocol
-)
-from .http_protocol import HttpProtocol
-from .h11_protocol import H11Protocol
-from .h2_protocol import H2Protocol
-from .types import (
+from .acgi import (
     HttpACGIRequest,
     HttpACGIRequestBody,
     HttpACGIDisconnect,
     HttpACGIResponseConnection,
     HttpACGIResponse,
-    HttpACGIResponseBody
+    HttpACGIResponseBody,
+    HttpProtocol,
+    H11Protocol,
+    H2Protocol
 )
+from .config import HttpClientConfig
+from .connection import ConnectionDetails
+from .constants import USER_AGENT
+from .middleware import HttpClientMiddlewareCallback, make_middleware_chain
+from .request import Request
+from .response import Response
+from .utils import get_negotiated_protocol
+
 
 LOGGER = logging.getLogger(__name__)
 

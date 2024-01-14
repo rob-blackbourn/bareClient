@@ -9,13 +9,13 @@ from typing import (
     Type,
 )
 
+from .acgi import HttpProtocol
 from .config import HttpClientConfig
 from .connection import ConnectionDetails
+from .connector import connect
 from .middleware import HttpClientMiddlewareCallback
 from .request import Request
-
-from .acgi import connect, Requester
-from .acgi.http_protocol import HttpProtocol
+from .requester import Requester
 
 
 class SessionInstance:

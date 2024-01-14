@@ -9,13 +9,13 @@ from typing import (
 )
 import urllib.parse
 
+from .config import HttpClientConfig
+from .connection import ConnectionDetails, ConnectionType
+from .connector import connect
+from .middleware import HttpClientMiddlewareCallback
 from .response import Response
 from .request import Request
-from .middleware import HttpClientMiddlewareCallback
-from .connection import ConnectionDetails, ConnectionType
-from .config import HttpClientConfig
-
-from .acgi import connect, Requester
+from .requester import Requester
 
 
 class HttpClient:

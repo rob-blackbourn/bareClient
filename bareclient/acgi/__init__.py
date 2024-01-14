@@ -1,12 +1,32 @@
 """ACGI exports"""
 
-from .connector import connect, ReceiveCallable, SendCallable
-from .requester import Requester
+from .http_protocol import HttpProtocol
+from .h11_protocol import H11Protocol
+from .h2_protocol import H2Protocol
+from .types import (
+    HttpACGIDisconnect,
+    HttpACGIRequest,
+    HttpACGIRequestBody,
+    HttpACGIRequests,
+    HttpACGIResponse,
+    HttpACGIResponseBody,
+    HttpACGIResponseConnection,
+    HttpACGIResponses,
+    HttpProtocolError,
+)
 
 __all__ = [
-    'connect',
-    'ReceiveCallable',
-    'SendCallable',
+    'HttpProtocol',
+    'H11Protocol',
+    'H2Protocol',
 
-    'Requester'
+    'HttpACGIDisconnect',
+    'HttpACGIRequest',
+    'HttpACGIRequestBody',
+    'HttpACGIRequests',
+    'HttpACGIResponse',
+    'HttpACGIResponseBody',
+    'HttpACGIResponseConnection',
+    'HttpACGIResponses',
+    'HttpProtocolError',
 ]

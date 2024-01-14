@@ -10,17 +10,17 @@ from typing import (
 )
 from urllib.error import URLError
 
-from ..config import HttpClientConfig
-from ..connection import ConnectionDetails
-from ..response import Response
-from .types import HttpACGIRequests, HttpACGIResponses
-
-from .utils import (
-    get_negotiated_protocol
+from .acgi import (
+    HttpACGIRequests,
+    HttpACGIResponses,
+    HttpProtocol,
+    H11Protocol,
+    H2Protocol
 )
-from .http_protocol import HttpProtocol
-from .h11_protocol import H11Protocol
-from .h2_protocol import H2Protocol
+from .config import HttpClientConfig
+from .connection import ConnectionDetails
+from .response import Response
+from .utils import get_negotiated_protocol
 
 SendCallable = Callable[[HttpACGIRequests], Coroutine[Any, Any, None]]
 ReceiveCallable = Callable[[], Awaitable[HttpACGIResponses]]
