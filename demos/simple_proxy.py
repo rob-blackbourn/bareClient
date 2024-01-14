@@ -23,13 +23,9 @@ def main_bareclient():
 
 
 def main_httpx():
-    # proxies = {
-    #     'http://': 'http://username:password@127.0.0.1:8080',
-    #     'https://': 'http://username:password@127.0.0.1:8080',
-    # }
     proxies = {
-        'http://': 'http://rtb:thereisnospoon@127.0.0.1:8080',
-        'https://': 'http://rtb:thereisnospoon@127.0.0.1:8080',
+        'http://': 'http://username:password@127.0.0.1:8080',
+        'https://': 'http://username:password@127.0.0.1:8080',
     }
 
     # r = httpx.get("http://example.com/index.html", proxies=proxies)
