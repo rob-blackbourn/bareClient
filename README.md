@@ -1,6 +1,6 @@
 # bareClient
 
-An asyncio HTTP Python client package supporting HTTP versions 1.0, 1.1
+An asyncio HTTP Python 3.11 client package supporting HTTP versions 1.0, 1.1
 and 2 (read the [docs](https://rob-blackbourn.github.io/bareClient/)).
 
 This is the client companion to the ASGI server side web framework
@@ -23,6 +23,7 @@ The client has the following notable features:
 - Uses asyncio
 - Supports HTTP versions 1.0, 1.1, 2
 - Supports middleware
+- Handles proxies
 
 ## Installation
 
@@ -32,7 +33,7 @@ The package can be installed with pip.
 pip install bareclient
 ```
 
-This is a Python3.7 and later package.
+This is a Python3.11 and later package.
 
 It has dependencies on:
 

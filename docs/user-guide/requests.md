@@ -8,13 +8,19 @@ The first argument is the `url`. The remaining are keyword arguments:
 
 Keyword arguments:
 
-- **`method`** (str, optional): The HTTP method. Defaults to 'GET'.
-- **`headers`** (Optional[Sequence[Header]], optional): The headers. Defaults to
+- **`method`** (`str`, optional): The HTTP method. Defaults to 'GET'.
+- **`headers`** (`Optional[Sequence[Tuple[bytes, bytes]]]`, optional): The headers. Defaults to
   None.
-- **`body`** (Optional[Content], optional): The body content. Defaults to
+- **`body`** (`Optional[AsyncIterable[bytes]]`, optional): The body content. Defaults to
   None.
-- **`loop`** (Optional[AbstractEventLoop], optional): The optional asyncio
-  event loop. Defaults to None.
+- **`middleware`** (`Optional[List[HttpClientMiddlewareCallback]]`, optional): The
+  middleware. Defaults to None.
+- **`config`** (`Optional[HttpClientConfig]`, optional): The client config. Defaults to None.
+
+### `HttpClientConfig`
+
+Keywork arguments:
+
 - **`h11_bufsiz`** (int, optional): The HTTP/1 buffer size. Defaults to 8096.
 - **`cafile`** (Optional[str], optional): The path to a file of concatenated
   CA certificates in PEM format. Defaults to None.
@@ -23,7 +29,7 @@ Keyword arguments:
 - **`cadata`** (Optional[str], optional): Either an ASCII string of one or
   more PEM-encoded certificates or a bytes-like object of
   DER-encoded certificates. Defaults to None.
+- **`ssl_context`** (`Optional[SSLCOntext]`, optional): An explicit SSL context to use for the connection. Defaults to None.
 - **`alpn_protocols`** (Optional[List[str]], optional): The alpn_protocols.
   Defaults to None.
-- **`middleware`** (Optional[List[HttpClientMiddlewareCallback]], optional): The
-  middleware. Defaults to None.
+- **`ciphers`** ('Iterable[str]', optional): The ciphers to use in an SSL connection. Defaults to `DEFAULT_CIPHERS`.
