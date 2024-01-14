@@ -124,7 +124,6 @@ class HttpClient:
                 http_protocol,
                 self._config
             )
-            print('here')
 
         response = await self._requester(
             self.request,
