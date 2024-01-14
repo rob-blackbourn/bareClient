@@ -1,63 +1,35 @@
 """Helpers"""
 
-from asyncio import AbstractEventLoop
 import json
-import ssl
-from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 from bareutils import bytes_writer, text_writer, header
 
 from .client import HttpClient
-from .constants import DEFAULT_PROTOCOLS
-from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
+from .config import HttpClientConfig
 from .middleware import HttpClientMiddlewareCallback
 
 
 async def get(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-        ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None,
-        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
+        config: Optional[HttpClientConfig] = None,
 ) -> Optional[bytes]:
     """Issues a GET request
 
     Args:
         url (str): The url
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
-            PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
-            used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
-        ciphers (Iterable[str], optional): The supported ciphers. Defaults
-            to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-            to DEFAULT_OPTIONS.
-        connect_timeout (Optional[Union[int, float]], optional): The number
-            of seconds to wait for the connection. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
             Optional middleware. Defaults to None.
+        config (Optional[HttpClientConfig], optional): Optional config for
+            the HttpClient. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -67,16 +39,8 @@ async def get(
             url,
             method='GET',
             headers=headers,
-            loop=loop,
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata,
-            ssl_context=ssl_context,
-            protocols=protocols,
-            ciphers=ciphers,
-            options=options,
-            connect_timeout=connect_timeout,
-            middleware=middleware
+            middleware=middleware,
+            config=config
     ) as response:
         await response.raise_for_status()
         return await response.raw()
@@ -85,18 +49,10 @@ async def get(
 async def get_text(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
         encoding: str = 'utf-8',
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-        ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None,
-        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+        config: Optional[HttpClientConfig] = None
 ) -> Optional[str]:
     """Issues a GET request returning a string
 
@@ -115,32 +71,16 @@ async def get_text(
 
     Args:
         url (str): The url
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
-            PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
-            used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
-        ciphers (Iterable[str], optional): The supported ciphers. Defaults
-            to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-            to DEFAULT_OPTIONS.
-        connect_timeout (Optional[Union[int, float]], optional): The number
-            of seconds to wait for the connection. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
+        encoding (str, optional): The byte encoding. Defaults to 'utf-8'.
         middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
             Optional middleware. Defaults to None.
+        config (Optional[HttpClientConfig], optional): Optional config for
+            the HttpClient. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -156,16 +96,8 @@ async def get_text(
             url,
             method='GET',
             headers=headers,
-            loop=loop,
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata,
-            ssl_context=ssl_context,
-            protocols=protocols,
-            ciphers=ciphers,
-            options=options,
-            connect_timeout=connect_timeout,
-            middleware=middleware
+            middleware=middleware,
+            config=config
     ) as response:
         await response.raise_for_status()
         return await response.text(encoding)
@@ -174,18 +106,10 @@ async def get_text(
 async def get_json(
         url: str,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
         loads: Callable[[bytes], Any] = json.loads,
-        loop: Optional[AbstractEventLoop] = None,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-        ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS,
-        connect_timeout: Optional[Union[int, float]] = None,
-        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+        config: Optional[HttpClientConfig] = None
 ) -> Optional[Any]:
     """Issues a GET request returning a JSON object
 
@@ -204,34 +128,17 @@ async def get_json(
 
     Args:
         url (str): The url
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loads (Callable[[bytes], Any], optional): The function to loads the
-            JSON object from the string. Defaults to json.loads.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
-            PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
-            used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
-        ciphers (Iterable[str], optional): The supported ciphers. Defaults
-            to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-            to DEFAULT_OPTIONS.
-        connect_timeout (Optional[Union[int, float]], optional): The number
-            of seconds to wait for the connection. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
             Optional middleware. Defaults to None.
+        loads (Callable[[bytes], Any], optional): The function to loads the
+            JSON object from the string. Defaults to json.loads.
+        config (Optional[HttpClientConfig], optional): Optional config for
+            the HttpClient. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -246,16 +153,8 @@ async def get_json(
             url,
             method='GET',
             headers=headers,
-            loop=loop,
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata,
-            ssl_context=ssl_context,
-            protocols=protocols,
-            ciphers=ciphers,
-            options=options,
-            connect_timeout=connect_timeout,
-            middleware=middleware
+            middleware=middleware,
+            config=config
     ) as response:
         await response.raise_for_status()
         return await response.json(loads)
@@ -265,52 +164,27 @@ async def post(
         url: str,
         content: bytes,
         *,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-        ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None,
-        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+        config: Optional[HttpClientConfig] = None
 ) -> Optional[bytes]:
     """Issues a POST request
 
     Args:
         url (str): The url
         content (bytes): The body content
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
-            PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
-            used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
-        ciphers (Iterable[str], optional): The supported ciphers. Defaults
-            to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-            to DEFAULT_OPTIONS.
-        chunk_size (int, optional): The size of each chunk to send or -1 to send
-            as a single chunk.. Defaults to -1.
-        connect_timeout (Optional[Union[int, float]], optional): The number
-            of seconds to wait for the connection. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
             Optional middleware. Defaults to None.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
+        config (Optional[HttpClientConfig], optional): Optional config for
+            the HttpClient. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -323,16 +197,8 @@ async def post(
             method='POST',
             headers=headers,
             body=data,
-            loop=loop,
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata,
-            ssl_context=ssl_context,
-            protocols=protocols,
-            ciphers=ciphers,
-            options=options,
-            connect_timeout=connect_timeout,
-            middleware=middleware
+            middleware=middleware,
+            config=config
     ) as response:
         await response.raise_for_status()
         return await response.raw()
@@ -342,53 +208,29 @@ async def post_text(
         url: str,
         text: str,
         *,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
         encoding='utf-8',
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-        ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None,
-        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+        config: Optional[HttpClientConfig] = None
 ) -> Optional[str]:
     """Issues a POST request with a str body
 
     Args:
         url (str): The url
         content (bytes): The body content
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
-            PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
-            used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
-        ciphers (Iterable[str], optional): The supported ciphers. Defaults
-            to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-            to DEFAULT_OPTIONS.
-        chunk_size (int, optional): The size of each chunk to send or -1 to send
-            as a single chunk.. Defaults to -1.
-        connect_timeout (Optional[Union[int, float]], optional): The number
-            of seconds to wait for the connection. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
             Optional middleware. Defaults to None.
+        encoding (str, optional): The byte encoding. Defaults to 'utf-8'.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
+        config (Optional[HttpClientConfig], optional): Optional config for
+            the HttpClient. Defaults to None.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -411,16 +253,8 @@ async def post_text(
             method='POST',
             headers=headers,
             body=data,
-            loop=loop,
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata,
-            ssl_context=ssl_context,
-            protocols=protocols,
-            ciphers=ciphers,
-            options=options,
-            connect_timeout=connect_timeout,
-            middleware=middleware
+            middleware=middleware,
+            config=config
     ) as response:
         await response.raise_for_status()
         return await response.text()
@@ -432,18 +266,10 @@ async def post_json(
         *,
         loads: Callable[[bytes], Any] = json.loads,
         dumps: Callable[[Any], str] = json.dumps,
-        headers: List[Tuple[bytes, bytes]] = None,
-        loop: Optional[AbstractEventLoop] = None,
-        cafile: Optional[str] = None,
-        capath: Optional[str] = None,
-        cadata: Optional[str] = None,
-        ssl_context: Optional[ssl.SSLContext] = None,
-        protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-        ciphers: Iterable[str] = DEFAULT_CIPHERS,
-        options: Iterable[int] = DEFAULT_OPTIONS,
+        headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
+        middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
         chunk_size: int = -1,
-        connect_timeout: Optional[Union[int, float]] = None,
-        middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+        config: Optional[HttpClientConfig] = None
 ) -> Optional[Any]:
     """Issues a POST request with a JSON payload
 
@@ -469,34 +295,17 @@ async def post_json(
             the response. Defaults to json.loads.
         dumps (Callable[[Any], str], optional): The function used to encode
             the request. Defaults to json.dumps.
-        headers (List[Tuple[bytes, bytes]], optional): Any extra headers required. Defaults to
-            None.
-        loop (Optional[AbstractEventLoop], optional): The optional asyncio event
-            loop.. Defaults to None.
-        cafile (Optional[str], optional): The path to a file of concatenated CA
-            certificates in PEM format. Defaults to None.
-        capath (Optional[str], optional): The path to a directory containing
-            several CA certificates in PEM format. Defaults to None.
-        cadata (Optional[str], optional): Either an ASCII string of one or more
-            PEM-encoded certificates or a bytes-like object of DER-encoded
-            certificates. Defaults to None.
-        ssl_context (Optional[SSLContext], optional): An ssl context to be
-            used instead of generating one from the certificates.
-        protocols (Iterable[str], optional): The supported protocols. Defaults
-            to DEFAULT_PROTOCOLS.
-        ciphers (Iterable[str], optional): The supported ciphers. Defaults
-            to DEFAULT_CIPHERS.
-        options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-            to DEFAULT_OPTIONS.
-        chunk_size (int, optional): The size of each chunk to send or -1 to send
-            as a single chunk.. Defaults to -1.
-        connect_timeout (Optional[Union[int, float]], optional): The number
-            of seconds to wait for the connection. Defaults to None.
+        headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): Any extra
+            headers required. Defaults to None.
         middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
             Optional middleware. Defaults to None.
+        config (Optional[HttpClientConfig], optional): Optional config for
+            the HttpClient. Defaults to None.
+        chunk_size (int, optional): The size of each chunk to send or -1 to send
+            as a single chunk.. Defaults to -1.
 
     Raises:
-        HTTPError: Is the status code is not ok.
+        HttpClientError: Is the status code is not ok.
         asyncio.TimeoutError: If the connect times out.
 
     Returns:
@@ -519,16 +328,8 @@ async def post_json(
             method='POST',
             headers=headers,
             body=data,
-            loop=loop,
-            cafile=cafile,
-            capath=capath,
-            cadata=cadata,
-            ssl_context=ssl_context,
-            protocols=protocols,
-            ciphers=ciphers,
-            options=options,
-            connect_timeout=connect_timeout,
-            middleware=middleware
+            middleware=middleware,
+            config=config
     ) as response:
         await response.raise_for_status()
         return await response.json(loads)

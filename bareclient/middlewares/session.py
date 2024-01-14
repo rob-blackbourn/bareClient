@@ -36,9 +36,10 @@ def extract_cookies(
         for key, cookie in cookie_cache.items()
         if 'expires' not in cookie or cookie['expires'] > now
     }
+
     for name, cookies in header_cookies.items():
         for cookie in cookies:
-            # Ensure permanant cookies have timestamps.
+            # Ensure permanent cookies have timestamps.
             if 'max_age' in cookie and 'expires' not in cookie:
                 cookie['expires'] = now + cookie['max_age']
             # Don't cache expired cookies
@@ -48,8 +49,9 @@ def extract_cookies(
             domain: bytes = cookie.get('domain', b'')
             key = (name, domain, path)
             cookie['creation_time'] = now
-            cookie['persistant'] = 'expires' in cookie
+            cookie['persistent'] = 'expires' in cookie
             current_cookies[key] = cookie
+
     return current_cookies
 
 
@@ -104,6 +106,7 @@ def gather_cookies(
                 continue
 
         cookies[name] = cookie
+
     for cookie in cookies.values():
         cookie['last_access_time'] = now
 

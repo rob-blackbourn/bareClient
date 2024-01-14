@@ -9,6 +9,7 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Sequence,
     Tuple,
     cast
 )
@@ -18,14 +19,15 @@ import h2.events
 import h2.settings
 
 from .types import (
-    HttpRequest,
-    HttpRequestBody,
-    HttpResponse,
-    HttpResponseConnection,
-    HttpResponseBody,
-    HttpDisconnect,
-    HttpRequests,
-    HttpResponses
+    HttpACGIRequest,
+    HttpACGIRequestBody,
+    HttpACGIResponse,
+    HttpACGIResponseConnection,
+    HttpACGIResponseBody,
+    HttpACGIDisconnect,
+    HttpACGIRequests,
+    HttpACGIResponses,
+    HttpProtocolError
 )
 
 from .http_protocol import HttpProtocol
@@ -60,26 +62,26 @@ class H2Protocol(HttpProtocol):
 
     async def send(
             self,
-            message: HttpRequests
+            message: HttpACGIRequests
     ) -> None:
         message_type: str = message['type']
 
         if message_type == 'http.request':
-            await self._send_request(cast(HttpRequest, message))
+            await self._send_request(cast(HttpACGIRequest, message))
         elif message_type == 'http.request.body':
-            await self._send_request_body(cast(HttpRequestBody, message))
+            await self._send_request_body(cast(HttpACGIRequestBody, message))
         elif message_type == 'http.disconnect':
             if self.on_close:
                 await self.on_close()
         else:
-            raise RuntimeError(f'unknown request type: {message_type}')
+            raise HttpProtocolError(f'unknown request type: {message_type}')
 
-    async def receive(self) -> HttpResponses:
+    async def receive(self) -> HttpACGIResponses:
         return await self.responses.get()
 
     async def _send_request(
             self,
-            message: HttpRequest
+            message: HttpACGIRequest
     ) -> None:
         # Start sending the request.
         if not self.initialized:
@@ -93,7 +95,7 @@ class H2Protocol(HttpProtocol):
             message.get('headers', [])
         )
         self.window_update_event[stream_id] = ResetEvent()
-        http_response_connection: HttpResponseConnection = {
+        http_response_connection: HttpACGIResponseConnection = {
             'type': 'http.response.connection',
             'http_version': 'h2',
             'stream_id': stream_id
@@ -115,7 +117,7 @@ class H2Protocol(HttpProtocol):
 
     async def _send_request_body(
             self,
-            message: HttpRequestBody
+            message: HttpACGIRequestBody
     ) -> None:
         assert message['stream_id'] is not None, "stream_id required for http/2"
         await self._send_request_data(
@@ -159,7 +161,7 @@ class H2Protocol(HttpProtocol):
             host: str,
             path: str,
             method: str,
-            headers: List[Tuple[bytes, bytes]]
+            headers: Sequence[Tuple[bytes, bytes]]
     ) -> int:
         stream_id = self.h2_state.get_next_available_stream_id()
         headers = [
@@ -228,13 +230,13 @@ class H2Protocol(HttpProtocol):
 
         status_code = 200
         headers: List[Tuple[bytes, bytes]] = []
-        for name, value in event.headers:
+        for name, value in event.headers or []:
             if name == b":status":
                 status_code = int(value)
             elif not name.startswith(b":"):
                 headers.append((name, value))
 
-        http_response: HttpResponse = {
+        http_response: HttpACGIResponse = {
             'type': 'http.response',
             'acgi': {
                 'version': "1.0"
@@ -255,7 +257,8 @@ class H2Protocol(HttpProtocol):
                 self.h2_state.acknowledge_received_data(
                     event.flow_controlled_length, event.stream_id
                 )
-                http_response_body: HttpResponseBody = {
+                assert event.data is not None, "data received cannot be None"
+                http_response_body: HttpACGIResponseBody = {
                     'type': 'http.response.body',
                     'body': event.data,
                     'more_body': event.stream_ended is None,
@@ -263,7 +266,7 @@ class H2Protocol(HttpProtocol):
                 }
                 await self.responses.put(http_response_body)
             elif isinstance(event, (h2.events.StreamEnded, h2.events.StreamReset)):
-                http_disconnect: HttpDisconnect = {
+                http_disconnect: HttpACGIDisconnect = {
                     'type': 'http.disconnect',
                     'stream_id': event.stream_id
                 }
@@ -276,6 +279,7 @@ class H2Protocol(HttpProtocol):
             events = self.h2_state.receive_data(data)
             for event in events:
                 if isinstance(event, h2.events.WindowUpdated):
+                    assert event.stream_id is not None, "window updated always has stream_id"
                     if event.stream_id == 0:
                         for update_event in self.window_update_event.values():
                             update_event.set()

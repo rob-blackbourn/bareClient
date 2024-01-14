@@ -9,7 +9,7 @@ from bareclient.acgi.asyncio_events import MessageEvent, ResetEvent
 
 
 @pytest.mark.asyncio
-async def test_message_event():
+async def test_message_event() -> None:
     """Test for message event"""
 
     async def waiter(event: MessageEvent[str]) -> Optional[str]:

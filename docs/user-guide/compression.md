@@ -34,8 +34,8 @@ async def main(url: str) -> None:
     async with HttpClient(
             url,
             headers=headers,
-            middleware=middleware,
-            body=text_writer('Hello, World!')
+            body=text_writer('Hello, World!'),
+            middleware=middleware
     ) as response:
         print(response)
         if response.status == 200 and response.body is not None:

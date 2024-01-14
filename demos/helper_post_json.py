@@ -3,7 +3,7 @@
 import asyncio
 from typing import Optional
 
-from bareclient import post_json
+from bareclient import post_json, HttpClientConfig
 
 
 async def main(url: str, cafile: Optional[str] = None) -> None:
@@ -12,7 +12,7 @@ async def main(url: str, cafile: Optional[str] = None) -> None:
         url,
         {'title': 'A job'},
         headers=[(b'accept-encoding', b'gzip')],
-        cafile=cafile
+        config=HttpClientConfig(cafile=cafile)
     )
     print(obj)
 

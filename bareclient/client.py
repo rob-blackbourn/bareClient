@@ -1,22 +1,21 @@
 """The HTTP Client"""
 
-from asyncio import AbstractEventLoop
-import urllib.parse
-from ssl import SSLContext
 from typing import (
     AsyncIterable,
-    Iterable,
     List,
     Optional,
+    Sequence,
     Tuple,
-    Union
 )
+import urllib.parse
 
-from .acgi import connect, RequestHandler
-from .constants import DEFAULT_PROTOCOLS
+from .config import HttpClientConfig
+from .connection import ConnectionDetails, ConnectionType
+from .connector import connect
 from .middleware import HttpClientMiddlewareCallback
-from .ssl_contexts import DEFAULT_CIPHERS, DEFAULT_OPTIONS
 from .response import Response
+from .request import Request
+from .requester import Requester
 
 
 class HttpClient:
@@ -27,19 +26,10 @@ class HttpClient:
             url: str,
             *,
             method: str = 'GET',
-            headers: Optional[List[Tuple[bytes, bytes]]] = None,
+            headers: Optional[Sequence[Tuple[bytes, bytes]]] = None,
             body: Optional[AsyncIterable[bytes]] = None,
-            loop: Optional[AbstractEventLoop] = None,
-            h11_bufsiz: int = 8096,
-            cafile: Optional[str] = None,
-            capath: Optional[str] = None,
-            cadata: Optional[str] = None,
-            ssl_context: Optional[SSLContext] = None,
-            protocols: Iterable[str] = DEFAULT_PROTOCOLS,
-            ciphers: Iterable[str] = DEFAULT_CIPHERS,
-            options: Iterable[int] = DEFAULT_OPTIONS,
-            connect_timeout: Optional[Union[int, float]] = None,
-            middleware: Optional[List[HttpClientMiddlewareCallback]] = None
+            middleware: Optional[List[HttpClientMiddlewareCallback]] = None,
+            config: Optional[HttpClientConfig] = None,
     ) -> None:
         """Make an HTTP client.
 
@@ -63,88 +53,86 @@ class HttpClient:
         Args:
             url (str): The url
             method (str, optional): The HTTP method. Defaults to 'GET'.
-            headers (Optional[List[Tuple[bytes, bytes]]], optional): The headers. Defaults to
-                None.
-            body (Optional[AsyncIterable[bytes]], optional): The body content. Defaults to
-                None.
-            loop (Optional[AbstractEventLoop], optional): The optional asyncio
-                event loop. Defaults to None.
-            h11_bufsiz (int, optional): The HTTP/1 buffer size. Defaults to
-                8096.
-            cafile (Optional[str], optional): The path to a file of concatenated
-                CA certificates in PEM format. Defaults to None.
-            capath (Optional[str], optional): The path to a directory containing
-                several CA certificates in PEM format. Defaults to None.
-            cadata (Optional[str], optional): Either an ASCII string of one or
-                more PEM-encoded certificates or a bytes-like object of
-                DER-encoded certificates. Defaults to None.
-            ssl_context (Optional[SSLContext], optional): An ssl context to be
-                used instead of generating one from the certificates.
-            protocols (Iterable[str], optional): The supported protocols. Defaults
-                to DEFAULT_PROTOCOLS.
-            ciphers (Iterable[str], optional): The supported ciphers. Defaults
-                to DEFAULT_CIPHERS.
-            options (Iterable[int], optional): The ssl.SSLContext.options. Defaults
-                to DEFAULT_OPTIONS.
-            connect_timeout (Optional[Union[int, float]], optional): The number
-                of seconds to wait for the connection. Defaults to None.
+            headers (Optional[Sequence[Tuple[bytes, bytes]]], optional): The
+                headers. Defaults to None.
+            body (Optional[AsyncIterable[bytes]], optional): The body content.
+                Defaults to None.
             middleware (Optional[List[HttpClientMiddlewareCallback]], optional):
                 Optional middleware. Defaults to None.
+            config (Optional[HttpClientConfig], optional): Optional config for
+                the HttpClient. Defaults to None.
         """
-        parsed_url = urllib.parse.urlparse(url)
-        if parsed_url.hostname is None:
-            raise ValueError('no hostname in url: ' + url)
-        self.scheme = parsed_url.scheme
-        self.netloc = parsed_url.netloc
-        self.hostname = parsed_url.hostname
-        self.path = parsed_url.path
-        self.port = parsed_url.port
-
-        self.method = method
-        self.headers = headers
-        self.body = body
-        self.loop = loop
-        self.h11_bufsiz = h11_bufsiz
-        self.cafile = cafile
-        self.capath = capath
-        self.cadata = cadata
-        self.ssl_context = ssl_context
-        self.protocols = protocols
-        self.ciphers = ciphers
-        self.options = options
-        self.connect_timeout = connect_timeout
         self.middleware = middleware or []
+        self._config = config or HttpClientConfig()
 
-        self.handler: Optional[RequestHandler] = None
+        target_url = urllib.parse.urlparse(url)
+        if target_url.hostname is None:
+            raise ValueError('no hostname in url: ' + url)
+
+        self._target_details = ConnectionDetails(
+            target_url.scheme,
+            target_url.hostname,
+            target_url.port,
+        )
+
+        proxy_url = (
+            None if not self._config.proxy
+            else urllib.parse.urlparse(self._config.proxy)
+        )
+        if proxy_url is not None and proxy_url.hostname is None:
+            raise ValueError('no hostname in proxy url: ' + url)
+        self._proxy_details = (
+            None if proxy_url is None or proxy_url.hostname is None
+            else ConnectionDetails(
+                proxy_url.scheme,
+                proxy_url.hostname,
+                proxy_url.port,
+            )
+        )
+
+        self._connection_type: ConnectionType = (
+            'direct'
+            if self._proxy_details is None
+            else 'proxy'
+            if self._target_details.scheme == 'http'
+            else 'tunnel'
+        )
+
+        target_path = (
+            url if self._connection_type == 'proxy'
+            else target_url.path
+        )
+
+        self.request = Request(
+            target_url.netloc,
+            target_url.scheme,
+            target_path,
+            method,
+            headers,
+            body
+        )
+
+        self._requester: Optional[Requester] = None
 
     async def __aenter__(self) -> Response:
-        self.handler = RequestHandler(
-            self.netloc,
-            self.scheme,
-            self.path,
-            self.method,
-            self.headers,
-            self.body,
-            self.middleware
-        )
-        response = await connect(
-            self.scheme,
-            self.hostname,
-            self.port,
-            self.handler,
-            cafile=self.cafile,
-            capath=self.capath,
-            cadata=self.cadata,
-            ssl_context=self.ssl_context,
-            loop=self.loop,
-            h11_bufsiz=self.h11_bufsiz,
-            protocols=self.protocols,
-            ciphers=self.ciphers,
-            options=self.options,
-            connect_timeout=self.connect_timeout
+        connection_details = self._proxy_details or self._target_details
+        http_protocol = await connect(connection_details, self._config)
+        self._requester = Requester()
+        if self._connection_type == 'tunnel':
+            http_protocol = await self._requester.establish_tunnel(
+                self._target_details,
+                http_protocol,
+                self._config
+            )
+
+        response = await self._requester(
+            self.request,
+            self.middleware,
+            http_protocol,
+            self._config
         )
         return response
 
     async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
-        if self.handler is not None:
-            await self.handler.close()
+        if self._requester is not None:
+            await self._requester.close()

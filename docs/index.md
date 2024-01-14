@@ -2,7 +2,7 @@
 
 ## Overview
 
-A simple asyncio http Python client package supporting HTTP versions 1.0, 1.1
+A simple asyncio http Python 3.11 client package supporting HTTP versions 1.0, 1.1
 and 2.
 
 This is the client companion to the ASGI server side web framework
@@ -21,3 +21,4 @@ The client has the following notable features:
 - Uses asyncio
 - Supports HTTP versions 1.0, 1.1, 2
 - Has middleware
+- Proxies

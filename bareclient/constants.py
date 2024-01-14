@@ -1,6 +1,7 @@
 """Constants"""
 
 import platform
+from typing import Literal, Iterable
 
 import pkg_resources
 
@@ -14,4 +15,6 @@ USER_AGENT = f'bareClient/{DIST_VERSION} ({SYSNAME}; {RELEASE}; {MACHINE})'.enco
     'ascii'
 )
 
-DEFAULT_PROTOCOLS = ("h2", "http/1.1")
+AlpnProtocol = Literal["h2", "http/1.1"]
+
+DEFAULT_ALPN_PROTOCOLS: Iterable[AlpnProtocol] = ("h2", "http/1.1")
