@@ -7,10 +7,8 @@ import httpx
 
 
 async def main_bareclient_async(url: str) -> None:
-    async with HttpClient(
-        url,
-        config=HttpClientConfig(proxy='http://127.0.0.1:8080')
-    ) as response:
+    config = HttpClientConfig(proxy='http://username:password@127.0.0.1:8080')
+    async with HttpClient(url, config=config) as response:
         print(response)
         if response.ok and response.body is not None:
             async for part in response.body:
