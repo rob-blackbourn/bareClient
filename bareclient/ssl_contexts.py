@@ -77,7 +77,8 @@ def create_ssl_context(
     ctx.set_alpn_protocols(list(protocols))
     try:
         ctx.set_npn_protocols(list(protocols))
-    except NotImplementedError:
+    except:  # pylint: disable=bare-except
+        # Deprecated in 3.10, removed in 3.11.
         LOGGER.debug("Can't set npn protocols")
     return ctx
 
